@@ -41,6 +41,7 @@ Experimental data used to fit the parameters and compare model predictions with 
 ---
 
 REFERENCES
+
 [^1] Matthew Scott, Carl W. Gunderson, Eduard M. Mateescu, Zhongge Zhang, and Terence Hwa. Interdependence of cell growth and gene expression: Origins and consequences. Science, 330(6007):1099–1102, 2010.
 
 [^2] Griffin Chure and Jonas Cremer. An optimal regulation of fluxes dictates microbial growth in and out of steady-state. biorXiv, 2022.
