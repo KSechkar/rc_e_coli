@@ -1,0 +1,8 @@
+# ignore folders with irrelevant legacy code
+failed_fitting_methods/
+frei/
+old_code/
+irrelevant_designs/
+*.asv
+mcmcsave.mat
+warning_fie.txt

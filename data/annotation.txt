@@ -1,0 +1,17 @@
+ANNOTATION AND REFERENCES FOR EXPERIMENTAL DATA
+
+- In growth_rib_fit_(...).csv, we present the data used for fitting our model's parameters. These data entail the growth rates and ribosomal mass fractions of E.coli cells grown in different media and in presence of different chloramphenicol concentrations, based on experimental observations by Scott et al. [1]. Notably, while the growth rate was measured directly, the ribosomal mass fractions was calculated by multiplying the ratio of the cells' RNA andprotein mass by a conversion factor of 0.4558 (according to Chure and Cremer, 2022 [2]).
+	-- growth_rib_fit_annotated.csv provides these data with annotations
+	-- growth_rib_fit_notext.csv provides these data without any text for the ease of reading by Matlab scripts
+	-- growth_rib_fit_errors.xlsx provides the measurement errors (standard deviations of readings for every condition)
+
+- In exp_meas_(...).csv, we store experimental measurements from 26 different studies of E.coli physiology conducted over the last 55 years, which have been compiled together  by Chure and Cremer [2].
+	-- exp_meas_ribosomes.csv matches measured ribosomal mass fractions with corresponding growth rates
+	-- exp_meas_elongation.csv matches translation elogation rates with corresponding growth rates
+	-- exp_meas_hetexp.csv matches heterologous protein mass fractions with ratios of the corresponding growth rates to the growth rate of cells not expressing any synthetic genes
+	-- exp_meas_ppGpp.csv matches ppGpp concentration in the cell (relative to the reference condition of the cell growing at a rate of 1/h) with corresponding growth rates
+
+REFERENCES
+[1] - Scott et al. 2010 Mechanistic links between cellular trade-offs, gene expression, and growth
+[2] - Chure and Cremer 2022 An Optimal Regulation of Fluxes Dictates Microbial Growth In and Out of Steady-State
+
