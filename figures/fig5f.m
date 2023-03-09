@@ -51,13 +51,13 @@ sim.opt = odeset('reltol',1.e-6,'abstol',1.e-9);
 
 %% DEFINE plasmid concs. to be tested
 
-sim.het.parameters('a_dist')=200;
+sim.het.parameters('a_dist')=1000;
 sim=sim.push_het();
-cdistadists=linspace(0,750.*sim.het.parameters('a_dist'),11);
-chis=linspace(0,7500.*sim.het.parameters('c_amp'),11);
+cdists=linspace(0,150,3);
+chis=linspace(0,7500.*sim.het.parameters('c_amp'),3);
 
 % initialise array of adaptation errors
-adaptation_errors=zeros(size(cdistadists,2),size(chis,2));
+adaptation_errors=zeros(size(cdists,2),size(chis,2));
 
 %% RUN simulations - with controller
 
@@ -68,15 +68,15 @@ u=(sim.het.parameters('c_act').*sim.het.parameters('a_act'))./...
 thetachi=sim.het.parameters('kb_anti')./(sim.het.parameters('c_anti').*sim.het.parameters('a_anti'));
 
 % initialise the array in which the results are stored
-phi_dists_with = zeros(1,size(cdistadists,2));
+phi_dists_with = zeros(1,size(cdists,2));
 
-for i=1:size(cdistadists,2)
+for i=1:size(cdists,2)
     for j=1:size(chis,2)
-        disp(['Testing c_dist=',num2str(cdistadists(i))...
+        disp(['Testing c_dist=',num2str(cdists(i))...
             ' chi=',num2str(chis(j))])
         
         % set plasmid concentration
-        sim.het.parameters('c_dist')=cdistadists(i)./sim.het.parameters('a_dist');
+        sim.het.parameters('c_dist')=cdists(i);
         % set amplifier gain
         sim.het.parameters('a_amp')=chis(j)./sim.het.parameters('c_amp');
         sim = sim.push_het();
@@ -106,10 +106,7 @@ end
 
 %% FIGURE 5 f
 
-% on the x-axis, total transcription rate/growth
-tot_trans=cdistadists*sim.het.parameters('a_dist');
-
-Fg = figure('Position',[0 0 271 250]);
+Fg = figure('Position',[0 0 239 220]);
 set(Fg, 'defaultAxesFontSize', 9)
 set(Fg, 'defaultLineLineWidth', 1.25)
 
@@ -131,15 +128,15 @@ for i=1:size(chis,2)
     end
 end
 
-cdistadists_flip=flip(cdistadists);
-y_text_labels=string(cdistadists_flip);
-for i=1:size(cdistadists_flip,2)
-    midpoint=round(size(cdistadists_flip,2)/2,0);
-    if (i~=1 && i~=size(cdistadists_flip,2) && i~=midpoint)
+cdists_flip=flip(cdists);
+y_text_labels=string(cdists_flip);
+for i=1:size(cdists_flip,2)
+    midpoint=round(size(cdists_flip,2)/2,0);
+    if (i~=1 && i~=size(cdists_flip,2) && i~=midpoint)
         y_text_labels(i)=' ';
     else
-        if(cdistadists_flip(i)~=0)
-            y_text_labels(i)=[num2str(cdistadists_flip(i)/1e4),'e4'];
+        if(cdists_flip(i)~=0)
+            y_text_labels(i)=num2str(cdists_flip(i));
         else
             y_text_labels(i)='0';
         end
@@ -148,7 +145,7 @@ end
 hmap.XDisplayLabels = x_text_labels;
 hmap.YDisplayLabels = y_text_labels;
 
-ylabel('c_{dist}\alpha_{dist}, dist. mRNA exp.');
+ylabel('c_{dist}, dist. gene conc. [nM]');
 xlabel('\chi, amplifier gain');
 
 hmap.GridVisible = 'off';
