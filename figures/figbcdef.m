@@ -1,7 +1,7 @@
-%% fig5abcde.m
+%% fig5bcdef.m
 
 % PROPORTIONAL-INTEGRAL CONTROLLER
-% Figure 5: a,b,c,d,e
+% Figure 5: b,c,d,e,f
 
 % Showcasing how our proportional-integral controller mitigates cisturbances 
 % caused by extra heterologous mRNA expression and keeps the burden almost constant 
@@ -138,11 +138,11 @@ D_estimated = ...
 
     
 
-%% FIGURE 5 a
+%% FIGURE 5 b
 
-Fa = figure('Position',[0 0 250 186]);
-set(Fa, 'defaultAxesFontSize', 9)
-set(Fa, 'defaultLineLineWidth', 1.25)
+Fb = figure('Position',[0 0 250 186]);
+set(Fb, 'defaultAxesFontSize', 9)
+set(Fb, 'defaultLineLineWidth', 1.25)
 
 % colours for plots
 colours={[1 0.586 0 1],... % sens
@@ -173,11 +173,11 @@ box on
 axis square
 hold off
 
-%% FIGURE 5 b
+%% FIGURE 5 c
 
-Fb = figure('Position',[0 0 250 185]);
-set(Fb, 'defaultAxesFontSize', 9)
-set(Fb, 'defaultLineLineWidth', 1.25)
+Fc = figure('Position',[0 0 250 185]);
+set(Fc, 'defaultAxesFontSize', 9)
+set(Fc, 'defaultLineLineWidth', 1.25)
 
 % colours for plots
 colours={[1 0.586 0 1],... % sens
@@ -218,11 +218,11 @@ Fs=calculated.Fs;
 ls=calculated.ls;
 Ds=calculated.Ds;
 
-%% FIGURE 5 c - control error
+%% FIGURE 5 d - control error
 
-Fa = figure('Position',[0 0 250 186]);
-set(Fa, 'defaultAxesFontSize', 9)
-set(Fa, 'defaultLineLineWidth', 1.25)
+Fd = figure('Position',[0 0 250 186]);
+set(Fd, 'defaultAxesFontSize', 9)
+set(Fd, 'defaultLineLineWidth', 1.25)
 hold on
 
 % plot model predictions
@@ -232,7 +232,7 @@ plot(rel_t-30,u*ones(size(Fs))-Fs,'Color',[0 0.4470 0.7410])
 plot([-inter_rad inter_rad],[0 0],'k:') 
 
 xlabel('t, time since disturbance [h]','FontName','Arial')
-ylabel('Control error','FontName','Arial')
+ylabel(', control error','FontName','Arial')
 
 ylim([-0.2 0.2])
 xlim([-inter_rad inter_rad])
@@ -244,11 +244,11 @@ box on
 axis square
 hold off
 
-%% FIGURE 5 d - growth rate
+%% FIGURE 5 e - growth rate
 
-Fd = figure('Position',[0 0 250 186]);
-set(Fd, 'defaultAxesFontSize', 9)
-set(Fd, 'defaultLineLineWidth', 1.25)
+Fe = figure('Position',[0 0 250 186]);
+set(Fe, 'defaultAxesFontSize', 9)
+set(Fe, 'defaultLineLineWidth', 1.25)
 
 hold on
 
@@ -271,11 +271,11 @@ box on
 axis square
 hold off
 
-%% FIGURE 5 e - resource competition denominator
+%% FIGURE 5 f - resource competition denominator
 
-Fe = figure('Position',[0 0 250 189]);
-set(Fe, 'defaultAxesFontSize', 9)
-set(Fe, 'defaultLineLineWidth', 1.25)
+Ff = figure('Position',[0 0 250 189]);
+set(Ff, 'defaultAxesFontSize', 9)
+set(Ff, 'defaultLineLineWidth', 1.25)
 
 hold on
 

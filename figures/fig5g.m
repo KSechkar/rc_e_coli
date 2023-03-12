@@ -1,11 +1,10 @@
-%% fig5g.m
+%% fig5f.m
 
 % PROPORTIONAL-INTEGRAL CONTROLLER
-% Figure 5: f
+% Figure 5: g
 
-% Showcasing how increasing our proportional-integral controller partially
-% restores modularity of synthetic gene expression by keeping the burden
-% roughly constant
+% Showcasing how increasing our controller's amplifier gain xi reduces the 
+% adaptation error caused by the expression of extra synthetic mRNA 
 
 %% CLEAR all variables
 
@@ -17,291 +16,179 @@ clear
 %% SET UP the simulators for both cases
 
 % 2 different setups - ideal AIF and realistic scenario
-sim_with=cell_simulator;
+sim=cell_simulator;
 
-sim_with=sim_with.load_heterologous_and_external('pi_controller','constant_inducer'); % load the het. gene and ext. inp. modules
-
-% output protein gene parameters
-sim_with.het.parameters('c_x')=100;
-sim_with.het.parameters('a_x')=100;
+sim=sim.load_heterologous_and_external('pi_controller','step_inducer'); % load the het. gene and ext. inp. modules
 
 % disturbance signal parameters
-sim_with.ext.input_func_parameters('inducer_level')=1; % inducer level: just full expression of xtra1 gene
-sim_with.het.parameters('c_dist')=100; % gene copy number
-sim_with.het.parameters('a_dist')=200; % max. gene transcription rate
+sim.ext.input_func_parameters('inducer_base_level')=0; % disturbance flicks transcription reg. func. from 0 to 1 at t=30
+sim.ext.input_func_parameters('inducer_final_level')=1; % disturbance flicks transcription reg. func. from 0 to 1 at t=30
+sim.ext.input_func_parameters('step_time')=100; % disturbance flicks transcription reg. func. from 0 to 1 at t=30
+sim.ext.input_func_parameters('slope_duration')=0.1;% disturbance flicks transcription reg. func. from 0 to 1 at t=30
+sim.het.parameters('c_dist')=100; % gene copy number
+sim.het.parameters('a_dist')=300; % max. gene transcription rate
 
 % integral controller parameters
-sim_with.het.parameters('K_dna(anti)-sens')=4000; % sensor prot.-DNA binding Hill constant
-sim_with.het.parameters('eta_dna(anti)-sens')=1; % sensor prot.-DNA binding Hill coefficient
+sim.het.parameters('K_dna(anti)-sens')=4000; % sensor prot.-DNA binding Hill constant
+sim.het.parameters('eta_dna(anti)-sens')=1; % sensor prot.-DNA binding Hill coefficient
 
-sim_with.het.parameters('K_dna(amp)-act')=4000; % sensor prot.-DNA binding Hill constant
-sim_with.het.parameters('eta_dna(amp)-act')=1; % sensor prot.-DNA binding Hill coefficient
+sim.het.parameters('K_dna(amp)-act')=4000; % sensor prot.-DNA binding Hill constant
+sim.het.parameters('eta_dna(amp)-act')=1; % sensor prot.-DNA binding Hill coefficient
 
-sim_with.het.parameters('kb_anti')=300; % atcuator-annihilator binding rate constant
-sim_with.het.parameters('a_sens')=22.5; % sensor gene transcription rate
-sim_with.het.parameters('a_anti')=800; % annigilator transcription rate
-sim_with.het.parameters('a_act')=400; % actuator transcription rate
+sim.het.parameters('kb_anti')=300; % atcuator-annihilator binding rate constant
+sim.het.parameters('a_sens')=22.5; % sensor gene transcription rate
+sim.het.parameters('a_anti')=800; % annigilator transcription rate
+sim.het.parameters('a_act')=400; % actuator transcription rate
 
-sim_with.het.parameters('a_amp')=4000; % integral controller amplifier transcription rate
+sim.het.parameters('a_amp')=4000; % integral controller amplifier transcription rate
    
 % push amended parameter values
-sim_with=sim_with.push_het();
+sim=sim.push_het();
 
 % simulation parameters
-sim_with.tf =  60;
-sim_with.opt = odeset('reltol',1.e-6,'abstol',1.e-9);
+sim.tf =  200;
+sim.opt = odeset('reltol',1.e-6,'abstol',1.e-9);
 
 %% DEFINE plasmid concs. to be tested
 
-sim_with.het.parameters('a_dist')=2000;
-sim_with=sim_with.push_het();
-plasmid_concs=linspace(0,150,20);
+sim.het.parameters('a_dist')=1000;
+sim=sim.push_het();
+cdists=linspace(0,150,3);
+chis=linspace(0,7500.*sim.het.parameters('c_amp'),3);
+
+% initialise array of adaptation errors
+adaptation_errors=zeros(size(cdists,2),size(chis,2));
 
 %% RUN simulations - with controller
 
-% initialise the array in which the results are stored
-p_xs_with = zeros(1,size(plasmid_concs,2));
+% as we scale the integral controller gain, ratio of (c_act*a_act):(c_anti*a_anti) stays the same
+u=(sim.het.parameters('c_act').*sim.het.parameters('a_act'))./...
+    (sim.het.parameters('c_anti').*sim.het.parameters('a_anti'));
 
-for i=1:size(plasmid_concs,2)
-    disp(['Testing c_dist=',num2str(plasmid_concs(i))])
-
-    % set plasmid concentration
-    sim_with.het.parameters('c_dist')=plasmid_concs(i);
-    sim_with = sim_with.push_het();
-
-    % simulate!
-    sim_with = sim_with.simulate_model;
-
-    % record
-    x_het=sim_with.x(end,10:(9+2*sim_with.num_het));
-    p_xs_with(i)=x_het(12); % output prot. conc.
-end
-
-%% RUN simulations - without controller
-sim_without=cell_simulator; % initialise simulator
-sim_without=sim_without.load_heterologous_and_external('two_constit','no_ext');
-sim_without.het.parameters('a_xtra1')=2000;
-sim_without=sim_without.push_het();
-sim_without.tf = 1000;
-sim_without.opt = odeset('reltol',1.e-6,'abstol',1.e-9); % more lenient integration tolerances for speed
-
-% output protein
-sim_without.het.parameters('a_xtra2')=100;
-sim_without.het.parameters('c_xtra2')=100;
+thetachi=sim.het.parameters('kb_anti')./(sim.het.parameters('c_anti').*sim.het.parameters('a_anti'));
 
 % initialise the array in which the results are stored
-p_xs_without = zeros(1,size(plasmid_concs,2));
+phi_dists_with = zeros(1,size(cdists,2));
 
-for i=1:size(plasmid_concs,2)
-    disp(['Testing c_x=',num2str(plasmid_concs(i))])
+for i=1:size(cdists,2)
+    for j=1:size(chis,2)
+        disp(['Testing c_dist=',num2str(cdists(i))...
+            ' chi=',num2str(chis(j))])
+        
+        % set plasmid concentration
+        sim.het.parameters('c_dist')=cdists(i);
+        % set amplifier gain
+        sim.het.parameters('a_amp')=chis(j)./sim.het.parameters('c_amp');
+        sim = sim.push_het();
+        
+        % simulate!
+        sim = sim.simulate_model;
+        
+        % find D value before disturbance
+        for t_counter=1:size(sim.t,1)
+            if(sim.t(t_counter)>sim.ext.input_func_parameters('step_time'))
+                t_before=sim.t(t_counter-1);
+                x_before=sim.x(t_counter-1,:);
+                D_before=get_D(sim,x_before,t_before);
+                break
+            end
+        end
 
-    % set plasmid concentration
-    sim_without.het.parameters('c_xtra1')=plasmid_concs(i);
-    sim_without = sim_without.push_het();
+        % find steady-state D value after disturbance
+        D_after=get_D(sim,sim.x(end,:),sim.t(end));
 
-    % simulate!
-    sim_without = sim_without.simulate_model;
+        % record adaptation error
+        adaptation_errors(i,j)=abs((D_after-D_before)./D_before)*100;
 
-    % record
-    x_het=sim_without.x(end,10:(9+2*sim_without.num_het));
-    p_xs_without(i)=x_het(4);
-end
-
-%% MAKE PRE-CALCULATIONS for the plot
-% on the x-axis, total transcription rate/growth
-tot_trans=plasmid_concs*sim_with.het.parameters('a_dist');
-
-
-%% ANALYTICALLY ESTIMATE the controller's dynamic range
-% finding no-burden values of translation rate, dissociation constants,
-% rib. gene transc. regulation function
-sim_nb=cell_simulator;
-sim_nb=sim_nb.load_heterologous_and_external('pi_controller','step_inducer');
-sim_nb.het.parameters('a_x')=0;
-sim_nb.het.parameters('a_sens')=0;
-sim_nb.het.parameters('a_anti')=0;
-sim_nb.het.parameters('a_act')=0;
-sim_nb.het.parameters('a_amp')=0;
-sim_nb.het.parameters('a_dist')=0;
-sim_nb=sim_nb.push_het();
-sim_nb.tf =  10;
-sim_nb.opt = odeset('reltol',1.e-6,'abstol',1.e-9);
-sim_nb = sim_nb.simulate_model;
-[e_nb,Fr_nb,k_a_nb,k_r_nb,k_sens_nb,k_act_nb,k_amp_nb,k_dist_nb,k_x_nb]=get_nb(sim_nb,sim_nb.x(end,:));
-
-% calculate values of 'meaningful paramters'
-par=sim_with.parameters; % IMPORTANT! parameters of the system where the controller's genes ARE expressed, not 'no burden' one
-u=par('a_act')./par('a_anti'); % ideal value of F_anti
-zeta=par('c_sens').*par('a_sens');
-
-%% 
-% calculating the value of lambda
-lambda_est = ...
-    e_nb./par('M') .* ...
-    Fr_nb.*par('c_r').*par('a_r') .* ...
-    par('n_sens').*k_sens_nb./(par('n_r').*k_r_nb) .* ...
-    par('K_dna(anti)-sens')./(zeta) .* ...
-    (1-u)./u;
-
-% calculating the value of D
-D_est = ...
-    1 + ...
-    (lambda_est.*zeta) ./ ...
-    ((lambda_est+par('b_sens')).*k_sens_nb) ./ ...
-    (par('n_sens')./par('M') .* par('K_dna(anti)-sens') .* ((1-u)./u) );
-
-% find sum of steady-state mj/kj_nb values
-maka_nb = ...
-    lambda_est.*par('c_a').*par('a_a') ./ ...
-    ((lambda_est+par('b_a')).*k_a_nb);
-mrkr_nb = ...
-    lambda_est.*Fr_nb.*par('c_r').*par('a_r') ./ ...
-    ((lambda_est+par('b_r')).*k_r_nb);
-msensksens_nb = ...
-    lambda_est.*Fr_nb.*zeta ./ ...
-    ((lambda_est+par('b_sens')).*k_sens_nb);
-sum_mjkj_nb=maka_nb+mrkr_nb+msensksens_nb;
-
-% find Omega
-% Omega = ...
-%     (1-par('phi_q')).*par('M').*zeta.*lambda_est ./ ...
-%     (par('K_dna(anti)-sens').*par('n_sens').*k_sens_nb.*(lambda_est+par('b_sens'))) .* ...
-%     (1-u)./u - ...
-%     sum_mjkj_nb;
-Omega=(1-par('phi_q')).*(D_est-1)-sum_mjkj_nb;
-
-%% FIND when the controller is expected to be out of its dynamic range
-
-% find steady-state m_x/k_x_nb+m_dist/k_dist_nb values, assuming the same
-% growth rate is maintained by the controller
-m_xk_x_nbs = ones(size(plasmid_concs)).* ...
-    lambda_est.*par('c_x').*par('a_x') ./ ...
-    ((lambda_est+par('b_x')).*k_x_nb); % same across all c_dist values
-mdistkdist_nbs = ...
-    lambda_est.*plasmid_concs.*par('a_dist') ./ ...
-    ((lambda_est+par('b_dist')).*k_dist_nb); % an array!!!
-sums_x_and_dist=mdistkdist_nbs+m_xk_x_nbs;
-
-% find when it exceeds Omega
-for i=1:size(plasmid_concs,2)
-    i_exceed=i;
-    if(sums_x_and_dist(i)>Omega)
-        break
     end
 end
 
-%% Main Figure g
 
-Fe = figure('Position',[0 0 274 226]);
-set(Fe, 'defaultAxesFontSize', 9)
-set(Fe, 'defaultLineLineWidth', 1.25)
+%% FIGURE 5 g
 
-hold on
+Fg = figure('Position',[0 0 239 220]);
+set(Fg, 'defaultAxesFontSize', 9)
+set(Fg, 'defaultLineLineWidth', 1.25)
 
-% plot p_x values with and without the controller
-plot(tot_trans,p_xs_with./p_xs_with(1),'Color',[0 0.5 0 1])
-plot(tot_trans,p_xs_without./p_xs_without(1),'Color',[0 0.5 0 0.5])
+% with aif controller
+hmap=heatmap(flip(adaptation_errors,1));
 
-% mark the dynamic range of the controller
-plot([tot_trans(i_exceed) tot_trans(i_exceed)],[0.6 1.2],'Color','k','LineStyle',':')
-
-xlabel('c_{dist}\alpha_{dist}, dist. mRNA transc. [nM]','FontName','Arial');
-ylabel('p_x:p_x^0, relative output prot. conc.','FontName','Arial');
-
-ylim([0.6 1.2])
-xlim([0 3e5])
-xticks(0:1e5:3e5)
-yticks(0.6:0.1:1.2)
-
-legend({'w/ controller','no controller'},'FontName','Arial','FontSize',8,'Location','northwest')
-
-grid 
-box on
-axis square
-hold off
-
-%% Poster figure
-Fpost = figure('Position',[0 0 380 240]);
-set(Fpost, 'defaultAxesFontSize', 9)
-set(Fpost, 'defaultLineLineWidth', 1.25)
-
-hold on
-
-% plot p_x values with and without the controller
-plot(plasmid_concs,p_xs_with./p_xs_with(1),'Color',[0.6 0.8 0 1])
-plot(plasmid_concs,p_xs_without./p_xs_without(1),'Color',[0.6 0.8 0 0.5])
-
-% mark the dynamic range of the controller
-plot([plasmid_concs(i_exceed) plasmid_concs(i_exceed)],[0.6 1.2],'Color','k','LineStyle',':')
-
-xlabel('c, disturbing gene dosage [nM]','FontName','Arial');
-ylabel('p_{out}:p_{out}^0, relative output prot. conc.','FontName','Arial');
-
-legend({'w/ controller','no controller'},'FontName','Arial','FontSize',8,'Location','northwest')
-
-ylim([0.6 1.2])
-yticks(0.6:0.1:1.2)
-
-grid 
-box on
-axis square
-hold off
-%% NO BURDEN VALUES FUNCTION
-%
-
-function [e,Fr,k_a,k_r,k_sens,k_act,k_amp,k_dist,k_x]=get_nb(sim,ss)   
-    par=sim.parameters;
-    % STATE VECTOR TO SINGLE VARIABLES
-    m_a = ss(1);
-    m_r = ss(2);
-    p_a = ss(3);
-    R = ss(4);
-    tc = ss(5);
-    tu = ss(6);
-    Bcm = ss(7);
-    s = ss(8);
-    h = ss(9);
-    x_het=ss(10 : (9+2*sim.num_het) );
-
-    % USEFUL PRE-CALCULATIONS
-    % translation elongation rate
-    e=sim.form.e(par,tc);
-
-    % ribosome inactivation rate due to chloramphenicol
-    kcmh=par('kcm').*h;
-
-    % ribosome dissociation constants
-    k_a=sim.form.k(e,par('k+_a'),par('k-_a'),par('n_a'),kcmh);
-    k_r=sim.form.k(e,par('k+_r'),par('k-_r'),par('n_r'),kcmh);
-    % heterologous genes
-    k_het=ones(1,sim.num_het);
-    if(sim.num_het>0)
-        for j=1:sim.num_het
-            k_het(j)=sim.form.k(e,...
-            sim.parameters(['k+_',sim.het.names{j}]),...
-            sim.parameters(['k-_',sim.het.names{j}]),...
-            sim.parameters(['n_',sim.het.names{j}]),...
-            kcmh);
+% display labels
+x_text_labels=string(chis);
+for i=1:size(chis,2)
+    midpoint=round(size(chis,2)/2,0);
+    if (i~=1 && i~=size(chis,2) && i~=midpoint)
+        x_text_labels(i)='';
+    else
+        if(chis(i)~=0)
+            x_text_labels(i)=[num2str(chis(i)/1e5),'e5'];
+        else
+            x_text_labels(i)='0';
         end
     end
+end
 
-    T=tc./tu; % ratio of charged to uncharged tRNAs
-    D=1+(m_a./k_a+m_r./k_r+sum(x_het(1:sim.num_het)./k_het))./...
-        (1-par('phi_q')); % denominator in ribosome competition calculations
-    B=R.*(1-1./D); % actively translating ribosomes - INCLUDING Q
+cdists_flip=flip(cdists);
+y_text_labels=string(cdists_flip);
+for i=1:size(cdists_flip,2)
+    midpoint=round(size(cdists_flip,2)/2,0);
+    if (i~=1 && i~=size(cdists_flip,2) && i~=midpoint)
+        y_text_labels(i)=' ';
+    else
+        if(cdists_flip(i)~=0)
+            y_text_labels(i)=num2str(cdists_flip(i));
+        else
+            y_text_labels(i)='0';
+        end
+    end
+end
+hmap.XDisplayLabels = x_text_labels;
+hmap.YDisplayLabels = y_text_labels;
 
-    % growth rate
-    l=sim.form.l(par,e,B);
+ylabel('c_{dist}, dist. gene conc. [nM]');
+xlabel('\chi, amplifier gain');
 
-    p_sens=x_het(6); % get sensor conc.
-    
-    % RECORD RIBOSOMAL GENE TRANSC. REGULATION FUNCTION
-    Fr=sim.form.F_r(par,T);
+hmap.GridVisible = 'off';
 
-    % RECORD DISSOCIATION CONSTANTS
-    k_sens=k_het(1);
-    k_act=k_het(3);
-    k_amp=k_het(4);
-    k_dist=k_het(5);
-    k_x=k_het(6);    
+%% FUNCTION for getting translation elongation rate
+function D=get_D(sim,ss,t)
+    % evaluate growth
+    par=sim.parameters;
+    m_a = ss(1); % metabolic gene mRNA
+    m_r = ss(2); % ribosomal mRNA
+    p_a = ss(3); % metabolic proteins
+    R = ss(4); % operational ribosomes
+    tc = ss(5); % charged tRNAs
+    tu = ss(6); % uncharged tRNAs
+    Bm = ss(7); % inactivated ribosomes
+    s=ss(8); % nutrient quality
+    h=ss(9); % chloramphenicol conc.
+    ss_het=ss(10:9+2*sim.num_het); % heterologous genes
+
+    e=sim.form.e(par,tc); % translation elongation ratio
+
+    kcmh=par('kcm').*h;
+    k_a=sim.form.k(e,par('k+_a'),par('k-_a'),par('n_a'),par('kcm').*h); % ribosome-mRNA dissociation constant (metab. genes)
+    k_r=sim.form.k(e,par('k+_r'),par('k-_r'),par('n_r'),par('kcm').*h); % ribosome-mRNA dissociation constant (rib. genes)
+    % ribosome dissociation constants
+            k_a=sim.form.k(e,par('k+_a'),par('k-_a'),par('n_a'),kcmh);
+            k_r=sim.form.k(e,par('k+_r'),par('k-_r'),par('n_r'),kcmh);
+
+            % heterologous genes rib. dissoc. constants
+            k_het=ones(sim.num_het,1); % initialise with default value 1
+            if(sim.num_het>0)
+                for i=1:sim.num_het
+                    k_het(i)=sim.form.k(e,...
+                    sim.parameters(['k+_',sim.het.names{i}]),...
+                    sim.parameters(['k-_',sim.het.names{i}]),...
+                    sim.parameters(['n_',sim.het.names{i}]),...
+                    kcmh);
+                end
+            end
+
+    D=1+(m_a./k_a+m_r./k_r+sum(ss_het(1:sim.num_het)./(k_het.')))./...
+            (1-par('phi_q')); % denominator in ribosome competition calculations
+    B=R.*(1-1./D); % actively translating ribosomes (inc. those translating housekeeping genes)
+
+    ext_inp=sim.ext.input(ss,t);
 end
