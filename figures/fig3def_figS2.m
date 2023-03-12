@@ -1,7 +1,7 @@
-% fig3bcd_figS2.m
+% fig3def_figS2.m
 
 % PREDICTING HETEROLOGOUS GENE EXPRESSION NUMERICALLY AND ANALYTICALLY
-% Figure 3: b, c, d
+% Figure 3: d, e, f
 % Figure S2: all subfigures
 
 % Analyse the effects of heterologous gene expression: investigate growth
@@ -110,7 +110,7 @@ for i=1:size(plasmid_concs,2)
     phi_hets(i)=phi_het;
 end
 
-%% MAIN FIGURE B cell growth as a function of burden
+%% MAIN FIGURE E cell growth as a function of burden
 approx_colour=[0.6350 0.0780 0.1840];
 
 Fb = figure('Position',[0 0 385 287]);
@@ -131,7 +131,7 @@ box on
 axis square
 hold off
 
-%% MAIN FIGURE C - het. prot. mass fraction as a function of burden
+%% MAIN FIGURE E - het. prot. mass fraction as a function of burden
 
 Fc = figure('Position',[0 0 385 290]);
 set(Fc, 'defaultAxesFontSize', 9)
@@ -146,14 +146,17 @@ plot([0,plasmid_concs*a_xtra]./kxNB,[phi_het0_approx,phi_hets_approx], ...
 xlabel('\xi, translational burden','FontName','Arial');
 ylabel('\phi_x, het. prot. mass fraction','FontName','Arial');
 
-legend('Simulation results','Analytical estimates','Location','southeast','FontName','Arial')
+legend('Simulation results','Analytical estimates','Location','northeast','FontName','Arial');
+
+ylim([0 0.35])
+yticks([0:0.1:0.3,0.35])
 
 grid on
 box on
 axis square
 hold off 
 
-%% Figure D - total heterologous protein production rate at t=0 in a population of cells (mu_het)
+%% Figure F - total heterologous protein production rate at t=0 in a population of cells (mu_het)
 
 delta=0.25;
 Fd = figure('Position',[0 0 385 290]);
@@ -196,10 +199,11 @@ plot([xi_max_approx xi_max_approx],[0 mu_max_approx], ...
 
 xlabel('\xi, translational burden','FontName','Arial');
 ylabel({'rate of total protein', 'production [aa/h/cell]'},'FontName','Arial');
+legend('Simulation results','Analytical estimates','Location','northeast','FontName','Arial');
 
-ylim([0 15*10^7])
+ylim([0 17.5*10^7])
 
-yticks((0:2.5:15)*10^7)
+yticks((0:2.5:17.5)*10^7)
 
 grid on
 box on

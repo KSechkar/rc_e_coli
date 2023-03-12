@@ -1,6 +1,6 @@
-%% fig3a.m
+%% fig3c.m
 % PREDICTING HETEROLOGOUS GENE EXPRESSION NUMERICALLY AND ANALYTICALLY
-% Figure 3: a
+% Figure 3: c
 
 % Change in cell growth rate vs heterologous protein mass fraction
 

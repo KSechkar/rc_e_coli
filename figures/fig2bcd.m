@@ -135,7 +135,7 @@ plot(l_map,ppGpp_map./ppGpp_ref,'-','Color','r','LineWidth',1)
 %plot([0.9 0.9],[10^(-1) 10^(1.5)],'--','Color','m','LineWidth',1)
 
 xlabel('\lambda, growth rate [1/h]');
-ylabel('[ppGpp]:[ppGpp]^{ref}, relative ppGpp conc.');
+ylabel('Normalised ppGpp conc.');
 legend('Experimental data','Model predictions',... 'Rel. rsd',
     'Location','northeast');
 

@@ -98,7 +98,7 @@ Fe = figure('Position',[0 0 385 280]);
 set(Fe, 'defaultAxesFontSize', 9)
 set(Fe, 'defaultLineLineWidth', 1.5)
 
-plot(nutrients,l_map(1,:)./l_map(2,:))
+plot(nutrients,l_map(1,:)./l_map(2,:),'x-')
 
 xlabel('\sigma, nutrient quality','FontName','Arial');
 ylabel({'\lambda:\lambda^{opt}, ratio of predicted', 'to optimal growth rate'},'FontName','Arial');
