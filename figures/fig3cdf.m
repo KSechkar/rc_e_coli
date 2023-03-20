@@ -1,8 +1,7 @@
 % fig3def_figS2.m
 
 % PREDICTING HETEROLOGOUS GENE EXPRESSION NUMERICALLY AND ANALYTICALLY
-% Figure 3: d, e, f
-% Figure S2: all subfigures
+% Figure 3: c, d, f
 
 % Analyse the effects of heterologous gene expression: investigate growth
 % rate and het. prot. mas fraction (Main Figure b,c), as well as charged/uncharged 
@@ -110,28 +109,8 @@ for i=1:size(plasmid_concs,2)
     phi_hets(i)=phi_het;
 end
 
-%% MAIN FIGURE E cell growth as a function of burden
+%% MAIN FIGURE C - het. prot. mass fraction as a function of burden
 approx_colour=[0.6350 0.0780 0.1840];
-
-Fb = figure('Position',[0 0 385 287]);
-set(Fb, 'defaultAxesFontSize', 9)
-set(Fb, 'defaultLineLineWidth', 1)
-hold on
-
-plot([0,plasmid_concs*a_xtra]./kxNB,[l0,ls],['r','-']) % plot model predictions
-plot([0,plasmid_concs*a_xtra]./kxNB,[l0_approx,ls_approx],...
-    'Color',approx_colour,'LineStyle','--') % plot approximation
-
-xlabel({'\xi, translational burden'},'FontName','Arial');
-ylabel('\lambda, growth rate [1/h]','FontName','Arial');
-
-legend('Simulation results','Analytical estimates','Location','northeast','FontName','Arial')
-grid on
-box on
-axis square
-hold off
-
-%% MAIN FIGURE E - het. prot. mass fraction as a function of burden
 
 Fc = figure('Position',[0 0 385 290]);
 set(Fc, 'defaultAxesFontSize', 9)
@@ -156,7 +135,27 @@ box on
 axis square
 hold off 
 
-%% Figure F - total heterologous protein production rate at t=0 in a population of cells (mu_het)
+%% MAIN FIGURE D cell growth as a function of burden
+
+Fb = figure('Position',[0 0 385 287]);
+set(Fb, 'defaultAxesFontSize', 9)
+set(Fb, 'defaultLineLineWidth', 1)
+hold on
+
+plot([0,plasmid_concs*a_xtra]./kxNB,[l0,ls],['r','-']) % plot model predictions
+plot([0,plasmid_concs*a_xtra]./kxNB,[l0_approx,ls_approx],...
+    'Color',approx_colour,'LineStyle','--') % plot approximation
+
+xlabel({'\xi, translational burden'},'FontName','Arial');
+ylabel('\lambda, growth rate [1/h]','FontName','Arial');
+
+legend('Simulation results','Analytical estimates','Location','northeast','FontName','Arial')
+grid on
+box on
+axis square
+hold off
+
+%% MAIN FIGURE F - total heterologous protein production rate at t=0 in a population of cells (mu_het)
 
 delta=0.25;
 Fd = figure('Position',[0 0 385 290]);
@@ -209,92 +208,6 @@ grid on
 box on
 axis square
 hold off 
-
-
-%% FIGURE S2 - metabolic changes induced by burden
-
-FS = figure('Position',[0 0 616 560]);
-
-% T
-subplot(2,2,3)
-hold on
-
-T0=ss0(5)/ss0(6);
-Ts=sss(5,:)./sss(6,:);
-
-plot([0,plasmid_concs*a_xtra.*ls],100*[T0,Ts]/T0,['r','-'])
-
-xlabel('c_x\alpha_x\lambda, het. mRNA transc. rate [nM/h]','FontName','Arial');
-ylabel({'T, proportional to 1/ppGpp conc.','[% of value with no burden]'},'FontName','Arial');
-ylim([85 115])
-xlim([0 7.5e5])
-yticks(85:5:115)
-xticks(0:2.5*10^5:10^6)
-grid on
-grid minor
-box on
-axis square
-hold off
-
-% Elongation rates
-subplot(2,2,1)
-hold on
-
-plot([0,plasmid_concs*a_xtra.*ls],100*[e0,es]/e0,['r','-']) % plot model predictions
-
-xlabel('c_x\alpha_x\lambda, het. mRNA transc. rate [nM/h]','FontName','Arial');
-ylabel({'\epsilon, translation elongation rate','[% of value with no burden]'},'FontName','Arial');
-ylim([85 115])
-xlim([0 7.5e5])
-yticks(85:5:115)
-xticks(0:2.5*10^5:10^6)
-grid on
-grid minor
-box on
-axis square
-hold off
-
-% Ribosome/tRNA transcription
-subplot(2,2,2)
-hold on
-
-F_r0=sim.form.F_r(par,T0);
-F_rs=sim.form.F_r(par,Ts);
-
-plot([0,plasmid_concs*a_xtra.*ls],100*[F_r0,F_rs]/F_r0,['r','-'])
-
-xlabel('c_x\alpha_x\lambda, het. mRNA transc. rate [nM/h]','FontName','Arial');
-ylabel({'F_r, rib. gene transc. reg. func.','[% of value with no burden]'},'FontName','Arial');
-ylim([85 115])
-yticks(85:5:115)
-xlim([0 7.5e5])
-xticks(0:2.5*10^5:10^6)
-grid on
-grid minor
-box on
-axis square
-hold off
-
-% tRNA charging
-subplot(2,2,4)
-hold on
-
-nu0=sim.form.nu(par,ss0(6),ss0(8));
-nus=sim.form.nu(par,sss(6,:),sss(8));
-
-plot([0,plasmid_concs*a_xtra.*ls],100*[nu0,nus]/nu0,['r','-'])
-
-xlabel('c_x\alpha_x\lambda, het. mRNA transc. rate [nM/h]','FontName','Arial');
-ylabel({'\nu, tRNA charging rate.','[% of value with no burden]'},'FontName','Arial');
-ylim([85 115])
-xlim([0 7.5e5])
-yticks(85:5:115)
-xticks(0:2.5*10^5:10^6)
-grid on
-grid minor
-box on
-axis square
-hold off
 
 %% FUNCTION for getting growth rate, translation elongation rate and het. prot. mass fraction from the system's steady state
 function [l,e,phi_het]=get_lephihet(sim,ss)

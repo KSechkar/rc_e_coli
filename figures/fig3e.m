@@ -1,6 +1,6 @@
-%% fig3c.m
+%% fig3e.m
 % PREDICTING HETEROLOGOUS GENE EXPRESSION NUMERICALLY AND ANALYTICALLY
-% Figure 3: c
+% Figure 3: e
 
 % Change in cell growth rate vs heterologous protein mass fraction
 
@@ -108,7 +108,7 @@ for i=1:size(plasmid_concs,2)
     phi_hets(i)=phi_het;
 end
 
-%% FIGURE 3 a 
+%% FIGURE 3 e 
 approx_colour='#A2142F'; % 'r' for plotting approximations
 Fig = figure('Position',[0 0 385 290]);
 set(Fig, 'defaultAxesFontSize', 9)
