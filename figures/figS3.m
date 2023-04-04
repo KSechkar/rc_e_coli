@@ -1,7 +1,7 @@
-%% fig3f.m
+%% figS3.m
 
 % WINNER-TAKES-ALL PHENOMENON
-% Figure 3: f
+% Figure S3
 
 % Two bistable switches (self-activating genes) in the same cell exhibiting
 % winner-takes-all behaviour, when the activation of one switch may prevent

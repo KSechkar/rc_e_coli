@@ -113,7 +113,7 @@ end
 % plot equilibria for different inducer 1 concentrations
 plot(eqbs(1,:),eqbs(2,:),'Color',[1 0 0],'LineWidth',2)
 
-legend('f_1=25nM','f_1=125nM','f_1=1000nM',...
+legend('f_1=25nM','f_1=125uM','f_1=1000uM',...
     'Location','northeast','FontName','Arial')
 
 xlabel('p_{s1}, conc. of switch 1 prot. [nM]','FontName','Arial')
