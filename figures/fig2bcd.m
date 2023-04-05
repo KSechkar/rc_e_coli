@@ -113,7 +113,7 @@ hold on
 
 plot(data_el(:,1),data_el(:,2),'.','Color','b')
 plot(l_map,el_map,'-','Color','r','LineWidth',1)
-plot([0.3 0.3],[6 20],':','Color','k')
+%plot([0.3 0.3],[6 20],':','Color','k')
 
 ylabel('\epsilon, translation elong. rate [aa/s]','FontName','Arial');
 xlabel('\lambda, growth rate [1/h]','FontName','Arial');

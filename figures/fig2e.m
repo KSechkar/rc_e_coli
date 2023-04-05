@@ -27,10 +27,10 @@ sim.opt = odeset('reltol',1.e-6,'abstol',1.e-9); % more lenient integration tole
 %% DEFINE nutrient condiitons to explore
 
 % vector of nurtient qualities
-nutrients=flip([0.05,0.1,0.25,0.5,0.75,1]);
+nutrients=flip(logspace(log10(0.05),log10(1),16));
 
 % range of fixed ribosome transcription regulation function values
-fixed_F_rs=0.01:0.01:0.99;
+fixed_F_rs=0.005:0.005:0.99;
 % corresponding reciprocals of ppGpp levels
 fixed_Ts=fixed_F_rs./(sim.parameters('tau').*ones(size(fixed_F_rs))-fixed_F_rs);
 
@@ -98,7 +98,7 @@ Fe = figure('Position',[0 0 385 280]);
 set(Fe, 'defaultAxesFontSize', 9)
 set(Fe, 'defaultLineLineWidth', 1.5)
 
-plot(nutrients,l_map(1,:)./l_map(2,:),'x-')
+plot(nutrients,l_map(1,:)./l_map(2,:),'-')
 
 xlabel('\sigma, nutrient quality','FontName','Arial');
 ylabel({'\lambda:\lambda^{opt}, ratio of predicted', 'to optimal growth rate'},'FontName','Arial');
