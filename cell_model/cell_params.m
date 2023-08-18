@@ -28,20 +28,24 @@ function params=cell_params(~)
 
     % ACTIVATION & RATE FUNCTION PARAMETERS
     params('e_max')=20*3600; % max elongation rate (aa/h) [4]
-    params('psi_max')= 1080000; % max synthesis rate (aa/h) [4]   
+    params('psi_max')= 1080000 / 2.5; % max synthesis rate (aa/h) [4]   
     params('tau')= 1; % ppGpp sensitivity (ribosome transc. and tRNA synth. Hill const) [4]
 
     % used in testing - fix the ppGpp level to make ribosome expression effectively cosntitutive
     params('is_fixed_T') = 0; % 1 if fixed
     params('fixed_T') = 1; % the fixed value of T decsribing the ppGpp level
 
+    % used for simulating nutrient upshifts
+    params('is_upshift') = 0; % 1 if simulating a nutrient upshift scenario
+    params('s_postshift') = 0; % post-upshift steady-state value of nutirent quality (zero as no upshift by default)
+
     % FITTED PARAMETERS
-    params('a_a') = 3.881e5; %3.462e5;  % metabolic gene transcription rate (/h) 
-    params('a_r') = 0.953427.*params('a_a'); % ribosomal gene transcription rate (/h) 
-    params('nu_max')= 4165.26; % max tRNA amioacylation rate (/h)
-    params('K_nut')= 5992.78; % tRNA charging rate Michaelis-Menten constant (nM) 
-    params('K_e')= 5992.78; % translation elongation rate Michaelis-Menten constant (nM) 
-    params('kcm')= 0.000353953;  % chloramphenical binding rate constant (/h/nM)   
+    params('a_a') = 394464.6979;  % metabolic gene transcription rate (/h) 
+    params('a_r') = 1.0318.*params('a_a'); % ribosomal gene transcription rate (/h) 
+    params('nu_max')= 4.0469e+03; % max tRNA amioacylation rate (/h)
+    params('K_nut')= 1.1233e+03; %5992.78; % tRNA charging rate Michaelis-Menten constant (nM) 
+    params('K_e')= 1.2397e+03; %5992.78; % translation elongation rate Michaelis-Menten constant (nM) 
+    params('kcm')= 3.5614e-04;  % chloramphenical binding rate constant (/h/nM)   
 end
 
 %% REFERENCES:

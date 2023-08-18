@@ -18,9 +18,9 @@ function last_x=get_steady(sim,... % simulator object
             last_x=sim.x(end,:);
             break
         else % if not, continue integration, making the current state the new initial condition
-            if(i==Max_iter)
-                disp('Warning! SS not reached yet')
-            end
+%             if(i==Max_iter)
+%                 disp('Warning! SS not reached yet')
+%             end
             last_x=sim.x(end,:);
             % mRNAs
             sim.init_conditions('m_a')=last_x(1);

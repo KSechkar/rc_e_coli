@@ -34,15 +34,15 @@ data_ppGpp(:,2) = dataset(:,2); % ppGpp conc. relative to reference (l=0.9/h)
 sim=cell_simulator; % initialise simulator
 
 % parameters for getting steady state
-sim.tf = 5; % single integraton step timeframe
-Delta = 0.01; % threshold that determines if we're in steady state
-Max_iter = 100; % maximum no. iterations (checking if SS reached over first 750 h)
+sim.tf = 12; % single integraton step timeframe
+Delta = 0; % threshold that determines if we're in steady state
+Max_iter = 5; % maximum no. iterations (checking if SS reached over first 60 h)
 
 sim.opt = odeset('reltol',1.e-6,'abstol',1.e-9); % more lenient integration tolerances for speed
 
 %% SPECIFY range of nutrient qualit for which we run the simulation
 
-nutr_quals=logspace(log10(0.01),log10(1),16);
+nutr_quals=logspace(log10(0.01),log10(1),32);
 
 %% INITIALISE the arrays where model predictions will be stored
 
@@ -58,6 +58,14 @@ for j=1:size(nutr_quals,2)
 
     % reset simulator
     sim.parameters=cell_params();
+    theta=[1.03184, 4046.89, 1239.69, 0.000356139];
+    sim.parameters('a_a') = 3.89e5; % metabolic prot. transcription rate (/h)
+    sim.parameters('a_r') = sim.parameters('a_a').*theta(1); % ribosome transcription rate (/h) - rescaled!
+    sim.parameters('nu_max') = theta(2); % max metabolic rate (/h)
+    sim.parameters('K_e') = theta(3); % elongation rate Hill constant (nM)
+    sim.parameters('K_nut') = theta(3); % tRNA charging rate Hill constant (nM)
+    sim.parameters('kcm') = theta(4); % tRNA charging rate Hill constant (nM)
+    
     sim.init_conditions=cell_init_conds(sim.parameters); % reset intial conditions
     
     % set nutrient quality
@@ -135,7 +143,7 @@ plot(l_map,ppGpp_map./ppGpp_ref,'-','Color','r','LineWidth',1)
 %plot([0.9 0.9],[10^(-1) 10^(1.5)],'--','Color','m','LineWidth',1)
 
 xlabel('\lambda, growth rate [1/h]');
-ylabel('Normalised ppGpp conc.');
+ylabel('Normalized ppGpp conc.');
 legend('Experimental data','Model predictions',... 'Rel. rsd',
     'Location','northeast');
 

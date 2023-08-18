@@ -17,9 +17,9 @@ close all
 % All parameters are constrained to be positive. Initial values from Weisse et al. 2015 and Chure et al. 2022
 params = {
     {'a_r/a_a', 1} % metabolic gene transcription rate
-    {'nu_max', 6000} % max. tRNA aminoacylatio rate
-    {'K_t', 80000} % MM constants for translation elongation and tRNA charging rates
-    {'kcm', 0.3594/1000} % chloramphenicol binding rate constant
+    {'nu_max', 6000} % max. tRNA aminoacylatio ratedefault
+    {'K', 3000}
+    {'kcm', 0.0003594}
     };
 
 % record all values in a row vector
@@ -46,7 +46,7 @@ DREAMPar.outlier='iqr'; % handling outliers -
 
 % Backing up the progress every 10 steps
 DREAMPar.save='yes';
-DREAMPar.steps=10;
+DREAMPar.steps=10;  
 
 % Initial sampling distribution
 Par_info.prior = 'normal'; % Sample initial state of chains from prior distribution
@@ -54,14 +54,16 @@ Par_info.mu=theta0; % means of prior distribution
 Par_info.cov=covar0; % covariances of prior distribution (parameters distributed independently)
 
 % Boundaries of parameter value domains
-Par_info.min = [params{1}{2}/100,... % lower bound of a_a/a_r
-    params{2}{2}/100,... % ditto nu_max
-    params{3}{2}/100,... % ditto K_t
-    params{4}{2}/100]; % ditto k_cm
-Par_info.max = [params{1}{2}*100,... % upper bound of a_a/a_r
-    params{2}{2}*100,... % ditto nu_max
-    params{3}{2}*100,... % ditto K_t
-    params{4}{2}*100]; % ditto k_cm
+Par_info.min = [params{1}{2}/50,... % lower bound of a_a/a_r
+    params{2}{2}/50,... % ditto nu_max
+    params{3}{2}/50,...
+    params{4}{2}/50
+];
+Par_info.max = [params{1}{2}*50,... % upper bound of a_a/a_r
+    params{2}{2}*50,... % ditto nu_max
+    params{3}{2}*50,... % ditto K
+    params{4}{2}*50
+];
 Par_info.boundhandling = 'fold'; % handle samples out of bounds by imagaing the domain as a torus, upholding MCMC detailed balance
 
 % do not output diagnostic
@@ -69,7 +71,7 @@ DREAMPar.diagnostics='no';
 
 % Parallel computing to speed the simulation up
 DREAMPar.parallel = 'yes'; 
-DREAMPar.CPU=2;
+DREAMPar.CPU=10;
 
 DREAMPar.restart='no';
 

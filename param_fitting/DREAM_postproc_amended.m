@@ -27,7 +27,7 @@
 %% EDITED BY K.S.! (this whole section)
 clear 
 close all
-load DREAM_fitting_outcome.mat
+load DREAM.mat
 
 % parameter names
 par_names = {
@@ -40,7 +40,7 @@ par_names = {
 %%
 
 % First assemble all chain in one matrix
-%chain=chain(1:1970,:,:);
+chain=chain(1:2000,:,:);
 ParSet = genparset(chain); DREAMPar.N = size(chain,3);
 
 % Take the last 25% of the posterior samples -- assume that these samples
@@ -265,7 +265,7 @@ while counter <= DREAMPar.d
     [~,mode_index]=max(N); % find index of the mode
     mode=X(mode_index);
 
-%     disp(['Posterior distribution mode for Par. ',num2str(counter),' is ',num2str(mode)])
+    disp(['Posterior distribution mode for Par. ',num2str(counter),' is ',num2str(mode)])
 
     % save into the cdf
     cdfs(:,counter)=(cumsum(N)./sum(N)).';

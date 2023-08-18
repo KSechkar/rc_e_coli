@@ -17,7 +17,7 @@ close all
 
 %% DEFINE number of samples
 
-num_samples=25;
+num_samples=100;
 
 %% LOAD the MCMC chains
 load DREAM_fitting_outcome.mat
@@ -63,11 +63,11 @@ end
 sim=cell_simulator; % initialise simulator
 
 % parameters for getting steady state
-sim.tf = 10; % single integraton step timeframe
-Delta = 1; % threshold that determines if we're in steady state
-Max_iter = 75; % maximum no. iterations (checking if SS reached over first 750 h)
+sim.tf = 12; % single integraton step timeframe
+Delta = 0.001; % threshold that determines if we're in steady state
+Max_iter = 4; % maximum no. iterations (checking if SS reached over first 48 h)
 
-sim.opt = odeset('reltol',1.e-6,'abstol',1.e-9); % more lenient integration tolerances for speed
+sim.opt = odeset('reltol',1.e-6,'abstol',1.e-6); % more lenient integration tolerances for speed
 
 model.ssfun = @(theta,data) rc_ecoli_sos(theta,data,sim,Delta,Max_iter);
 

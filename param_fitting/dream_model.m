@@ -16,6 +16,7 @@ function loglike=dream_model(theta)
         % get inputs: nutrient quality and h; get outputs: l and rib mass frac
         data.xdata=[]; % initialise inputs array
         data.ydata=[]; % initialise outputs array
+
         for i = 1:size(dataset,1)
             if(dataset(i,1)>0.3)
                 % inputs
@@ -40,16 +41,16 @@ function loglike=dream_model(theta)
         sim=cell_simulator; % initialise simulator
         
         % settings
-        sim.tf = 10; % single integraton step timeframe
-        sim.opt = odeset('reltol',1.e-6,'abstol',1.e-9); % more lenient integration tolerances for speed
+        sim.tf = 12; % single integraton step timeframe
+        sim.opt = odeset('reltol',1.e-6,'abstol',1.e-6); % more lenient integration tolerances for speed
     end
 
     % parameters for getting steady state
-    Delta = 0.1; % threshold that determines if we're in steady state
-    Max_iter = 75; % maximum no. iterations (checking if SS reached over first 750 h)
+    Delta = 0.001; % threshold that determines if we're in steady state
+    Max_iter = 4; % maximum no. iterations (checking if SS reached over first 750 h)
     
     %% GET model predictions
-    ymodel=dream_modelfun(theta,data.xdata,sim,Delta,Max_iter);
+    ymodel=dream_modelfun(theta,data.xdata,sim,Delta,Max_iter,3.89e5); % using crude estimate 3.89e5 for a_a
 
     %% FIND log likelihood
 

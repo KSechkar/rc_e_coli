@@ -18,9 +18,9 @@ close all
 sim=cell_simulator; % initialise simulator
 
 % parameters for getting steady state
-sim.tf = 10; % single integraton step timeframe
-Delta = 0.01; % threshold that determines if we're in steady state
-Max_iter = 75; % maximum no. iterations (checking if SS reached over first 750 h)
+sim.tf = 12; % single integraton step timeframe
+Delta = 0.001; % threshold that determines if we're in steady state
+Max_iter = 4; % maximum no. iterations (checking if SS reached over first 48 h)
 
 sim.opt = odeset('reltol',1.e-6,'abstol',1.e-9); % more lenient integration tolerances for speed
 

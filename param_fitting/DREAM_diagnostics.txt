@@ -1,0 +1,320 @@
+=================================================== 
+MCMC CONVERGENCE diagnostics for chain number  1 
+Based on sample size =       1001 
+=================================================== 
+Autocorrelation for each parameter 
+Variable          Lag 1        Lag 5       Lag 10       Lag 25 
+variable 1        0.966        0.854        0.731        0.480 
+variable 2        0.953        0.795        0.642        0.370 
+variable 3        0.961        0.819        0.660        0.299 
+variable 4        0.948        0.757        0.567        0.098 
+
+Raftery-Lewis Diagnostics for each parameter 
+(q=0.025000, r=0.010000, s=0.950000)
+Variable         Thin       Burn   Total(N)     (Nmin)     I-stat 
+variable 1          1        197     124544        937    132.918 
+variable 2          1        197     124544        937    132.918 
+variable 3          1        197     124544        937    132.918 
+variable 4          1        197     124544        937    132.918 
+
+Geweke Diagnostics for each parameter 
+Variable           Mean      std dev      NSE iid      RNE iid 
+variable 1     1.032973     0.306067     0.009679     1.000000 
+variable 2  4078.892375   135.216596     4.275924     1.000000 
+variable 3  1869.171392  1039.823590    32.882109     1.000000 
+variable 4     0.000349     0.000011     0.000000     1.000000 
+
+Variable         NSE 4%       RNE 4%       NSE 8%       RNE 8%      NSE 15%      RNE 15% 
+variable 1     0.060643     0.025473     0.049203     0.038694     0.031638     0.093584 
+variable 2    26.330968     0.026371    14.670742     0.084949    11.094261     0.148547 
+variable 3   174.872925     0.035357   126.641834     0.067416   116.876772     0.079152 
+variable 4     0.000001     0.087485     0.000001     0.084674     0.000001     0.081519 
+
+=================================================== 
+MCMC CONVERGENCE diagnostics for chain number  2 
+Based on sample size =       1001 
+=================================================== 
+Autocorrelation for each parameter 
+Variable          Lag 1        Lag 5       Lag 10       Lag 25 
+variable 1        0.993        0.970        0.942        0.853 
+variable 2        0.952        0.756        0.562        0.154 
+variable 3        0.955        0.803        0.665        0.485 
+variable 4        0.946        0.783        0.628        0.212 
+
+Raftery-Lewis Diagnostics for each parameter 
+(q=0.025000, r=0.010000, s=0.950000)
+Variable         Thin       Burn   Total(N)     (Nmin)     I-stat 
+variable 1          1         62      19287        937     20.584 
+variable 2          1         62      19287        937     20.584 
+variable 3          1         62      19287        937     20.584 
+variable 4          1         62      19287        937     20.584 
+
+Geweke Diagnostics for each parameter 
+Variable           Mean      std dev      NSE iid      RNE iid 
+variable 1     1.663287     1.055240     0.033370     1.000000 
+variable 2  4050.806574   136.456202     4.315124     1.000000 
+variable 3  1059.568679   881.848414    27.886495     1.000000 
+variable 4     0.000358     0.000011     0.000000     1.000000 
+
+Variable         NSE 4%       RNE 4%       NSE 8%       RNE 8%      NSE 15%      RNE 15% 
+variable 1     0.378961     0.007754     0.406353     0.006744     0.359181     0.008631 
+variable 2    28.025170     0.023708    32.799818     0.017308    32.374681     0.017765 
+variable 3   244.787524     0.012978   297.638721     0.008778   288.452731     0.009346 
+variable 4     0.000001     0.061531     0.000001     0.086839     0.000001     0.181913 
+
+=================================================== 
+MCMC CONVERGENCE diagnostics for chain number  3 
+Based on sample size =       1001 
+=================================================== 
+Autocorrelation for each parameter 
+Variable          Lag 1        Lag 5       Lag 10       Lag 25 
+variable 1        0.983        0.928        0.874        0.692 
+variable 2        0.941        0.741        0.581        0.158 
+variable 3        0.955        0.816        0.728        0.411 
+variable 4        0.956        0.805        0.697        0.427 
+
+Raftery-Lewis Diagnostics for each parameter 
+(q=0.025000, r=0.010000, s=0.950000)
+Variable         Thin       Burn   Total(N)     (Nmin)     I-stat 
+variable 1          1        210      72739        937     77.630 
+variable 2          1        210      72739        937     77.630 
+variable 3          1        210      72739        937     77.630 
+variable 4          1        210      72739        937     77.630 
+
+Geweke Diagnostics for each parameter 
+Variable           Mean      std dev      NSE iid      RNE iid 
+variable 1     1.115382     0.377374     0.011934     1.000000 
+variable 2  4121.768736   143.932777     4.551554     1.000000 
+variable 3  1701.975330  1062.388754    33.595682     1.000000 
+variable 4     0.000353     0.000014     0.000000     1.000000 
+
+Variable         NSE 4%       RNE 4%       NSE 8%       RNE 8%      NSE 15%      RNE 15% 
+variable 1     0.090806     0.017271     0.084020     0.020173     0.060078     0.039456 
+variable 2    21.208507     0.046057    14.439325     0.099363    10.054743     0.204917 
+variable 3   159.614703     0.044302    95.648893     0.123369    83.413727     0.162215 
+variable 4     0.000002     0.029181     0.000002     0.033564     0.000002     0.051958 
+
+=================================================== 
+MCMC CONVERGENCE diagnostics for chain number  4 
+Based on sample size =       1001 
+=================================================== 
+Autocorrelation for each parameter 
+Variable          Lag 1        Lag 5       Lag 10       Lag 25 
+variable 1        0.889        0.534        0.226        0.081 
+variable 2        0.947        0.784        0.632        0.398 
+variable 3        0.952        0.793        0.623        0.264 
+variable 4        0.937        0.714        0.472        0.138 
+
+Raftery-Lewis Diagnostics for each parameter 
+(q=0.025000, r=0.010000, s=0.950000)
+Variable         Thin       Burn   Total(N)     (Nmin)     I-stat 
+variable 1          1        208     139861        937    149.265 
+variable 2          1        208     139861        937    149.265 
+variable 3          1        208     139861        937    149.265 
+variable 4          1        208     139861        937    149.265 
+
+Geweke Diagnostics for each parameter 
+Variable           Mean      std dev      NSE iid      RNE iid 
+variable 1     0.959266     0.133659     0.004227     1.000000 
+variable 2  4086.104061   130.805900     4.136446     1.000000 
+variable 3  1836.999129   844.613274    26.709017     1.000000 
+variable 4     0.000348     0.000009     0.000000     1.000000 
+
+Variable         NSE 4%       RNE 4%       NSE 8%       RNE 8%      NSE 15%      RNE 15% 
+variable 1     0.022327     0.035836     0.022184     0.036301     0.017155     0.060707 
+variable 2    21.868499     0.035778    11.826736     0.122328    10.706605     0.149263 
+variable 3   147.799928     0.032656    94.719881     0.079512    66.854878     0.159606 
+variable 4     0.000002     0.026163     0.000002     0.023661     0.000002     0.035705 
+
+=================================================== 
+MCMC CONVERGENCE diagnostics for chain number  5 
+Based on sample size =       1001 
+=================================================== 
+Autocorrelation for each parameter 
+Variable          Lag 1        Lag 5       Lag 10       Lag 25 
+variable 1        0.994        0.977        0.955        0.906 
+variable 2        0.952        0.783        0.634        0.407 
+variable 3        0.975        0.891        0.803        0.672 
+variable 4        0.958        0.792        0.635        0.517 
+
+Raftery-Lewis Diagnostics for each parameter 
+(q=0.025000, r=0.010000, s=0.950000)
+Variable         Thin       Burn   Total(N)     (Nmin)     I-stat 
+variable 1          1        166      91624        937     97.784 
+variable 2          1        166      91624        937     97.784 
+variable 3          1        166      91624        937     97.784 
+variable 4          1        166      91624        937     97.784 
+
+Geweke Diagnostics for each parameter 
+Variable           Mean      std dev      NSE iid      RNE iid 
+variable 1     1.817072     1.120758     0.035441     1.000000 
+variable 2  4083.661308   123.158919     3.894627     1.000000 
+variable 3  1248.696919  1119.616912    35.405395     1.000000 
+variable 4     0.000359     0.000013     0.000000     1.000000 
+
+Variable         NSE 4%       RNE 4%       NSE 8%       RNE 8%      NSE 15%      RNE 15% 
+variable 1     0.414643     0.007306     0.412492     0.007382     0.267420     0.017565 
+variable 2    28.891719     0.018171    28.042804     0.019288    17.888751     0.047399 
+variable 3   339.578186     0.010871   337.990197     0.010973   208.605188     0.028806 
+variable 4     0.000003     0.020736     0.000002     0.027547     0.000001     0.082405 
+
+=================================================== 
+MCMC CONVERGENCE diagnostics for chain number  6 
+Based on sample size =       1001 
+=================================================== 
+Autocorrelation for each parameter 
+Variable          Lag 1        Lag 5       Lag 10       Lag 25 
+variable 1        0.975        0.881        0.763        0.465 
+variable 2        0.948        0.771        0.582        0.229 
+variable 3        0.960        0.845        0.704        0.397 
+variable 4        0.958        0.820        0.660        0.328 
+
+Raftery-Lewis Diagnostics for each parameter 
+(q=0.025000, r=0.010000, s=0.950000)
+Variable         Thin       Burn   Total(N)     (Nmin)     I-stat 
+variable 1          1        184      56047        937     59.815 
+variable 2          1        184      56047        937     59.815 
+variable 3          1        184      56047        937     59.815 
+variable 4          1        184      56047        937     59.815 
+
+Geweke Diagnostics for each parameter 
+Variable           Mean      std dev      NSE iid      RNE iid 
+variable 1     1.259370     0.521853     0.016502     1.000000 
+variable 2  4084.527228   138.147000     4.368592     1.000000 
+variable 3  1392.442542   973.917656    30.797980     1.000000 
+variable 4     0.000355     0.000013     0.000000     1.000000 
+
+Variable         NSE 4%       RNE 4%       NSE 8%       RNE 8%      NSE 15%      RNE 15% 
+variable 1     0.120164     0.018860     0.101057     0.026666     0.088529     0.034747 
+variable 2    20.279473     0.046406    17.317084     0.063640    11.211015     0.151842 
+variable 3   159.778419     0.037154   103.743567     0.088130    93.631881     0.108192 
+variable 4     0.000002     0.045514     0.000002     0.073465     0.000001     0.087745 
+
+=================================================== 
+MCMC CONVERGENCE diagnostics for chain number  7 
+Based on sample size =       1001 
+=================================================== 
+Autocorrelation for each parameter 
+Variable          Lag 1        Lag 5       Lag 10       Lag 25 
+variable 1        0.842        0.631        0.420        0.008 
+variable 2        0.940        0.759        0.600        0.331 
+variable 3        0.942        0.755        0.562        0.276 
+variable 4        0.935        0.756        0.575        0.131 
+
+Raftery-Lewis Diagnostics for each parameter 
+(q=0.025000, r=0.010000, s=0.950000)
+Variable         Thin       Burn   Total(N)     (Nmin)     I-stat 
+variable 1          1         44      13226        937     14.115 
+variable 2          1         44      13226        937     14.115 
+variable 3          1         44      13226        937     14.115 
+variable 4          1         44      13226        937     14.115 
+
+Geweke Diagnostics for each parameter 
+Variable           Mean      std dev      NSE iid      RNE iid 
+variable 1     1.041622     0.091371     0.002889     1.000000 
+variable 2  4100.529123   115.134231     3.640864     1.000000 
+variable 3  1647.338772   784.707027    24.814615     1.000000 
+variable 4     0.000356     0.000008     0.000000     1.000000 
+
+Variable         NSE 4%       RNE 4%       NSE 8%       RNE 8%      NSE 15%      RNE 15% 
+variable 1     0.011474     0.063419     0.007819     0.136572     0.006070     0.226562 
+variable 2    19.424194     0.035134    15.948620     0.052115    15.247954     0.057015 
+variable 3   120.372045     0.042498    99.852173     0.061759    77.802114     0.101726 
+variable 4     0.000001     0.048460     0.000001     0.092675     0.000001     0.149297 
+
+=================================================== 
+MCMC CONVERGENCE diagnostics for chain number  8 
+Based on sample size =       1001 
+=================================================== 
+Autocorrelation for each parameter 
+Variable          Lag 1        Lag 5       Lag 10       Lag 25 
+variable 1        0.963        0.829        0.705        0.518 
+variable 2        0.939        0.698        0.500        0.143 
+variable 3        0.967        0.847        0.716        0.489 
+variable 4        0.961        0.847        0.721        0.491 
+
+Raftery-Lewis Diagnostics for each parameter 
+(q=0.025000, r=0.010000, s=0.950000)
+Variable         Thin       Burn   Total(N)     (Nmin)     I-stat 
+variable 1          1        196     127885        937    136.483 
+variable 2          1        196     127885        937    136.483 
+variable 3          1        196     127885        937    136.483 
+variable 4          1        196     127885        937    136.483 
+
+Geweke Diagnostics for each parameter 
+Variable           Mean      std dev      NSE iid      RNE iid 
+variable 1     1.087570     0.246893     0.007807     1.000000 
+variable 2  4093.997598   122.778236     3.882589     1.000000 
+variable 3  1748.417549  1000.618051    31.642321     1.000000 
+variable 4     0.000354     0.000012     0.000000     1.000000 
+
+Variable         NSE 4%       RNE 4%       NSE 8%       RNE 8%      NSE 15%      RNE 15% 
+variable 1     0.061168     0.016292     0.045847     0.029000     0.031862     0.060044 
+variable 2    17.618017     0.048566    16.009255     0.058817    14.323528     0.073476 
+variable 3   261.400061     0.014653   248.939683     0.016157   219.850619     0.020715 
+variable 4     0.000003     0.017780     0.000002     0.027959     0.000002     0.045487 
+
+=================================================== 
+MCMC CONVERGENCE diagnostics for chain number  9 
+Based on sample size =       1001 
+=================================================== 
+Autocorrelation for each parameter 
+Variable          Lag 1        Lag 5       Lag 10       Lag 25 
+variable 1        0.991        0.961        0.926        0.827 
+variable 2        0.945        0.764        0.585        0.336 
+variable 3        0.975        0.870        0.745        0.577 
+variable 4        0.952        0.776        0.629        0.253 
+
+Raftery-Lewis Diagnostics for each parameter 
+(q=0.025000, r=0.010000, s=0.950000)
+Variable         Thin       Burn   Total(N)     (Nmin)     I-stat 
+variable 1          1         87      25591        937     27.312 
+variable 2          1         87      25591        937     27.312 
+variable 3          1         87      25591        937     27.312 
+variable 4          1         87      25591        937     27.312 
+
+Geweke Diagnostics for each parameter 
+Variable           Mean      std dev      NSE iid      RNE iid 
+variable 1     1.468374     1.026601     0.032464     1.000000 
+variable 2  4115.810830   141.149658     4.463544     1.000000 
+variable 3  1697.134677  1187.862837    37.563521     1.000000 
+variable 4     0.000349     0.000012     0.000000     1.000000 
+
+Variable         NSE 4%       RNE 4%       NSE 8%       RNE 8%      NSE 15%      RNE 15% 
+variable 1     0.374704     0.007506     0.411638     0.006220     0.385187     0.007103 
+variable 2    25.762413     0.030018    19.139122     0.054390    12.547174     0.126552 
+variable 3   368.949309     0.010366   393.900017     0.009094   287.238565     0.017102 
+variable 4     0.000002     0.028022     0.000002     0.024266     0.000002     0.036927 
+
+=================================================== 
+MCMC CONVERGENCE diagnostics for chain number 10 
+Based on sample size =       1001 
+=================================================== 
+Autocorrelation for each parameter 
+Variable          Lag 1        Lag 5       Lag 10       Lag 25 
+variable 1        0.967        0.843        0.643        0.100 
+variable 2        0.937        0.691        0.439        0.144 
+variable 3        0.918        0.632        0.354        0.285 
+variable 4        0.937        0.744        0.540        0.352 
+
+Raftery-Lewis Diagnostics for each parameter 
+(q=0.025000, r=0.010000, s=0.950000)
+Variable         Thin       Burn   Total(N)     (Nmin)     I-stat 
+variable 1          1         38      12750        937     13.607 
+variable 2          1         38      12750        937     13.607 
+variable 3          1         38      12750        937     13.607 
+variable 4          1         38      12750        937     13.607 
+
+Geweke Diagnostics for each parameter 
+Variable           Mean      std dev      NSE iid      RNE iid 
+variable 1     1.080444     0.480527     0.015196     1.000000 
+variable 2  4007.462345   124.053300     3.922910     1.000000 
+variable 3  1274.141997   689.807119    21.813616     1.000000 
+variable 4     0.000354     0.000009     0.000000     1.000000 
+
+Variable         NSE 4%       RNE 4%       NSE 8%       RNE 8%      NSE 15%      RNE 15% 
+variable 1     0.081418     0.034833     0.080133     0.035959     0.068525     0.049175 
+variable 2    11.477063     0.116830     6.404173     0.375224     5.659036     0.480542 
+variable 3    92.876074     0.055163    54.910256     0.157815    45.066680     0.234285 
+variable 4     0.000002     0.027026     0.000001     0.041402     0.000001     0.079711 
+

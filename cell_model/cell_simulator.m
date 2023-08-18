@@ -261,15 +261,24 @@ classdef cell_simulator
             B=R.*(1-1./D); % actively translating ribosomes (inc. those translating housekeeping genes)
 
             nu=obj.form.nu(par,tu,s); % tRNA charging rate
-            psi=obj.form.psi(par,T); % tRNA synthesis rate -NEEDS CHANGING!!
 
             l=obj.form.l(par,e,B); % growth rate
 
-            % GET RNAP ACTIVITY - NEW!
+            psi=obj.form.psi(par,T); % tRNA synthesis rate - MUST BE SCALED BY GROWTH RATE
+
+            % GET RNAP ACTIVITY
             rnap_act=l;
 
             % GET EXTERNAL INPUT
             ext_inp=obj.ext.input(x,t);
+
+            % GET RATE OF EFFECTIVE NUTR. QUAL. CHANGE (for upshifts)
+            if(par('is_upshift')==1)
+                dsdt = (par('s_postshift') - s) * ...
+                    (e./par('n_a')).*(m_a./k_a./D).*R./p_a;
+            else
+                dsdt = 0;
+            end
 
             % DEFINE DX/DT FOR...
             % ...THE HOST CELL
@@ -283,11 +292,11 @@ classdef cell_simulator
                     (e./par('n_r')).*(m_r./k_r./D).*R-l.*R-kcmh.*B;
                     % tRNAs
                     nu.*p_a-l.*tc-e.*B;
-                    psi-l.*tu-nu.*p_a+e.*B;
+                    psi*l-l.*tu-nu.*p_a+e.*B;
                     % ribosomes inactivated by chloramphenicol
                     kcmh.*B-l.*Bcm;
-                    % nutrient quality assumed constant
-                    0;
+                    % nutrient quality
+                    dsdt;
                     % chloramphenicol concentration assumed constant
                     0;
                     ];

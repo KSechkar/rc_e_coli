@@ -3,13 +3,13 @@
 % parameter fitting using DREAM
 
 %%
-function ymodel=dream_modelfun(theta,xdata,sim,Delta,Max_iter)
+function ymodel=dream_modelfun(theta,xdata,sim,Delta,Max_iter,a_a_estimate)
     % reset parameters and initial condition
     sim=sim.set_default_parameters();
     sim=sim.set_default_init_conditions();
 
     % change fitted parameters to current values
-    sim.parameters('a_a') = 2.72e5; % metabolic prot. transcription rate (/h)
+    sim.parameters('a_a') = a_a_estimate; % metabolic prot. transcription rate (/h)
     sim.parameters('a_r') = sim.parameters('a_a').*theta(1); % ribosome transcription rate (/h) - rescaled!
     sim.parameters('nu_max') = theta(2); % max metabolic rate (/h)
     sim.parameters('K_e') = theta(3); % elongation rate Hill constant (nM)
@@ -21,6 +21,7 @@ function ymodel=dream_modelfun(theta,xdata,sim,Delta,Max_iter)
     for i=1:size(xdata,1)
         %disp(i)
         % change parameter values to relevant inputs
+        sim=sim.set_default_init_conditions();
         sim.init_conditions('s')=xdata(i,1);
         sim.init_conditions('h')=xdata(i,2);
         
@@ -51,7 +52,7 @@ function ymodel=dream_modelfun(theta,xdata,sim,Delta,Max_iter)
         % ribosome dissociation constants for heterologous genes
         if(sim.num_het>0)
             for j=1:sim.num_het
-                k_het(i)=sim.form.k(e,...
+                k_het(j)=sim.form.k(e,...
                 sim.parameters(['k+_',sim.het.names{j}]),...
                 sim.parameters(['k-_',sim.het.names{j}]),...
                 sim.parameters(['n_',sim.het.names{j}]),...

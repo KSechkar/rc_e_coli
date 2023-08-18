@@ -16,7 +16,8 @@ close all
 
 %% VECTOR of fitted parameter values
 
-theta=[0.953427, 4165.26, 5992.78, 0.000353953];
+%theta=[0.9998, 4.0140e+03, 1.1233e+03, 3.5527e-04];
+theta=[1.03184, 4046.89, 1239.69, 0.000356139];
 
 %% DEFINE starting parameter values (to compare with the fit)
 
@@ -63,20 +64,27 @@ end
 sim=cell_simulator; % initialise simulator
 
 % parameters for getting steady state
-sim.tf = 10; % single integraton step timeframe
-Delta = 0.1; % threshold that determines if we're in steady state
-Max_iter = 75; % maximum no. iterations (checking if SS reached over first 750 h)
+sim.tf = 12; % single integraton step timeframe
+Delta = 0.001; % threshold that determines if we're in steady state
+Max_iter = 4; % maximum no. iterations (checking if SS reached over first 750 h)
 
-sim.opt = odeset('reltol',1.e-6,'abstol',1.e-9); % more lenient integration tolerances for speed
+sim.opt = odeset('reltol',1.e-6,'abstol',1.e-6); % more lenient integration tolerances for speed
 
 
 %% GET model predictions with fitted parameters
-ymodel=dream_modelfun(theta,data.xdata,sim,Delta,Max_iter);
+ymodel=dream_modelfun(theta,data.xdata,sim,Delta,Max_iter,sim.parameters('a_a'));
 
-disp(['SOS=',num2str(sum((ymodel-data.ydata).^2))]) % print resultant sum of squared errors
 
+l_stdev=0.04467;
+phir_stdev=0.018976;
+sos=sum((ymodel-data.ydata).^2);
+loglike=-log(l_stdev.*sqrt(2.*pi))-0.5.*sos(1)./(l_stdev.^2)... % growth rate
+        -log(phir_stdev.*sqrt(2.*pi))-0.5.*sos(2)./(phir_stdev.^2); % ribosomal mass fraction
+disp(['SOS=',num2str(sos)]) % print resultant sum of squared errors
+disp(['loglike=',num2str(loglike)])
 % get points for original/strarting parameter values (optional)
-ymodel_origin=dream_modelfun(theta_origin,data.xdata,sim,Delta,Max_iter);
+ymodel_origin=dream_modelfun(theta_origin,data.xdata,sim,Delta,Max_iter, ...
+    sim.parameters('a_a')); % log-likelihoods found with the UPDATED a_a value
 
 %% COLOURS FOR THE PLOT 
 
