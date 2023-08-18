@@ -186,7 +186,7 @@ plot([0,plasmid_concs*a_xtra]./kxNB,[mu_het0_approx,mu_hets_approx], ...
 mu_max_approx=mu_hets(index_of_max_mu); % find the corresponding mu
 % get the value
 plot([plasmid_concs(index_of_max_mu)*a_xtra./kxNB plasmid_concs(index_of_max_mu)*a_xtra./kxNB],[0 mu_max_approx], ...
-    'Color',[0,0.8,0],'LineStyle','-','LineWidth',0.75) % plot
+    'Color',[0,0.8,0.8],'LineStyle','-','LineWidth',0.75) % plot
 
 % draw a line to mark xi that maximises production  (ANALYTICAL PREDICTION)
 xi_max_approx=approx.xi_max(ss,ss0,e0,l0,sim,delta); % estimate optimal burden
@@ -194,7 +194,7 @@ phi_het_max_approx=approx.phi_het_max(l0,sim,delta); % estimate optimal mass fra
 mu_max_approx=par('M').*phi_het_max_approx.*...
     (l0.*(1-phi_het_max_approx./(1-par('phi_q')))-delta); % find corresponding mu
 plot([xi_max_approx xi_max_approx],[0 mu_max_approx], ...
-    'Color',[0,0.8,0],'LineStyle','--','LineWidth',0.75) % plot
+    'Color',[0,0.8,0.8],'LineStyle','--','LineWidth',0.75) % plot
 
 xlabel('\xi, translational burden','FontName','Arial');
 ylabel({'rate of total protein', 'production [aa/h/cell]'},'FontName','Arial');
