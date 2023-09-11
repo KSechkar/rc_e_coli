@@ -1,7 +1,7 @@
-%% fig5bcdef.m
+%% fig6bcdef.m
 
 % PROPORTIONAL-INTEGRAL CONTROLLER
-% Figure 5: b,c,d,e,f
+% FIGURE 6: b,c,d,e,f
 
 % Showcasing how our proportional-integral controller mitigates cisturbances 
 % caused by extra heterologous mRNA expression and keeps the burden almost constant 
@@ -15,7 +15,6 @@ clear
 
 %% SET UP and RUN the simulator
 
-% 2 different setups - ideal AIF and realistic scenario
 sim=cell_simulator;
 
 sim=sim.load_heterologous_and_external('pi_controller','step_inducer'); % load the het. gene and ext. inp. modules
@@ -23,34 +22,36 @@ sim=sim.load_heterologous_and_external('pi_controller','step_inducer'); % load t
 % disturbance signal parameters
 sim.ext.input_func_parameters('inducer_base_level')=0; % disturbance flicks transcription reg. func. from 0 to 1 at t=30
 sim.ext.input_func_parameters('inducer_final_level')=1; % disturbance flicks transcription reg. func. from 0 to 1 at t=30
-sim.ext.input_func_parameters('step_time')=30; % disturbance flicks transcription reg. func. from 0 to 1 at t=30
+sim.ext.input_func_parameters('step_time')=72; % disturbance flicks transcription reg. func. from 0 to 1 at t=30
 sim.ext.input_func_parameters('slope_duration')=0.1;% disturbance flicks transcription reg. func. from 0 to 1 at t=30
 sim.het.parameters('c_dist')=100; % gene copy number
-sim.het.parameters('a_dist')=300; % max. gene transcription rate
+sim.het.parameters('a_dist')=500; % max. gene transcription rate
 
 % no output protein expression here
 sim.het.parameters('c_x')=0; % gene copy number
 sim.het.parameters('a_x')=0; % max. gene transcription rate
 
 % integral controller parameters
-sim.het.parameters('K_dna(anti)-sens')=4000; % sensor prot.-DNA binding Hill constant
+sim.het.parameters('K_dna(anti)-sens')=7000; % sensor prot.-DNA binding Hill constant
 sim.het.parameters('eta_dna(anti)-sens')=1; % sensor prot.-DNA binding Hill coefficient
 
-sim.het.parameters('K_dna(amp)-act')=4000; % sensor prot.-DNA binding Hill constant
+sim.het.parameters('K_dna(amp)-act')=700; % sensor prot.-DNA binding Hill constant
 sim.het.parameters('eta_dna(amp)-act')=1; % sensor prot.-DNA binding Hill coefficient
 
 sim.het.parameters('kb_anti')=300; % atcuator-annihilator binding rate constant
-sim.het.parameters('a_sens')=22.5; % sensor gene transcription rate
+sim.het.parameters('c_sens')=100;
+sim.het.parameters('a_sens')=50; % sensor gene transcription rate
 sim.het.parameters('a_anti')=800; % annigilator transcription rate
 sim.het.parameters('a_act')=400; % actuator transcription rate
 
+sim.het.parameters('a_amp')=100; % integral controller amplifier gene copy number
 sim.het.parameters('a_amp')=4000; % integral controller amplifier transcription rate
    
 % push amended parameter values
 sim=sim.push_het();
 
 % simulate
-sim.tf =  60;
+sim.tf =  200;
 sim.opt = odeset('reltol',1.e-6,'abstol',1.e-9);
 sim = sim.simulate_model;
 
@@ -138,7 +139,7 @@ D_estimated = ...
 
     
 
-%% FIGURE 5 b
+%% FIGURE 6 b
 
 Fb = figure('Position',[0 0 250 186]);
 set(Fb, 'defaultAxesFontSize', 9)
@@ -167,13 +168,14 @@ ylabel('m_i, mRNA concentration [nM]','FontName','Arial')
 xlim([(dist_time-inter_rad) (dist_time+inter_rad)])
 xticks(-inter_rad:inter_rad/2:inter_rad)
 xlim([-inter_rad inter_rad])
+ylim([0 6e4])
 
 grid on
 box on
 axis square
 hold off
 
-%% FIGURE 5 c
+%% FIGURE 6 c
 
 Fc = figure('Position',[0 0 250 185]);
 set(Fc, 'defaultAxesFontSize', 9)
@@ -202,8 +204,8 @@ ylabel('m_i, mRNA concentration [nM]','FontName','Arial')
 xlim([(dist_time-inter_rad) (dist_time+inter_rad)])
 xticks(-inter_rad:inter_rad/2:inter_rad)
 xlim([-inter_rad inter_rad])
-ylim([0 750])
-yticks(0:250:750)
+ylim([0 800])
+yticks(0:200:800)
 
 grid on
 box on
@@ -218,7 +220,7 @@ Fs=calculated.Fs;
 ls=calculated.ls;
 Ds=calculated.Ds;
 
-%% FIGURE 5 d - control error
+%% FIGURE 6 d - control error
 
 Fd = figure('Position',[0 0 250 186]);
 set(Fd, 'defaultAxesFontSize', 9)
@@ -226,7 +228,7 @@ set(Fd, 'defaultLineLineWidth', 1.25)
 hold on
 
 % plot model predictions
-plot(rel_t-30,u*ones(size(Fs))-Fs,'Color',[0 0.4470 0.7410])
+plot(rel_t-dist_time,u*ones(size(Fs))-Fs,'Color',[0 0.4470 0.7410])
 
 % plot ideal value
 plot([-inter_rad inter_rad],[0 0],'k:') 
@@ -244,7 +246,7 @@ box on
 axis square
 hold off
 
-%% FIGURE 5 e - growth rate
+%% FIGURE 6 e - growth rate
 
 Fe = figure('Position',[0 0 250 186]);
 set(Fe, 'defaultAxesFontSize', 9)
@@ -253,7 +255,7 @@ set(Fe, 'defaultLineLineWidth', 1.25)
 hold on
 
 % plot model predictions
-plot(rel_t-30,ls,'Color',[0 0.4470 0.7410])
+plot(rel_t-dist_time,ls,'Color',[0 0.4470 0.7410])
 
 % plot analytically calculated target value
 plot([-inter_rad inter_rad],[lambda_estimated lambda_estimated],'k:') 
@@ -261,8 +263,8 @@ plot([-inter_rad inter_rad],[lambda_estimated lambda_estimated],'k:')
 xlabel('t, time since disturbance [h]','FontName','Arial')
 ylabel('\lambda, growth rate [1/h]','FontName','Arial')
 
-ylim([0.6 1.8])
-yticks(0.6:0.3:1.8)
+ylim([0.3 1.5])
+yticks(0.3:0.3:1.5)
 xlim([-inter_rad inter_rad])
 xticks(-inter_rad:inter_rad/2:inter_rad)
 
@@ -271,7 +273,7 @@ box on
 axis square
 hold off
 
-%% FIGURE 5 f - resource competition denominator
+%% FIGURE 6 f - resource competition denominator
 
 Ff = figure('Position',[0 0 250 189]);
 set(Ff, 'defaultAxesFontSize', 9)
@@ -280,7 +282,7 @@ set(Ff, 'defaultLineLineWidth', 1.25)
 hold on
 
 % plot model predictions
-plot(rel_t-30,Ds,'Color',[0 0.4470 0.7410])
+plot(rel_t-dist_time,Ds,'Color',[0 0.4470 0.7410])
 
 % plot analytically calculated target value
 plot([-inter_rad inter_rad],[D_estimated D_estimated],'k:') 

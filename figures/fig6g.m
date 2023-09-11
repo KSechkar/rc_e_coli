@@ -1,7 +1,7 @@
-%% fig5f.m
+%% fig6f.m
 
 % PROPORTIONAL-INTEGRAL CONTROLLER
-% Figure 5: g
+% Figure 6: g
 
 % Showcasing how increasing our controller's amplifier gain xi reduces the 
 % adaptation error caused by the expression of extra synthetic mRNA 
@@ -23,38 +23,42 @@ sim=sim.load_heterologous_and_external('pi_controller','step_inducer'); % load t
 % disturbance signal parameters
 sim.ext.input_func_parameters('inducer_base_level')=0; % disturbance flicks transcription reg. func. from 0 to 1 at t=30
 sim.ext.input_func_parameters('inducer_final_level')=1; % disturbance flicks transcription reg. func. from 0 to 1 at t=30
-sim.ext.input_func_parameters('step_time')=100; % disturbance flicks transcription reg. func. from 0 to 1 at t=30
+sim.ext.input_func_parameters('step_time')=30; % disturbance flicks transcription reg. func. from 0 to 1 at t=30
 sim.ext.input_func_parameters('slope_duration')=0.1;% disturbance flicks transcription reg. func. from 0 to 1 at t=30
-sim.het.parameters('c_dist')=100; % gene copy number
-sim.het.parameters('a_dist')=300; % max. gene transcription rate
+
+% no output protein expression here
+sim.het.parameters('c_x')=0; % gene copy number
+sim.het.parameters('a_x')=0; % max. gene transcription rate
 
 % integral controller parameters
-sim.het.parameters('K_dna(anti)-sens')=4000; % sensor prot.-DNA binding Hill constant
+sim.het.parameters('K_dna(anti)-sens')=7000; % sensor prot.-DNA binding Hill constant
 sim.het.parameters('eta_dna(anti)-sens')=1; % sensor prot.-DNA binding Hill coefficient
 
-sim.het.parameters('K_dna(amp)-act')=4000; % sensor prot.-DNA binding Hill constant
+sim.het.parameters('K_dna(amp)-act')=700; % sensor prot.-DNA binding Hill constant
 sim.het.parameters('eta_dna(amp)-act')=1; % sensor prot.-DNA binding Hill coefficient
 
 sim.het.parameters('kb_anti')=300; % atcuator-annihilator binding rate constant
-sim.het.parameters('a_sens')=22.5; % sensor gene transcription rate
+sim.het.parameters('c_sens')=100;
+sim.het.parameters('a_sens')=50; % sensor gene transcription rate
 sim.het.parameters('a_anti')=800; % annigilator transcription rate
 sim.het.parameters('a_act')=400; % actuator transcription rate
 
+sim.het.parameters('a_amp')=100; % integral controller amplifier gene copy number
 sim.het.parameters('a_amp')=4000; % integral controller amplifier transcription rate
    
 % push amended parameter values
 sim=sim.push_het();
 
 % simulation parameters
-sim.tf =  200;
+sim.tf =  72;
 sim.opt = odeset('reltol',1.e-6,'abstol',1.e-9);
 
 %% DEFINE plasmid concs. to be tested
 
-sim.het.parameters('a_dist')=1000;
+sim.het.parameters('a_dist')=500;
 sim=sim.push_het();
-cdists=linspace(0,150,3);
-chis=linspace(0,7500.*sim.het.parameters('c_amp'),3);
+cdists=linspace(0,200,11);
+chis=linspace(0,8e5,11);
 
 % initialise array of adaptation errors
 adaptation_errors=zeros(size(cdists,2),size(chis,2));

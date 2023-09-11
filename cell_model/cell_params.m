@@ -43,9 +43,9 @@ function params=cell_params(~)
     params('a_a') = 394464.6979;  % metabolic gene transcription rate (/h) 
     params('a_r') = 1.0318.*params('a_a'); % ribosomal gene transcription rate (/h) 
     params('nu_max')= 4.0469e+03; % max tRNA amioacylation rate (/h)
-    params('K_nut')= 1.1233e+03; %5992.78; % tRNA charging rate Michaelis-Menten constant (nM) 
+    params('K_nut')= 1.2397e+03; %5992.78; % tRNA charging rate Michaelis-Menten constant (nM) 
     params('K_e')= 1.2397e+03; %5992.78; % translation elongation rate Michaelis-Menten constant (nM) 
-    params('kcm')= 3.5614e-04;  % chloramphenical binding rate constant (/h/nM)   
+    params('kcm')= 3.5436e-04;  % chloramphenical binding rate constant (/h/nM)   
 end
 
 %% REFERENCES:

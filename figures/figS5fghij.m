@@ -20,45 +20,41 @@ clear
 % 2 different setups - ideal AIF and realistic scenario
 sim=cell_simulator;
 
-sim=sim.load_heterologous_and_external('aif_amplified','step_inducer'); % load the het. gene and ext. inp. modules
+sim=sim.load_heterologous_and_external('pi_controller','step_inducer'); % load the het. gene and ext. inp. modules
 
 % disturbance signal parameters
 sim.ext.input_func_parameters('inducer_base_level')=0; % disturbance flicks transcription reg. func. from 0 to 1 at t=30
 sim.ext.input_func_parameters('inducer_final_level')=1; % disturbance flicks transcription reg. func. from 0 to 1 at t=30
-sim.ext.input_func_parameters('step_time')=50; % disturbance flicks transcription reg. func. from 0 to 1 at t=30
+sim.ext.input_func_parameters('step_time')=72; % disturbance flicks transcription reg. func. from 0 to 1 at t=30
 sim.ext.input_func_parameters('slope_duration')=0.1;% disturbance flicks transcription reg. func. from 0 to 1 at t=30
-sim.het.parameters('c_dist')=100; % gene copy number
-sim.het.parameters('a_dist')=300; % max. gene transcription rate
+sim.het.parameters('c_dist')=400; % gene copy number
+sim.het.parameters('a_dist')=500; % max. gene transcription rate
 
 % no output protein expression here
 sim.het.parameters('c_x')=0; % gene copy number
 sim.het.parameters('a_x')=0; % max. gene transcription rate
 
 % integral controller parameters
-sim.het.parameters('K_dna(anti)-sens')=4000; % sensor prot.-DNA binding Hill constant
+sim.het.parameters('K_dna(anti)-sens')=7000; % sensor prot.-DNA binding Hill constant
 sim.het.parameters('eta_dna(anti)-sens')=1; % sensor prot.-DNA binding Hill coefficient
 
-sim.het.parameters('K_dna(amp)-act')=4000; % sensor prot.-DNA binding Hill constant
+sim.het.parameters('K_dna(amp)-act')=700; % sensor prot.-DNA binding Hill constant
 sim.het.parameters('eta_dna(amp)-act')=1; % sensor prot.-DNA binding Hill coefficient
 
-sim.het.parameters('kb_anti')=300; % atcuator-annihilator binding rate constant
-sim.het.parameters('a_sens')=22.5; % sensor gene transcription rate
-sim.het.parameters('a_anti')=800; % annigilator transcription rate
-sim.het.parameters('a_act')=400; % actuator transcription rate
+sim.het.parameters('kb_anti')=3000; % atcuator-annihilator binding rate constant
+sim.het.parameters('c_sens')=100;
+sim.het.parameters('a_sens')=50; % sensor gene transcription rate
+sim.het.parameters('a_anti')=8000; % annigilator transcription rate
+sim.het.parameters('a_act')=4000; % actuator transcription rate
 
+sim.het.parameters('a_amp')=100; % integral controller amplifier gene copy number
 sim.het.parameters('a_amp')=4000; % integral controller amplifier transcription rate
-
-% boost a_act, a_anti and theta
-boost=10;
-sim.het.parameters('a_anti')=sim.het.parameters('a_anti')*boost;
-sim.het.parameters('a_act')=sim.het.parameters('a_act')*boost;
-sim.het.parameters('kb_anti')=sim.het.parameters('kb_anti')*boost;
    
 % push amended parameter values
 sim=sim.push_het();
 
 % simulate
-sim.tf =  100;
+sim.tf =  200;
 sim.opt = odeset('reltol',1.e-6,'abstol',1.e-9);
 sim = sim.simulate_model;
 
@@ -66,7 +62,7 @@ sim = sim.simulate_model;
 %% GET relevant time frame (start 'inter_rad' h before disturbance, end 'inter_rad' h after)
 % note: plus one point either side of the interval to have prettier plots
 
-inter_rad=15;
+inter_rad=30;
 
 dist_time=sim.ext.input_func_parameters('step_time'); % time of disturbance
 
@@ -98,6 +94,20 @@ for i=size(sim.t,1):(-1):1
     end
 end
 
+% find point 15h before last point
+for i=1:size(sim.t,1)
+    if(sim.t(i)>=sim.t(last_pt)-15)
+        meanfirst_pt=i-1;
+        
+        % correction if first point already relevant
+        if(meanfirst_pt==0)
+            meanfirst_pt=1;
+        end
+
+        break
+    end
+end
+
 % record relevant time points
 rel_t=sim.t(first_pt:last_pt);
 
@@ -110,7 +120,7 @@ rel_dist=sim.x(first_pt:last_pt,:);
 % finding no-burden values of translation rate, dissociation constants,
 % rib. gene transc. regulation function
 sim_nb=cell_simulator;
-sim_nb=sim_nb.load_heterologous_and_external('aif_amplified','step_inducer');
+sim_nb=sim_nb.load_heterologous_and_external('pi_controller','step_inducer');
 sim_nb.het.parameters('a_x')=0;
 sim_nb.het.parameters('a_sens')=0;
 sim_nb.het.parameters('a_anti')=0;
@@ -210,8 +220,8 @@ ylabel('m_i, mRNA concentration [nM]','FontName','Arial')
 xlim([(dist_time-inter_rad) (dist_time+inter_rad)])
 xticks(-inter_rad:inter_rad/2:inter_rad)
 xlim([-inter_rad inter_rad])
-ylim([0 750])
-yticks(0:250:750)
+ylim([0 2000])
+yticks(0:500:2000)
 
 grid on
 box on
@@ -233,9 +243,12 @@ set(Fh, 'defaultAxesFontSize', 9)
 set(Fh, 'defaultLineLineWidth', 1.25)
 hold on
 
+% find mean post-disturbance
+Fs_mean=mean(Fs(meanfirst_pt-first_pt:end));
+
 % plot model predictions
 plot(rel_t-sim.ext.input_func_parameters('step_time'),u*ones(size(Fs))-Fs,'Color',[0 0.4470 0.7410 1])
-plot([-inter_rad inter_rad],mean(u*ones(size(Fs))-Fs)*[1 1],'Color',[0.6350 0.0780 0.1840])
+plot([-inter_rad inter_rad],(u-Fs_mean)*[1 1],'Color',[0.6350 0.0780 0.1840])
 
 % plot ideal value
 plot([-inter_rad inter_rad],[0 0],'k:') 
@@ -262,9 +275,11 @@ set(Fi, 'defaultLineLineWidth', 1.25)
 
 hold on
 
+ls_mean=mean(ls(meanfirst_pt-first_pt:end));
+
 % plot model predictions
 plot(rel_t-sim.ext.input_func_parameters('step_time'),ls,'Color',[0 0.4470 0.7410])
-plot([-inter_rad inter_rad],mean(ls)*[1 1],'Color',[0.6350 0.0780 0.1840])
+plot([-inter_rad inter_rad],ls_mean*[1 1],'Color',[0.6350 0.0780 0.1840])
 
 % plot analytically calculated target value
 plot([-inter_rad inter_rad],[lambda_estimated lambda_estimated],'k:') 
@@ -272,8 +287,8 @@ plot([-inter_rad inter_rad],[lambda_estimated lambda_estimated],'k:')
 xlabel('t, time since disturbance [h]','FontName','Arial')
 ylabel('\lambda, growth rate [1/h]','FontName','Arial')
 
-ylim([1 1.4])
-%yticks(0.6:0.3:1.8)
+ylim([0.8 1.2])
+yticks(0.8:0.1:1.2)
 xlim([-inter_rad inter_rad])
 xticks(-inter_rad:inter_rad/2:inter_rad)
 legend('simulation','mean','estimate')
@@ -291,9 +306,11 @@ set(Fj, 'defaultLineLineWidth', 1.25)
 
 hold on
 
+Ds_mean=mean(Ds(meanfirst_pt-first_pt:end));
+
 % plot model predictions
 plot(rel_t-sim.ext.input_func_parameters('step_time'),Ds,'Color',[0 0.4470 0.7410])
-plot([-inter_rad inter_rad],mean(Ds)*[1 1],'Color',[0.6350 0.0780 0.1840])
+plot([-inter_rad inter_rad],Ds_mean*[1 1],'Color',[0.6350 0.0780 0.1840])
 
 % plot analytically calculated target value
 plot([-inter_rad inter_rad],[D_estimated D_estimated],'k:') 
@@ -301,7 +318,7 @@ plot([-inter_rad inter_rad],[D_estimated D_estimated],'k:')
 xlabel('t, time since disturbance [h]','FontName','Arial')
 ylabel('D, RC denominator','FontName','Arial')
 
-ylim([7e4 9e4])
+ylim([7e4 10e4])
 xlim([-inter_rad inter_rad])
 xticks(-inter_rad:inter_rad/2:inter_rad)
 legend('simulation','mean','estimate')

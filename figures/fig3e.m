@@ -1,142 +1,120 @@
 %% fig3e.m
-% PREDICTING HETEROLOGOUS GENE EXPRESSION NUMERICALLY AND ANALYTICALLY
+% GROWTH PHENOMENA PREDICTION
 % Figure 3: e
 
-% Change in cell growth rate vs heterologous protein mass fraction
+% Find growth rates for different fixed values of the ribosomal gene
+% transcription function, compare to those produced by Flux-Parity
+% Regulation. Plot ratios of ribosome mass fractions
 
-%% CLEAR all variables
+%% CLEAR parameters, add paths of all files
 
 addpath(genpath('..'))
 
 clear
 close all
 
-%% LOAD experimental data
-% het. prot. mass fractions vs growth rates
-[dataset,captions,~] = xlsread('data/exp_meas_hetexp.csv');
-data_het(:,1) = dataset(:,1); % het. prot. mass fraction
-data_het(:,2) = dataset(:,3); % (growth rate w/ het. prot):(growth rate w/out)
-
 %% SET UP the simulator
 
 sim=cell_simulator; % initialise simulator
 
 % parameters for getting steady state
-sim.tf = 20; % single integraton step timeframe
-Delta = 0.1; % threshold that determines if we're in steady state
-Max_iter = 100; % maximum no. iterations (checking if SS reached over first 750 h)
+sim.tf = 12; % single integraton step timeframe
+Delta = 0.001; % threshold that determines if we're in steady state
+Max_iter = 6; % maximum no. iterations (checking if SS reached over first 48 h)
 
 sim.opt = odeset('reltol',1.e-6,'abstol',1.e-9); % more lenient integration tolerances for speed
 
+%% DEFINE nutrient condiitons to explore
 
-%% DEFINE gene expression paramaters
+% vector of nurtient qualities
+nutrients=flip(logspace(log10(0.05),log10(1),16));
 
-a_xtra=1000; % transcription rate of the heterologous gene PER PLASMID
+% range of fixed ribosome transcription regulation function values
+fixed_F_rs=0.005:0.005:0.99;
+% corresponding reciprocals of ppGpp levels
+fixed_Ts=fixed_F_rs./(sim.parameters('tau').*ones(size(fixed_F_rs))-fixed_F_rs);
 
-sim=sim.load_heterologous_and_external('one_constit','no_ext'); % load heterologous gene expression module
-sim.het.parameters('a_xtra')=a_xtra;
-sim=sim.push_het;
+%% INITIALISE arrays that will store differen growth rates
+% storing growth rates - optimal and flux-parity
+l_map = zeros(2,size(nutrients,2));
 
-plasmid_concs = logspace(0,5,100); % range of plasmid concentrations
+% storing ribosome transcription regulation function values - flux-parity
+F_r_map = zeros(2,size(nutrients,2));
+phi_r_map = zeros(2,size(nutrients,2));
 
+% storing growth rates - for flux-parity and different fixed regulation function values
+ls=zeros(size(nutrients,2),size(fixed_Ts,2));
 
-%% SET UP the approximate estimator
-approx=heterologous_approx;
+% auxiliary array required to find optimal ribosomal mass fraction
+phi_rs_with_fixed_Ts=zeros(size(fixed_Ts));
 
-%% INITIALISE arrays where obtained values of phys. variables will be stored
+%% RUN simulations
+for j=1:size(nutrients,2)
+    % RESET
+    sim=sim.set_default_parameters(); % reset initial consitions and parameters
+    sim=sim.set_default_init_conditions(); % reset initial consitions and parameters
+    sim.init_conditions('s')=nutrients(j); % set nutrient quality
 
-% values without het. prot. exp.
-ss0=zeros((size(sim.init_conditions,1)+size(sim.het.init_conditions,1)),1); % steady states of the system
-l0=0; % growth rates
-e0=0;  % elongation rates
-phi_het0=0; % heterologous protein fractions
+    % Run with regulated ribosome transcription
+    sim.parameters('is_fixed_T')=0; % F_r regulated now
 
-% numerically obtained values
-sss=zeros(size(sim.init_conditions,1),size(plasmid_concs,2)); % steady states of the system
-ls = zeros(1,size(plasmid_concs,2)); % growth rates
-es = zeros(1,size(plasmid_concs,2)); % elongation rates
-phi_hets = zeros(1,size(plasmid_concs,2)); % heterologous protein fractions
-
-% approximate estimates
-l0_approx=0;
-phi_het0_approx=0;
-ls_approx = zeros(1,size(plasmid_concs,2)); % growth rates
-phi_hets_approx = zeros(1,size(plasmid_concs,2)); % heterologous protein fractions
-
-%% RUN withput heterologous gene expression
-% values w/out het. prot.
-for i=1:sim.num_het
-    sim.het.parameters(['c_',sim.het.names{i}])=0;
-end
-
-sim = sim.push_het(); % push initial condition to main object
-ss=get_steady(sim,Delta,Max_iter);
-
-[l,e,phi_het]=get_lephihet(sim,ss); % get values of variables
-
-% record
-ss0 = ss;
-l0=l;
-e0=e;
-phi_het0=phi_het;
-
-% find k_xtra^NB (mRNA-ribosome dissoc. const for het. gene - will be needed later)
-par=sim.het.parameters;
-kxNB=sim.form.k(e,par('k+_xtra'),par('k-_xtra'),par('n_xtra'),0);
-
-%% GET approximate estimates
-l0_approx=approx.ss_l(0,ss0,ss0,e0,sim);
-ls_approx=approx.ss_l(plasmid_concs,sss,ss0,e0,sim);
-phi_hets_approx=approx.ss_phi_het(plasmid_concs,sss,ss0,e0,sim);
-
-%% OBTAIN numerical predictions
-
-% get actual model predictions
-for i=1:size(plasmid_concs,2)
-    % disp(plasmid_concs(i))
-    for j=1:sim.num_het
-        sim.het.parameters(['c_',sim.het.names{j}])=plasmid_concs(i);
-    end
-    sim = sim.push_het(); % reset initial condition
     ss=get_steady(sim,Delta,Max_iter);
-    [l,e,phi_het]=get_lephihet(sim,ss); % get desired values
+    [l,F_r,phi_r]=get_lFrphir(sim,ss);
+    l_map(1,j)=l;
+    F_r_map(1,j)=F_r;
+    phi_r_map(1,j)=phi_r;
 
-    % record
-    sss(:,i) = ss;
-    ls(i)=l;
-    es(i)=e;
-    phi_hets(i)=phi_het;
+    % RESET
+    sim=sim.set_default_parameters(); % reset initial consitions and parameters
+    sim=sim.set_default_init_conditions(); % reset initial consitions and parameters
+    sim.init_conditions('s')=nutrients(j); % set nutrient quality 
+
+    % Run with a range of fixed F_r values
+    for i=1:size(fixed_Ts,2)
+        sim=sim.set_default_parameters(); % reset initial consitions and parameters
+        sim=sim.set_default_init_conditions(); % reset initial consitions and parameters
+        sim.init_conditions('s')=nutrients(j); % set nutrient quality
+        sim.parameters('is_fixed_T')=1; % F_r fixed now
+
+        disp(fixed_Ts(i))
+        sim.parameters('fixed_T')=fixed_Ts(i);
+        ss=get_steady(sim,Delta,Max_iter);
+        [l,F_r,phi_r]=get_lFrphir(sim,ss);
+        ls(j,i)=l;
+        phi_rs_with_fixed_Ts(j,i)=phi_r;
+    end
+
+    % finding optimal ribosome content
+    [maxl,maxlpos]=max(ls(j,:));
+    l_map(2,j)=maxl;
+    F_r_map(2,j)=fixed_F_rs(maxlpos);
+    phi_r_map(2,j)=phi_rs_with_fixed_Ts(maxlpos);
+    disp(['Nutrient quality ',num2str(j),'/',num2str(size(nutrients,2)),' considered'])
 end
 
-%% FIGURE 3 e 
-approx_colour='#A2142F'; % 'r' for plotting approximations
-Fig = figure('Position',[0 0 385 290]);
-set(Fig, 'defaultAxesFontSize', 9)
-hold on
 
-plot([0,phi_hets],...
-    [l0,ls]/l0,['r','-'],'LineWidth',1) % plot model predictions
-plot([0,phi_hets_approx],[l0_approx,ls_approx]/l0_approx,...
-    'Color',approx_colour,'LineStyle','--','LineWidth',1) % plot approximate estimates
+%% FIGURE 2 E
+Fe = figure('Position',[0 0 385 280]);
+set(Fe, 'defaultAxesFontSize', 9)
+set(Fe, 'defaultLineLineWidth', 1.5)
 
-plot(data_het(:,1),data_het(:,2),'b.') % plot experimental data
+plot(nutrients,l_map(1,:)./l_map(2,:),'-')
 
-plot([0.25 0.25],[0 1.05],':','Color','k','LineWidth',1)
-xlabel('\phi_x, het. prot. mass fraction','FontName','Arial');
-ylabel('\lambda:\lambda^{NB}, relative growth rate','FontName','Arial');
-xlim([0 0.41])
-ylim([0 1.05])
+xlabel('\sigma, nutrient quality','FontName','Arial');
+ylabel({'\lambda:\lambda^{opt}, ratio of predicted', 'to optimal growth rate'},'FontName','Arial');
 
-legend('Simulation results','Analytical estimates','Experimental data',...
-    'Location','northeast','FontName','Arial')
+xlim([0 1])
+ylim([0.8 1.2])
+xticks(0:0.25:1)
+yticks(0.8:0.1:1.2)
 
 axis square
 grid on
 box on
 hold off
 
-%% FUNCTION for getting growth rate, translation elongation rate and het. prot. mass fraction from the system's steady state
-function [l,e,phi_het]=get_lephihet(sim,ss)
+%% FUNCTION for getting growth rate and F_r from the system's steady state
+function [l,F_r,phi_r]=get_lFrphir(sim,ss)
     % evaluate growth
     par=sim.parameters;
     m_a = ss(1); % metabolic gene mRNA
@@ -148,7 +126,6 @@ function [l,e,phi_het]=get_lephihet(sim,ss)
     Bm = ss(7); % inactivated ribosomes
     s=ss(8); % nutrient quality
     h=ss(9); % chloramphenicol conc.
-    ss_het=ss(10:9+2*sim.num_het); % heterologous genes
 
     e=sim.form.e(par,tc); % translation elongation ratio
     k_a=sim.form.k(e,par('k+_a'),par('k-_a'),par('n_a'),par('kcm').*h); % ribosome-mRNA dissociation constant (metab. genes)
@@ -157,11 +134,8 @@ function [l,e,phi_het]=get_lephihet(sim,ss)
     B=R.*(1-1./D); % actively translating ribosomes (inc. those translating housekeeping genes)
 
     l=sim.form.l(par,e,B); % growth rate!
-    e=sim.form.e(par,tc); % translation elongation rate!
-
-    % heterologous protein mass fraction
-    phi_het=0;
-    for i=1:sim.num_het
-        phi_het=phi_het+ss_het(sim.num_het+i).*sim.parameters(['n_',sim.het.names{i}])./sim.parameters('M');
-    end
+    
+    T = tc./tu; % ratio of charged to uncharged tRNAs
+    F_r = sim.form.F_r(par,T) ; % ribosome regulation
+    phi_r=R.*par('n_r')./par('M');
 end

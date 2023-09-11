@@ -1,12 +1,10 @@
-%% cell_simulator_no_proportional_fbck.m
-% Matlab class enabling simulations of the host cell FOR SUPPLEMENTARY FIGURE S5A-E:
-% actuator gene 'act' of the controller is made to be unaffected by
-% resource competition
+%% cell_simulator.m
+% Matlab class enabling simulations of the host cell. 
 
 % The expression of synthetic circuits can be simulated by loading the
 % 'heterologous genes' and 'external input' modules (see het_modules and
-% ext_inputs folders). Remember to PUSH the associated modules' parameters
-% into the main framework's memory every time you alter them.
+% ext_inputs folders). Remember to PUSH (obj.push_het()) the associated 
+% modules' parameters into the main framework every time you alter them.
 
 %%
 
@@ -35,11 +33,10 @@ classdef cell_simulator_no_proportional
         opt = odeset('RelTol', 1e-12, 'AbsTol', 1e-16); % integration tolerances
         tf = 100; % time frame over which we conduct the simulation
         form=cell_formulae; % formulae for rate and activation functions
-
     end
     
     methods (Access = public)
-        % CONSTRUCTOR
+        %% CONSTRUCTOR
         function obj = cell_simulator_no_proportional(tf)
             % if non-default simulation time suggested, use it
             if nargin == 1
@@ -50,7 +47,7 @@ classdef cell_simulator_no_proportional
             obj=obj.set_default_parameters();
             obj=obj.set_default_init_conditions();
             
-            % set up heterologous genes and external inputs (SELECT APPROPRIATE CLASS FILES)
+            % set up heterologous genes and external inputs
             obj=obj.load_heterologous_and_external('no_het','no_ext'); % none by default
 
             % push parameters and initial conditions of het. system into main framework
@@ -69,7 +66,7 @@ classdef cell_simulator_no_proportional
             obj.init_conditions=cell_init_conds(obj.parameters);
         end
         
-
+        %% HETEROLOGOUS GENE AND EXTERNAL INPUT MODULE MANAGEMENT
         % LOAD heterologous gene and external input modules
         function obj = load_heterologous_and_external(obj,het_sys,ext_sys)
             % LOAD HETEROLOGOUS GENES MODULE
@@ -162,8 +159,8 @@ classdef cell_simulator_no_proportional
             end
         end
         
-
-        % SIMULATE the model
+        %% SIMULATION
+        % CALL the simulator, save the outcome
         function obj = simulate_model(obj)
             obj = obj.set_x0; % set initial condition
             [obj.t, obj.x] = ode15s(@obj.ss_model, [0, obj.tf], [obj.x0], obj.opt);
@@ -175,19 +172,21 @@ classdef cell_simulator_no_proportional
             % NATIVE GENES
             obj.x0 = [
                       % mRNAs;
-                      obj.init_conditions('m_a');
-                      obj.init_conditions('m_r');
+                      obj.init_conditions('m_a'); % metabolic gene transcripts
+                      obj.init_conditions('m_r'); % ribosomal gene transcripts
 
                       % proteins
-                      obj.init_conditions('p_a');
+                      obj.init_conditions('p_a'); % metabolic proteins
                       obj.init_conditions('R'); % non-inactivated ribosomes
 
                       % tRNAs
                       obj.init_conditions('tc'); % charged
-                      obj.init_conditions('tu'); % free ribosomes inactivated by chloramphenicol
+                      obj.init_conditions('tu'); % uncharged
+
+                      % free ribosomes inactivated by chloramphenicol
                       obj.init_conditions('Bcm');
 
-                      % (constant) nutrient quality and chloramphenicol
+                      % culture medium's nutrient quality and chloramphenicol concentration
                       obj.init_conditions('s'); % nutrient quality
                       obj.init_conditions('h'); % chloramphenicol levels
                       ];
@@ -195,7 +194,6 @@ classdef cell_simulator_no_proportional
             % ...ADD HETEROLOGOUS GENES IF THERE ARE ANY
             if(obj.num_het>0)
                 x0_het=zeros(2*obj.num_het,1); % initialise
-                % calculate
                 for i=1:obj.num_het
                     % mRNA
                     x0_het(i)=obj.init_conditions(['m_',obj.het.names{i}]);
@@ -208,7 +206,6 @@ classdef cell_simulator_no_proportional
             % ...ADD MISCELLANEOUS SPECIES IF THERE ARE ANY
             if(obj.num_misc>0)
                 x0_misc=zeros(obj.num_misc,1); % initialise
-                % calculate
                 for i=1:obj.num_misc
                     x0_misc(i)=obj.init_conditions(obj.het.misc_names{i});
                 end
@@ -232,7 +229,7 @@ classdef cell_simulator_no_proportional
             Bcm = x(7); % inactivated ribosomes
             s = x(8); % nutrient quality (constant)
             h = x(9); % chloramphenicol concentration (constant)
-            x_het=x(10:(9+2*obj.num_het+obj.num_misc)); % heterologous genes and miscellaneous species
+            x_het=x(10:(9+2*obj.num_het+obj.num_misc)); % heterologous genes and miscellaneous synthetic species
 
             % CALCULATE PHYSIOLOGICAL VARIABLES
             % translation elongation rate
@@ -264,15 +261,24 @@ classdef cell_simulator_no_proportional
             B=R.*(1-1./D); % actively translating ribosomes (inc. those translating housekeeping genes)
 
             nu=obj.form.nu(par,tu,s); % tRNA charging rate
-            psi=obj.form.psi(par,T); % tRNA synthesis rate -NEEDS CHANGING!!
 
             l=obj.form.l(par,e,B); % growth rate
 
-            % GET RNAP ACTIVITY - NEW!
+            psi=obj.form.psi(par,T); % tRNA synthesis rate - MUST BE SCALED BY GROWTH RATE
+
+            % GET RNAP ACTIVITY
             rnap_act=l;
 
             % GET EXTERNAL INPUT
             ext_inp=obj.ext.input(x,t);
+
+            % GET RATE OF EFFECTIVE NUTR. QUAL. CHANGE (for upshifts)
+            if(par('is_upshift')==1)
+                dsdt = (par('s_postshift') - s) * ...
+                    (e./par('n_a')).*(m_a./k_a./D).*R./p_a;
+            else
+                dsdt = 0;
+            end
 
             % DEFINE DX/DT FOR...
             % ...THE HOST CELL
@@ -286,11 +292,11 @@ classdef cell_simulator_no_proportional
                     (e./par('n_r')).*(m_r./k_r./D).*R-l.*R-kcmh.*B;
                     % tRNAs
                     nu.*p_a-l.*tc-e.*B;
-                    psi-l.*tu-nu.*p_a+e.*B;
+                    psi*l-l.*tu-nu.*p_a+e.*B;
                     % ribosomes inactivated by chloramphenicol
                     kcmh.*B-l.*Bcm;
-                    % nutrient quality assumed constant
-                    0;
+                    % nutrient quality
+                    dsdt;
                     % chloramphenicol concentration assumed constant
                     0;
                     ];
@@ -313,7 +319,7 @@ classdef cell_simulator_no_proportional
                             -l.*x_het(i+obj.num_het)+...
                             obj.het.extra_p_term(obj.het.names{i},x,ext_inp);
                     else % remove rpoprtional feedback: actuator protein production RC-independent!
-                        dxdt_het(i+obj.num_het)=(e./par(['n_',obj.het.names{i}])).*(x_het(i)./4.4721./7.9930e4).*2.3605e4...
+                        dxdt_het(i+obj.num_het)=(e./par(['n_',obj.het.names{i}])).*(x_het(i)./4.6689./7.9565e4).*2.3605e4...
                             -l.*x_het(i+obj.num_het)+...
                             obj.het.extra_p_term(obj.het.names{i},x,ext_inp);
                     end
@@ -327,7 +333,7 @@ classdef cell_simulator_no_proportional
             end
         end
         
-
+        %% VARIED
         % PLOT simulation results
         function plot_simulation(obj,species,plot_type)
             % PLOT FOR THE HOST CELL
@@ -388,7 +394,7 @@ classdef cell_simulator_no_proportional
                     plot(obj.t,obj.x(:,3),'Color',[0.9290, 0.6940, 0.1250]);
                     plot(obj.t,obj.x(:,4),'Color',[0.4940, 0.1840, 0.5560]);
                     xlabel('Time (h)');
-                    ylabel('mRNA concentration (nM)');
+                    ylabel('Protein concentration (nM)');
                     legend('a','r');
                     title('protein levels');
                     hold off
@@ -527,7 +533,7 @@ classdef cell_simulator_no_proportional
         end
     
 
-        % RETURN total heterologous mRNA transcription (conc.*transcription rate) for a given state of the system
+        % RETURN total heterologous mRNA transcription (gene conc. times transcription rate) for a given state of the system
         function tht = total_heterologous_transcription(obj, x, t)
             tht=zeros(1,size(x,1));
             if(obj.num_het>0)

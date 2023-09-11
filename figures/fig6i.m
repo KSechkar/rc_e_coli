@@ -1,7 +1,7 @@
-%% fig5i.m
+%% fig6i.m
 
 % PROPORTIONAL-INTEGRAL CONTROLLER
-% Figure 5: i
+% Figure 6: i
 
 % Showcasing how increasing our proportional-integral controller partially
 % restores modularity of synthetic gene expression by keeping the burden
@@ -27,18 +27,17 @@ sim_with.het.parameters('a_x')=100;
 
 % disturbance signal parameters
 sim_with.ext.input_func_parameters('inducer_level')=1; % inducer level: just full expression of xtra1 gene
-sim_with.het.parameters('c_dist')=100; % gene copy number
-sim_with.het.parameters('a_dist')=200; % max. gene transcription rate
 
 % integral controller parameters
-sim_with.het.parameters('K_dna(anti)-sens')=4000; % sensor prot.-DNA binding Hill constant
+sim_with.het.parameters('K_dna(anti)-sens')=7000; % sensor prot.-DNA binding Hill constant
 sim_with.het.parameters('eta_dna(anti)-sens')=1; % sensor prot.-DNA binding Hill coefficient
 
-sim_with.het.parameters('K_dna(amp)-act')=4000; % sensor prot.-DNA binding Hill constant
+sim_with.het.parameters('K_dna(amp)-act')=700; % sensor prot.-DNA binding Hill constant
 sim_with.het.parameters('eta_dna(amp)-act')=1; % sensor prot.-DNA binding Hill coefficient
 
 sim_with.het.parameters('kb_anti')=300; % atcuator-annihilator binding rate constant
-sim_with.het.parameters('a_sens')=22.5; % sensor gene transcription rate
+sim_with.het.parameters('c_sens')=100;
+sim_with.het.parameters('a_sens')=50; % sensor gene transcription rate
 sim_with.het.parameters('a_anti')=800; % annigilator transcription rate
 sim_with.het.parameters('a_act')=400; % actuator transcription rate
 
@@ -53,9 +52,9 @@ sim_with.opt = odeset('reltol',1.e-6,'abstol',1.e-9);
 
 %% DEFINE plasmid concs. to be tested
 
-sim_with.het.parameters('a_dist')=2000;
+sim_with.het.parameters('a_dist')=500;
 sim_with=sim_with.push_het();
-plasmid_concs=linspace(0,150,20);
+plasmid_concs=linspace(0,1200,50);
 
 %% RUN simulations - with controller
 
@@ -80,7 +79,7 @@ end
 %% RUN simulations - without controller
 sim_without=cell_simulator; % initialise simulator
 sim_without=sim_without.load_heterologous_and_external('two_constit','no_ext');
-sim_without.het.parameters('a_xtra1')=2000;
+sim_without.het.parameters('a_xtra1')=sim_with.het.parameters('a_dist');
 sim_without=sim_without.push_het();
 sim_without.tf = 1000;
 sim_without.opt = odeset('reltol',1.e-6,'abstol',1.e-9); % more lenient integration tolerances for speed
@@ -199,19 +198,19 @@ set(Fe, 'defaultLineLineWidth', 1.25)
 hold on
 
 % plot p_x values with and without the controller
-plot(tot_trans,p_xs_with./p_xs_with(1),'Color',[0.6 0.8 0 1])
-plot(tot_trans,p_xs_without./p_xs_without(1),'Color',[0.6 0.8 0 0.5])
+plot(plasmid_concs,p_xs_with./p_xs_with(1),'Color',[0.6 0.8 0 1])
+plot(plasmid_concs,p_xs_without./p_xs_without(1),'Color',[0.6 0.8 0 0.5])
 
 % mark the dynamic range of the controller
-plot([tot_trans(i_exceed) tot_trans(i_exceed)],[0.6 1.2],'Color','k','LineStyle',':')
+plot([plasmid_concs(i_exceed) plasmid_concs(i_exceed)],[0.4 1.2],'Color','k','LineStyle',':')
 
 xlabel('c_{dist}, disturbing gene conc. [nM]','FontName','Arial');
 ylabel('p_x:p_x^0, relative output prot. conc.','FontName','Arial');
 
-ylim([0.6 1.2])
-xlim([0 3e5])
+ylim([0.4 1.2])
+xlim([0 1200])
 %xticks(0:1e5:3e5)
-yticks(0.6:0.1:1.2)
+yticks(0.4:0.2:1.2)
 
 legend({'w/ controller','no controller'},'FontName','Arial','FontSize',8,'Location','northwest')
 

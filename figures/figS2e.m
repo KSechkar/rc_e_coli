@@ -58,7 +58,7 @@ default_theta=[default_par('a_r')/default_par('a_a'), ...
     default_par('kcm')];
 
 % ranges of parameter values to consider
-points_in_range=51;
+points_in_range=75;
 ratio_range=logspace(log10(1/10),log10(10),points_in_range)*default_theta(1);
 numax_range=logspace(log10(1/10),log10(10),points_in_range)*default_theta(2);
 K_range=logspace(log10(1/10),log10(10),points_in_range)*default_theta(3);
@@ -92,7 +92,7 @@ for i_comb=1:size(parcombs,1)
     % parameters for getting steady state
     sim.tf = 12; % single integraton step timeframe
     Delta = 0.001; % threshold that determines if we're in steady state
-    Max_iter = 5; % maximum no. iterations (checking if SS reached over first 500 h)
+    Max_iter = 4; % maximum no. iterations (checking if SS reached over first 48 h)
 
     % which parameter combination is being considered - x and y histogram ranges
     parcomb=parcombs(i_comb,:);
@@ -127,21 +127,20 @@ bckup.loglikes=loglikes;
 save('S1e.mat','bckup')
 
 %% LOAD the saved simulation results (optional)
-
-load('S1e.mat');
-%load('S1e.mat');
-parnames=bckup.parnames;
-ranges=bckup.ranges;
-parcombs=bckup.parcombs;
-loglikes=bckup.loglikes;
-points_in_range=size(ranges,2);
+% 
+% %load('S1e_freshest.mat');
+% parnames=bckup.parnames;
+% ranges=bckup.ranges;
+% parcombs=bckup.parcombs;
+% loglikes=bckup.loglikes;
+% points_in_range=size(ranges,2);
 
 
 %% PLOT
 % heatmap colour axis range
 hmap_crange=[-3000,0];
 
-Fs1e = figure('Position',[0 0 900 900]);
+Fs1e = figure('Position',[0 0 900 700]);
 set(Fs1e, 'defaultAxesFontSize', 9)
 set(Fs1e, 'defaultLineLineWidth', 1.25)
 
@@ -159,7 +158,7 @@ for i_comb=1:size(parcombs,1)
     subplot(plots_in_row,plots_in_row,10-(plots_in_row*(y_par-2)+(plots_in_row+1-x_par)))
 
     % plot heatmap
-    hmap=heatmap(flip(loglikes(:,:,i_comb),1),'ColorMap', jet(100));
+    hmap=heatmap(flip(loglikes(:,:,i_comb).',1),'ColorMap', jet(100));
 %     hmap=heatmap(flip(loglikes{i_comb},1),'ColorMap', jet(100));
 
     % display labels

@@ -1,6 +1,6 @@
-%% fig2a.m
+%% fig3a.m
 % GROWTH PHENOMENA PREDICTION BY THE MODEL
-% Figure 2: a
+% Figure 3: a
 
 % Parameter fitting results: model predictions for growth rates and ribosomal
 % mass fractions in different media and chloramphenicol concs, compared to

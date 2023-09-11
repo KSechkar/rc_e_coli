@@ -1,6 +1,6 @@
-%% fig2bcd.m
-% GROWTH PHENOMENA PREDICTION BY THE MODEL
-% Figure 2: f
+%% figS1.m
+% NUTRIENT UPSHIFT SIMULATION
+% Figure S1
 
 % Compare model predictions for the dynamics of nutrient upshifts with
 % experimental data collected by Erickson et al. and processed by Chure et
@@ -148,8 +148,8 @@ for upshift_medium = 1:size(upshift_media,2)
     sim.init_conditions('s')=sim.init_conditions('s')+...
         (sim.parameters('s_postshift')-sim.init_conditions('s' )).*...
         base_l./upshift_ls{upshift_medium};
-    sim.init_conditions('s')=sim.parameters('s_postshift').*...
-        base_l./upshift_ls{upshift_medium};
+%     sim.init_conditions('s')=sim.parameters('s_postshift').*...
+%         base_l./upshift_ls{upshift_medium};
     sim=sim.push_het;
     sim.tf=t_after;
     sim=sim.simulate_model;
@@ -169,7 +169,7 @@ end
 
 disp('Nutrient upshift simulation successful')
 
-%% FIGURE 2 F
+%% FIGURE S1
 
 Fd = figure('Position',[0 0 385 281]);
 set(Fd, 'defaultAxesFontSize', 9)
@@ -182,7 +182,7 @@ for upshift_medium = 1:size(upshift_media,2)
 
     % model predictions
     plot(model{upshift_medium}.ts,model{upshift_medium}.ls, ...
-        '-','Color',upshift_colours{upshift_medium},'LineWidth',1)
+        '-','Color',upshift_colours{upshift_medium},'LineWidth',1.5)
 end
 
 xlabel('Time since upshift [h]')

@@ -45,12 +45,12 @@ phir_stdev=0.018976;
 sim=cell_simulator; % initialise simulator
 
 % settings
-sim.tf = 10; % single integraton step timeframe
+sim.tf = 12; % single integraton step timeframe
 sim.opt = odeset('reltol',1.e-6,'abstol',1.e-9); % more lenient integration tolerances for speed
 
 % parameters for getting steady state
-Delta = 0.1; % threshold that determines if we're in steady state
-Max_iter = 50; % maximum no. iterations (checking if SS reached over first 500 h)
+Delta = 0.001; % threshold that determines if we're in steady state
+Max_iter = 4; % maximum no. iterations (checking if SS reached over first 48 h)
 
 %% DEFINE a_a and a_r value to check
 a_as=logspace(log10(sim.parameters('a_a')/10),log10(sim.parameters('a_a')*30),9);

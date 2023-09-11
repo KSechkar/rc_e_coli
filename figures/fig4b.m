@@ -1,7 +1,7 @@
-%% fig3b.m
+%% fig4b.m
 
 % WINNER-TAKES-ALL PHENOMENON
-% Figure 3: b
+% Figure 4: b
 
 % Two bistable switches (self-activating genes) in the same cell exhibiting
 % winner-takes-all behaviour, when the activation of one switch may prevent
@@ -17,7 +17,7 @@ clear
 %% SET UP and RUN the simulators to get three trajectories
 
 % switch 2 only, both switches on, switch 1 only
-f1s={25 125 1000};
+f1s={4 20 800};
 
 
 sims={cell_simulator cell_simulator cell_simulator};
@@ -30,19 +30,23 @@ for scenario=1:size(f1s,2)
     
     % 'inducer levels'
     sims{scenario}.het.parameters('f1')=f1s{scenario}; % inducer for switch 1
-    sims{scenario}.het.parameters('f2')=125; % inducer for switch 2
+    sims{scenario}.het.parameters('f2')=20; % inducer for switch 2
     
     % max transcription rates
     sims{scenario}.het.parameters('a_switch1')=3000;
     sims{scenario}.het.parameters('a_switch2')=3000;
     % Switch 1:
-    sims{scenario}.het.parameters('K_dna(switch1)-switch1f1')=5e4; % gene reg. Hill constant
+    sims{scenario}.het.parameters('K_dna(switch1)-switch1f1')=5e3; % gene reg. Hill constant
     sims{scenario}.het.parameters('eta_dna(switch1)-switch1f1')=2; % gene reg. Hill coefficient
     sims{scenario}.het.parameters('baseline1')=0.1; % baseline promoter activity
     % Switch 2:
-    sims{scenario}.het.parameters('K_dna(switch2)-switch2f2')=5e4; % gene reg. Hill constant
+    sims{scenario}.het.parameters('K_dna(switch2)-switch2f2')=5e3; % gene reg. Hill constant
     sims{scenario}.het.parameters('eta_dna(switch2)-switch2f2')=2; % gene reg. Hill coefficient
     sims{scenario}.het.parameters('baseline2')=0.1; % baseline promoter activity
+
+    % inducer protein binding
+    sims{scenario}.het.parameters('K_switch1-f1')=1000; % dissociation constant for inducer-protein binding
+    sims{scenario}.het.parameters('K_switch2-f2')=1000; % dissociation constant for inducer-protein binding
     
     % DO NOT TOUCH!
     sims{scenario}.ext.input_func_parameters('inducer_base_level')=1; % disturbance flicks transcription reg. func. from 0 to 1 at t=30
@@ -54,14 +58,14 @@ for scenario=1:size(f1s,2)
     sims{scenario}=sims{scenario}.push_het();
     
     % simulate
-    sims{scenario}.tf =  50;
+    sims{scenario}.tf =  72;
     sims{scenario}.opt = odeset('reltol',1.e-6,'abstol',1.e-9);
     sims{scenario} = sims{scenario}.simulate_model;
 end
 
 %% FIND equilibria across different inducer 1 concentrations
 
-f1_sweep=f1s{1}:12.5:f1s{3};
+f1_sweep=f1s{1}:4:f1s{3};
 
 eqbs=zeros(2, size(f1_sweep,2));
 
@@ -113,7 +117,7 @@ end
 % plot equilibria for different inducer 1 concentrations
 plot(eqbs(1,:),eqbs(2,:),'Color',[1 0 0],'LineWidth',2)
 
-legend('f_1=25nM','f_1=125uM','f_1=1000uM',...
+legend('f_1=4 nM','f_1=20 nM','f_1=800 nM',...
     'Location','northeast','FontName','Arial')
 
 xlabel('p_{s1}, conc. of switch 1 prot. [nM]','FontName','Arial')

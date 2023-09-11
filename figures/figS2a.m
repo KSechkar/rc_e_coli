@@ -1,7 +1,7 @@
-%% figS1a.m
+%% figS2a.m
 
 % MCMC FITTING
-% Figure S1: a
+% Figure S2: a
 
 % Sample parameter combinations from the MCMC chains and display the corresponding model
 % predictions
@@ -69,8 +69,6 @@ Max_iter = 4; % maximum no. iterations (checking if SS reached over first 48 h)
 
 sim.opt = odeset('reltol',1.e-6,'abstol',1.e-6); % more lenient integration tolerances for speed
 
-model.ssfun = @(theta,data) rc_ecoli_sos(theta,data,sim,Delta,Max_iter);
-
 %% GET model predictions with fitted parameters
 % Find Maximum A Posteriori estimate (mode of the distribution) - these are the values we ultimately use in our model
 [~,max_index] = max(ParSet(:,end)); max_index = max_index(1);
@@ -78,7 +76,7 @@ fitted_theta = ParSet(max_index,1:DREAMPar.d);
 
 disp(['Fitted parameters: Theta=',num2str(fitted_theta)]) % print resultant sum of squared errors
 
-ymodel_fitted=dream_modelfun(fitted_theta,data.xdata,sim,Delta,Max_iter); % find model predictions
+ymodel_fitted=dream_modelfun(fitted_theta,data.xdata,sim,Delta,Max_iter,sim.parameters('a_a')); % find model predictions
 disp(['Fitted parameters: SOS=',num2str(sum((ymodel_fitted-data.ydata).^2))]) % print resultant sum of squared errors
 
 %% GET model predictions with sampled parameters - randomly draw from the chains
@@ -93,7 +91,7 @@ for sample_cntr=1:num_samples
 
     disp(['Sample ',num2str(sample_cntr),': Theta=',num2str(tried_thetas(sample_cntr,:))]) % print resultant sum of squared errors
 
-    ymodels{sample_cntr}=dream_modelfun(tried_thetas(sample_cntr,:),data.xdata,sim,Delta,Max_iter); % find model predictions
+    ymodels{sample_cntr}=dream_modelfun(tried_thetas(sample_cntr,:),data.xdata,sim,Delta,Max_iter,sim.parameters('a_a')); % find model predictions
     disp(['Sample ',num2str(sample_cntr),': SOS=',num2str(sum((ymodels{sample_cntr}-data.ydata).^2))]) % print resultant sum of squared errors
 end
 

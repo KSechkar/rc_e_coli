@@ -1,6 +1,6 @@
-%% fig2bcd.m
+%% fig3bcd.m
 % GROWTH PHENOMENA PREDICTION BY THE MODEL
-% Figure 2: b,c,d
+% Figure 3: b,c,d
 
 % Compare model predictions of the cell's growth rate, ribosomal mass
 % fraction, translation elongation rate and ppGpp levels with experimental data from the 
@@ -35,8 +35,8 @@ sim=cell_simulator; % initialise simulator
 
 % parameters for getting steady state
 sim.tf = 12; % single integraton step timeframe
-Delta = 0; % threshold that determines if we're in steady state
-Max_iter = 5; % maximum no. iterations (checking if SS reached over first 60 h)
+Delta = 0.001; % threshold that determines if we're in steady state
+Max_iter = 6; % maximum no. iterations (checking if SS reached over first 60 h)
 
 sim.opt = odeset('reltol',1.e-6,'abstol',1.e-9); % more lenient integration tolerances for speed
 
@@ -101,7 +101,7 @@ set(Fb, 'defaultAxesFontSize', 9)
 hold on
 
 plot(data_rib(:,1),data_rib(:,2),'.','Color','b')
-plot(l_map,phir_map,'-','Color','r','LineWidth',1)
+plot(l_map,phir_map,'-','Color','r','LineWidth',1.5)
 plot([0.3 0.3],[0 0.3],':','Color','k')
 
 ylabel('\phi_r, ribosomal mass fraction','FontName','Arial');
@@ -120,7 +120,7 @@ set(Fc, 'defaultAxesFontSize', 9)
 hold on
 
 plot(data_el(:,1),data_el(:,2),'.','Color','b')
-plot(l_map,el_map,'-','Color','r','LineWidth',1)
+plot(l_map,el_map,'-','Color','r','LineWidth',1.5)
 %plot([0.3 0.3],[6 20],':','Color','k')
 
 ylabel('\epsilon, translation elong. rate [aa/s]','FontName','Arial');
@@ -138,8 +138,8 @@ Fd = figure('Position',[0 0 385 281]);
 set(Fd, 'defaultAxesFontSize', 9)
 hold on
 
-plot(data_ppGpp(:,1),data_ppGpp(:,2),'.','Color','b','LineWidth',1)
-plot(l_map,ppGpp_map./ppGpp_ref,'-','Color','r','LineWidth',1)
+plot(data_ppGpp(:,1),data_ppGpp(:,2),'.','Color','b')
+plot(l_map,ppGpp_map./ppGpp_ref,'-','Color','r','LineWidth',1.5)
 %plot([0.9 0.9],[10^(-1) 10^(1.5)],'--','Color','m','LineWidth',1)
 
 xlabel('\lambda, growth rate [1/h]');

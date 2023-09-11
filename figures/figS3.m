@@ -1,124 +1,237 @@
-%% figS3.m
+% figS3.m
 
-% WINNER-TAKES-ALL PHENOMENON
-% Figure S3
+% HETEROLOGOUS GENE EXPRESSION AND ITS EFFECT ON CELLULAR VARIABLES
+% Figure S3: all subfigures
 
-% Two bistable switches (self-activating genes) in the same cell exhibiting
-% winner-takes-all behaviour, when the activation of one switch may prevent
-% the activation of the other. However, here we decrease the maximum 
-% expression rates of the genes - eventually, resource competition exerted
-% by the two genes on each other becomes insufficient to cause
-% winner-takes-all behaviour.
+% Show how heterologous gene expression affects cellular variables in
+% culture media of different qualities
 
 %% CLEAR all variables
 
 addpath(genpath('..'))
 
-close all
 clear
+close all
 
-%% DEFINE the range of inducer 1 concs to consider
-f1_sweep=25:25:1000;
+%% SET UP the simulator
 
-%% DEFINE the range of promoter strengths and Hill constant values to consider
-% which factors we decrease the original values by
-fold_decreases=[1,1.25,2.5,5,10];
+sim=cell_simulator; % initialise simulator
 
-% maximum values
-a_switch1_max=3000;
-a_switch2_max=3000;
-K1_max=5e4;
-K2_max=5e4;
+sim.init_conditions('s')=0.25;
 
-%% SET UP the simulator with all other parameters
-sim=cell_simulator;
+% parameters for getting steady state
+sim.tf = 12; % single integraton step timeframe
+Delta = 0.001; % threshold that determines if we're in steady state
+Max_iter = 40; % maximum no. iterations (checking if SS reached over first 48 h)
 
-sim=sim.load_heterologous_and_external('two_switches','pulse_inducer'); % load the het. gene and ext. inp. modules
+sim.opt = odeset('reltol',1.e-6,'abstol',1.e-9); % more lenient integration tolerances for speed
 
-% inducer addition time
-inducer_add_time=10;
+par=sim.parameters; % the model's parameters: saved separately for ease of notation
 
-% 'inducer levels'
-sim.het.parameters('f2')=125; % inducer for switch 2
+% save simulation options to pass on to parallel computing instances
+tf=sim.tf;
+opt=sim.opt;
+%% DEFINE culture media
 
-% max transcription rates
-sim.het.parameters('a_switch1')=3000;
-sim.het.parameters('a_switch2')=3000;
-% Switch 1:
-sim.het.parameters('eta_dna(switch1)-switch1f1')=2; % gene reg. Hill coefficient
-% Switch 2:
-sim.het.parameters('eta_dna(switch2)-switch2f2')=2; % gene reg. Hill coefficient
+sigmas=linspace(0.05,1,25); %logspace(log(0.05)/log(10),0,25); % range of culture media's nutrient qualities
 
-% DO NOT TOUCH!
-sim.ext.input_func_parameters('inducer_base_level')=1; % disturbance flicks transcription reg. func. from 0 to 1 at t=30
-sim.ext.input_func_parameters('pulse_value_prop')=0; % disturbance flicks transcription reg. func. from 0 to 1 at t=30
-sim.ext.input_func_parameters('pulse_start_time')=0; % disturbance flicks transcription reg. func. from 0 to 1 at t=30
-sim.ext.input_func_parameters('pulse_duration')=inducer_add_time;% disturbance flicks transcription reg. func. from 0 to 1 at t=30
+%% DEFINE gene expression paramaters
 
-% push amended parameter values
-sim=sim.push_het();
+a_xtra=1000; % transcription rate of the heterologous gene PER PLASMID
 
-% simulate
-sim.tf =  50;
-sim.opt = odeset('reltol',1.e-6,'abstol',1.e-9);
+sim=sim.load_heterologous_and_external('one_constit','no_ext'); % load heterologous gene expression module
+sim.het.parameters('a_xtra')=a_xtra;
+sim=sim.push_het;
+
+%plasmid_concs = [0,linspace(0,log(par('a_a')*2/a_xtra)/log(10),24)]; % range of plasmid concentrations
+plasmid_concs = linspace(0,par('a_a')*2/a_xtra,25);
+
+%% INITIALISE arrays where obtained values of phys. variables will be stored
+
+% values without het. prot. exp.
+e0=zeros(size(sigmas,2),1);  % elongation rates
+F_r0=zeros(size(sigmas,2),1); % ribosomal gene transcription regulation function
+T0=zeros(size(sigmas,2),1); % proportional to 1/ppGpp concentration
+nu0=zeros(size(sigmas,2),1); % tRNA charging rate
+
+% numerically obtained values
+es = zeros(size(sigmas,2),size(plasmid_concs,2)); % elongation rates
+F_rs = zeros(size(sigmas,2),size(plasmid_concs,2)); % ribosomal gene transcription regulation function
+Ts = zeros(size(sigmas,2),size(plasmid_concs,2)); % proportional to 1/ppGpp concentration
+nus = zeros(size(sigmas,2),size(plasmid_concs,2)); % tRNA charging rate
 
 
-%% FIND equilibria for different inducer 1 concs across different rescalings of promoter strengths and Hill constants
+%% RUN without heterologous gene expression
+for i=1:size(sigmas,2)
+    % set parameter values
+    sim.init_conditions('s')=sigmas(i);
+    for het_cntr=1:sim.num_het
+        sim.het.parameters(['c_',sim.het.names{het_cntr}])=0;
+    end
+    sim = sim.push_het(); % push initial condition and parameters to main object
 
-eqbs={}; % storing the system's equilibria here
-
-for fd_index=1:size(fold_decreases,2)
-    % initialise the storage array
-    eqbs{fd_index}=zeros(2, size(f1_sweep,2));
-
-    % rescale promoter strengths and hill constants
-    fold_decrease=fold_decreases(fd_index);
-    sim.het.parameters('a_switch1')=a_switch1_max/fold_decrease;
-    sim.het.parameters('a_switch2')=a_switch1_max/fold_decrease;
-    sim.het.parameters('K_dna(switch1)-switch1f1')=K1_max/fold_decrease;
-    sim.het.parameters('K_dna(switch2)-switch2f2')=K2_max/fold_decrease;
+    ss=get_steady(sim,Delta,Max_iter);
     
-    % run simulations, record equilibria
-    for i=1:size(f1_sweep,2)
-        sim.het.parameters('f1')=f1_sweep(i);
-        sim=sim.push_het();
-        sim = sim.simulate_model;
-        x_het=sim.x(:,10:(9+2*sim.num_het));
-        eqbs{fd_index}(1,i)=x_het(end,3);
-        eqbs{fd_index}(2,i)=x_het(end,4);
-    end 
+    [e,nu,F_r,T]=get_enuFrT(sim,ss); % get values of variables
+    
+    % record
+    e0(i)=e;
+    F_r0(i)=F_r;
+    nu0(i)=nu;
+    T0(i)=T;
 end
 
-%% PHASE PLANE PLOT
+%% RUN with different burden levels
 
-% create figure
-Fig_pp = figure('Position',[0 0 385 295]);
-set(Fig_pp, 'defaultAxesFontSize', 9)
-set(Fig_pp, 'defaultLineLineWidth', 1.25)
+% get actual model predictions
+for i=1:size(sigmas,2)
+    parfor j=1:size(plasmid_concs,2)
+        parsim=cell_simulator(); % create cell simulator for parallel computing
+        parsim=parsim.load_heterologous_and_external('one_constit','no_ext'); % load heterologous gene expression module
+        parsim.het.parameters('a_xtra')=a_xtra;
+        parsim.push_het();
+        parsim.opt=opt;
+        parsim.tf=tf;
 
-hold on
-
-colour_start=[1 0 0];
-colour_end=[0 0 1];
-for fd_index=1:size(fold_decreases,2)
-    % define a colour for a given rescaling's plot
-    colour=(colour_start*(size(fold_decreases,2)-fd_index)+colour_end*(fd_index-1))/(size(fold_decreases,2)-1);
-
-    % plot equilibria for different inducer 1 concentrations
-    plot(eqbs{fd_index}(1,:),eqbs{fd_index}(2,:),'Color',colour,'LineWidth',2)
+        parsim.init_conditions('s')=sigmas(i);
+        for het_cntr=1:parsim.num_het
+            parsim.het.parameters(['c_',parsim.het.names{het_cntr}])=plasmid_concs(j);
+        end
+        parsim = parsim.push_het(); % push initial condition and parameters to main object
+    
+        ss=get_steady(parsim,Delta,Max_iter);
+        
+        [e,nu,F_r,T]=get_enuFrT(parsim,ss); % get values of variables
+        
+        % record
+        es(i,j)=(e-e0(i))/e0(i);
+        F_rs(i,j)=(F_r-F_r0(i))/F_r0(i);
+        nus(i,j)=(nu-nu0(i))/nu0(i);
+        Ts(i,j)=(T-T0(i))/T0(i);
+    end
+    disp([num2str(i),' out of ',num2str(size(sigmas,2)),' nutirent qualities considered: ',num2str(sigmas(i))])
 end
 
-legend({'\upsilon=1','\upsilon=1.25','\upsilon=2.5','\upsilon=5','\upsilon=10'},'FontSize',9)
+%% MAKE axis labels
+x_text_labels=string(sigmas);
+for i=1:size(sigmas,2)
+    midpoint=round(size(sigmas,2)/2,0);
+    if (i~=1 && i~=size(sigmas,2) && i~=midpoint)
+        x_text_labels(i)='';
+    else
+        if(sigmas(i)~=0)
+            x_text_labels(i)=num2str(round(sigmas(i),2));
+        else
+            x_text_labels(i)='0';
+        end
+    end
+end
 
-xlabel('p_{s1}, conc. of switch 1 prot. [nM]','FontName','Arial')
-ylabel('p_{s2}, conc. of switch 2 prot. [nM]','FontName','Arial')
+plasmid_concs_flip=flip(plasmid_concs);
+y_text_labels=string(plasmid_concs_flip);
+for i=1:size(plasmid_concs,2)
+    midpoint=round(size(plasmid_concs_flip,2)/2,0);
+    if (i~=1 && i~=size(plasmid_concs_flip,2) && i~=midpoint)
+        y_text_labels(i)=' ';
+    else
+        if(plasmid_concs_flip(i)~=0)
+            y_text_labels(i)=num2str(round(plasmid_concs_flip(i),2));
+        else
+            y_text_labels(i)='0';
+        end
+    end
+end
 
-xlim([0 5e5])
-ylim([0 5e5])
-xticks(0:1e5:5e5)
-yticks(0:1e5:5e5)
+%% CREATE FIGURE
 
-grid on
-axis square
-box on
-hold off
+F = figure('Position',[0 0 720 560]);
+set(F, 'defaultAxesFontSize', 9)
+set(F, 'defaultLineLineWidth', 1.25)
+
+%% SUBFIGURE A - TRANSLATION ELONGATION RATES
+subplot(2,2,1)
+hmap=heatmap(100*abs(flip(es.',1)),'ColorMap', jet(100));
+
+% axis labels and ticks
+xlabel('\sigma, nutr. qual.');
+ylabel('c_x, gene DNA conc.');
+title('Change in \epsilon due to burden, %');
+hmap.XDisplayLabels = x_text_labels;
+hmap.YDisplayLabels = y_text_labels;
+
+%appaearance of the heatmap
+caxis(hmap,[0 1.5e-4]); % colour map
+hmap.GridVisible = 'off'; % don't show grid lines
+
+%% SUBFIGURE B - RIBOSOMAL GENE TRANSCRIPTION REGULATION
+
+subplot(2,2,2)
+hmap=heatmap(100*abs(flip(F_rs.',1)),'ColorMap', jet(100));
+
+% axis labels and ticks
+xlabel('\sigma, nutr. qual.');
+ylabel('c_x, gene DNA conc.');
+title('Change in F_r due to burden, %');
+hmap.XDisplayLabels = x_text_labels;
+hmap.YDisplayLabels = y_text_labels;
+
+%appaearance of the heatmap
+caxis(hmap,[0 1.5e-4]); % colour map
+hmap.GridVisible = 'off'; % don't show grid lines
+
+%% SUBFIGURE C - tRNA AMINOACYLATION RATES
+subplot(2,2,3)
+hmap=heatmap(100*abs(flip(nus.',1)),'ColorMap', jet(100));
+
+% axis labels and ticks
+xlabel('\sigma, nutr. qual.');
+ylabel('c_x, gene DNA conc.');
+title('Change in \nu due to burden, %');
+hmap.XDisplayLabels = x_text_labels;
+hmap.YDisplayLabels = y_text_labels;
+
+%appaearance of the heatmap
+caxis(hmap,[0 1.5e-4]); % colour map
+hmap.GridVisible = 'off'; % don't show grid lines
+
+%% SUBFIGURE D - ppGpp levels
+subplot(2,2,4)
+hmap=heatmap(100*abs(flip(Ts.',1)),'ColorMap', jet(100));
+
+% axis labels and ticks
+xlabel('\sigma, nutr. qual.');
+ylabel('c_x, gene DNA conc.');
+title('Change in T due to burden, %');
+hmap.XDisplayLabels = x_text_labels;
+hmap.YDisplayLabels = y_text_labels;
+
+%appaearance of the heatmap
+caxis(hmap,[0 1.5e-4]); % colour map
+hmap.GridVisible = 'off'; % don't show grid lines
+
+%% FUNCTION for getting growth rate, translation elongation rate and het. prot. mass fraction from the system's steady state
+function [e,nu,F_r,T]=get_enuFrT(sim,ss)
+    % evaluate growth
+    par=sim.parameters;
+    m_a = ss(1); % metabolic gene mRNA
+    m_r = ss(2); % ribosomal mRNA
+    p_a = ss(3); % metabolic proteins
+    R = ss(4); % operational ribosomes
+    tc = ss(5); % charged tRNAs
+    tu = ss(6); % uncharged tRNAs
+    Bm = ss(7); % inactivated ribosomes
+    s=ss(8); % nutrient quality
+    h=ss(9); % chloramphenicol conc.
+    ss_het=ss(10:9+2*sim.num_het); % heterologous genes
+
+    e=sim.form.e(par,tc); % translation elongation ratio
+    k_a=sim.form.k(e,par('k+_a'),par('k-_a'),par('n_a'),par('kcm').*h); % ribosome-mRNA dissociation constant (metab. genes)
+    k_r=sim.form.k(e,par('k+_r'),par('k-_r'),par('n_r'),par('kcm').*h); % ribosome-mRNA dissociation constant (rib. genes)
+    D=1+(m_a./k_a+m_r./k_r)./(1-par('phi_q')); % denominator in ribosome competition calculations
+    B=R.*(1-1./D); % actively translating ribosomes (inc. those translating housekeeping genes)
+
+    e=sim.form.e(par,tc); % translation elongation rate
+    nu=sim.form.nu(par,tu,s); % tRNA aminoacylation rate
+    T=tc./tu; % inversely proportional to ppGpp conc.
+    F_r=sim.form.F_r(par,T); % ribosomal gene transcription regulation function
+end

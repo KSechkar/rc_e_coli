@@ -1,7 +1,7 @@
-% fig3def_figS2.m
+% fig4cdf.m
 
 % PREDICTING HETEROLOGOUS GENE EXPRESSION NUMERICALLY AND ANALYTICALLY
-% Figure 3: c, d, f
+% Figure 4: c, d, f
 
 % Analyse the effects of heterologous gene expression: investigate growth
 % rate and het. prot. mas fraction (Main Figure b,c), as well as charged/uncharged 
@@ -23,9 +23,9 @@ close all
 sim=cell_simulator; % initialise simulator
 
 % parameters for getting steady state
-sim.tf = 20; % single integraton step timeframe
-Delta = 0.1; % threshold that determines if we're in steady state
-Max_iter = 100; % maximum no. iterations (checking if SS reached over first 2000 h)
+sim.tf = 12; % single integraton step timeframe
+Delta = 0.001; % threshold that determines if we're in steady state
+Max_iter = 6; % maximum no. iterations (checking if SS reached over first 2000 h)
 
 sim.opt = odeset('reltol',1.e-6,'abstol',1.e-9); % more lenient integration tolerances for speed
 
@@ -110,11 +110,11 @@ for i=1:size(plasmid_concs,2)
 end
 
 %% MAIN FIGURE C - het. prot. mass fraction as a function of burden
-approx_colour=[0.6350 0.0780 0.1840];
+approx_colour=[0 0.8 0.8];
 
 Fc = figure('Position',[0 0 385 290]);
 set(Fc, 'defaultAxesFontSize', 9)
-set(Fc, 'defaultLineLineWidth', 1)
+set(Fc, 'defaultLineLineWidth', 1.5)
 
 hold on
 
@@ -139,12 +139,12 @@ hold off
 
 Fb = figure('Position',[0 0 385 287]);
 set(Fb, 'defaultAxesFontSize', 9)
-set(Fb, 'defaultLineLineWidth', 1)
+set(Fb, 'defaultLineLineWidth', 1.5)
 hold on
 
 plot([0,plasmid_concs*a_xtra]./kxNB,[l0,ls],['r','-']) % plot model predictions
 plot([0,plasmid_concs*a_xtra]./kxNB,[l0_approx,ls_approx],...
-    'Color',approx_colour,'LineStyle','--') % plot approximation
+    'Color',approx_colour,'LineStyle','--','LineWidth',1.5) % plot approximation
 
 xlabel({'\xi, translational burden'},'FontName','Arial');
 ylabel('\lambda, growth rate [1/h]','FontName','Arial');
@@ -154,6 +154,7 @@ grid on
 box on
 axis square
 hold off
+ylim([0.4 1.6])
 
 %% MAIN FIGURE F - total heterologous protein production rate at t=0 in a population of cells (mu_het)
 
@@ -162,7 +163,7 @@ Fd = figure('Position',[0 0 385 290]);
 hold on
 
 set(Fd, 'defaultAxesFontSize', 9)
-set(Fd, 'defaultLineLineWidth', 1)
+set(Fd, 'defaultLineLineWidth', 1.5)
 
 mu_het0=0; % initialise
 mu_het0_approx=0; % initialise
@@ -186,7 +187,7 @@ plot([0,plasmid_concs*a_xtra]./kxNB,[mu_het0_approx,mu_hets_approx], ...
 mu_max_approx=mu_hets(index_of_max_mu); % find the corresponding mu
 % get the value
 plot([plasmid_concs(index_of_max_mu)*a_xtra./kxNB plasmid_concs(index_of_max_mu)*a_xtra./kxNB],[0 mu_max_approx], ...
-    'Color',[0,0.8,0.8],'LineStyle','-','LineWidth',0.75) % plot
+    'Color',[0.7, 0.7, 0.7],'LineStyle','-','LineWidth',1.5) % plot
 
 % draw a line to mark xi that maximises production  (ANALYTICAL PREDICTION)
 xi_max_approx=approx.xi_max(ss,ss0,e0,l0,sim,delta); % estimate optimal burden
@@ -194,7 +195,7 @@ phi_het_max_approx=approx.phi_het_max(l0,sim,delta); % estimate optimal mass fra
 mu_max_approx=par('M').*phi_het_max_approx.*...
     (l0.*(1-phi_het_max_approx./(1-par('phi_q')))-delta); % find corresponding mu
 plot([xi_max_approx xi_max_approx],[0 mu_max_approx], ...
-    'Color',[0,0.8,0.8],'LineStyle','--','LineWidth',0.75) % plot
+    'Color',[0.7, 0.7, 0.7],'LineStyle','--','LineWidth',1.5) % plot
 
 xlabel('\xi, translational burden','FontName','Arial');
 ylabel({'rate of total protein', 'production [aa/h/cell]'},'FontName','Arial');
