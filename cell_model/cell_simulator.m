@@ -35,10 +35,10 @@ classdef cell_simulator
         form=cell_formulae; % formulae for rate and activation functions
 
         % HYBRID SIMULATOR
-        het_S; % stoichiometry matix for hybrid simulations of heterologous gene expression
+        S; % stoichiometry matix for hybrid simulations of heterologous gene expression
         num_stoch_reactions; % number of possible stochastic reactions
-        de_condition; % randomly drawn condition for discrete events happening
-        record_time_step; % time interval between recordings of the
+        em_timestep=0.01; % Eulare-Maruyama simulation timestep (h)
+        em_save_every_n_steps=1000;
     end
     
     methods (Access = public)
@@ -74,11 +74,11 @@ classdef cell_simulator
         
         %% HETEROLOGOUS GENE AND EXTERNAL INPUT MODULE MANAGEMENT
         % LOAD heterologous gene and external input modules
-        function obj = load_heterologous_and_external(obj,het_sys,ext_sys)
+        function obj = load_heterologous_and_external(obj,Sys,ext_sys)
             % LOAD HETEROLOGOUS GENES MODULE
             % access the relevant file
             addpath(genpath([pwd, filesep,'het_modules']));
-            het_func=str2func(het_sys);
+            het_func=str2func(Sys);
 
             % class file describing a synthetic gene system
             obj.het=het_func();
@@ -192,7 +192,7 @@ classdef cell_simulator
                       % free ribosomes inactivated by chloramphenicol
                       obj.init_conditions('Bcm');
 
-                      % culture medium'het_S nutrient quality and chloramphenicol concentration
+                      % culture medium'S nutrient quality and chloramphenicol concentration
                       obj.init_conditions('s'); % nutrient quality
                       obj.init_conditions('h'); % chloramphenicol levels
                       ];
@@ -333,217 +333,147 @@ classdef cell_simulator
             end
         end
 
-        %% HYBRID SIMULATION - HOST CELL VARIABLES DETERMINISTIC, HETEROLOGOUS CIRUIT STOCHASTIC
-
-        % hybrid simulator 
-        function obj = simulate_model_hybrid(obj)
-            % set initial condition
-            obj = obj.set_x0; 
-            obj.x0=[obj.x0(1:9); ...        % host cell variables continuous and deterministic
-                   round(obj.x0(10:end))];   % heterologous circuit variables discrete and stochastic => must be integer
-
-            % add the discrete event condition check to ODE options
-            detopt=obj.opt; % back up deterministic simulation options
-            obj.opt=odeset(obj.opt,'Events', @obj.check_de_condition);
+        %% STOCHASTIC SIMULATION - CHEMICAL LANGEVIN EQUATION
+        
+        % SIMULATE the system using the Euler-Maruyama method
+        function obj = simulate_model_cle(obj)
+            obj = obj.set_x0; % set initial condition
+            obj =obj.generate_stoichiometry_matrix; % generate the stoichiometry matrix
             
-            % genereate the stocihiometry matrix for heterologous genes
-            obj=obj.generate_het_stoichiometry_matrix();
+            obj.t=0:(obj.em_timestep*obj.em_save_every_n_steps):obj.tf; % define the time axis
+            obj.x=zeros(size(obj.x0,1),size(obj.t,2)); % initialise the trajectory
+            obj.x(:,1)=obj.x0; % set the initial condition
+            sqrt_timestep=sqrt(obj.em_timestep); % pre-calculkate the sqyuare root of time step for speed
 
-            % start at t=0
-            t_start=0;
+            % simulate!
+            t=obj.t(1);
+            x=obj.x(:,1);
+            record_cntr=2;
+            for i=1:(size(0:obj.em_timestep:obj.tf,2)-1)
+                % find the deterministic change
+                det=obj.ss_model(t,x)*obj.em_timestep; 
 
-            % initialise empty time and state arrays
-            obj.t=[];obj.x=[];
+                % find the stochastic change
+                v=obj.generate_propensity_vector(t,x);
+                disp(i)
+                dw=normrnd(0,sqrt_timestep,size(v));
+                stoch=obj.S*(sqrt(v).*dw);
+                x=x+det+stoch;
+                t=t+obj.em_timestep;
 
-            % simulate
-            next_record=0; % the next time point to be recorded
-            while (t_start<obj.tf)
-                disp(t_start)
-                % draw an exponentially determined variable for the discrete event condition
-                obj.de_condition=-log(rand);
-                obj.opt=odeset(obj.opt,'Events', @obj.check_de_condition);
-
-                % simulate deterministacally until the next discrete event
-                % (note: every time, integrating propensities from scratch)
-                [t_until_de,x_until_de]=ode15s(@obj.ss_model_hybrid, [t_start, obj.tf], [obj.x0; 0], obj.opt);
-                
-                % if we didn't just run into the end of the simulation overall
-                if(t_start<obj.tf)
-                    % find which discrete event happened
-                    v=obj.generate_het_propensity_vector(t_until_de(end),x_until_de(end,:)); % get propensities of all reactions
-                    random_draw=rand*sum(v); % draw a random variable between 0 and 1, scale by total propensity
-                    which_reaction=find(random_draw>[0;cumsum(v)],1); % find which reaction occured according to the cdf and random draw
-                    
-                    % update x according to which reaction happened
-                    x_until_de(end,:)=x_until_de(end-1,:)+[obj.het_S(:,which_reaction);0].';
+                % saving the simulation
+                if(rem(i,obj.em_save_every_n_steps)==0)
+                    obj.x(:,record_cntr)=x;
+                    obj.t(record_cntr)=t;
+                    disp(obj.t(record_cntr))
+                    record_cntr=record_cntr+1;
                 end
-
-                if(t_until_de(end)>=next_record)
-                    for i=1:size(t_until_de)
-                        if(t_until_de(i)>=next_record)
-                            obj.t=[obj.t;t_until_de(i)];
-                            obj.x=[obj.x;x_until_de(i,1:end-1)];
-                            next_record=next_record+obj.record_time_step;
-                            disp('recorded!')
-                        end
-                    end
-                end
-                
-                % next time, start where we finished
-                t_start=t_until_de(end);                
             end
 
-            % undo the addition of a discrete event condtion check
-            obj.opt=detopt;
+            % transpose the records for consistecy with deterministic simulations
+            obj.t=obj.t.';
+            obj.x=obj.x.';
+        end
+
+        % CLE ODEs 
+        function dxdt = ss_model_cle(obj, t, x)
+            % DETERMINISTIC COMPONENT
+            dxdt=obj.ss_model(t,x); % deterministic component
+
+            % STOCHASTIC COMPONENT
+            v=obj.generate_propensity_vector(t,x); % get the propensity vector for all stochastic reactions
+            w=normrnd(0,1,size(v)); % get Gaussian noise
+            dxdt=dxdt+(obj.S*(sqrt(v).*w)); % add the stochastic component
         end
 
         % generating the stoichiometry matrix for heterologous genes (also find number of stochastic reactions)
-        function obj = generate_het_stoichiometry_matrix(obj)
+        function obj = generate_stoichiometry_matrix(obj)
             par=obj.parameters;
             
             % find total number of reactions that can occur
-            obj.num_stoch_reactions = obj.num_het*3+... % synthesis/degradation/dilution of mRNA
-                +obj.num_het*2; % synthesis/dilution of protein
+            obj.num_stoch_reactions = (2+obj.num_het)*3+... % synthesis/degradation/dilution of mRNA - 2 native genes + heterologous
+                obj.num_het*2+... % synthesis/dilution of protein - 2 native genes + heterologous
+                4; % tRNA aminoacylation, aa-tRNA dilution, uncraged tRNA syntesis, uncharged tRNA dilution
             if(strcmp(obj.het.module_name,'pi_controller'))
                 obj.num_stoch_reactions=obj.num_stoch_reactions+3; % mutual annihiulation in AIF motif; degradation and dilution of the resultant complex
             end
 
             % initialise the stoichiometry matrix with zeros
-            obj.het_S=zeros(9+2*obj.num_het+obj.num_misc, ... % number of species in the cell - INCLUDING HOST CELL VARIABLES
+            obj.S=zeros(9+2*obj.num_het+obj.num_misc, ... % number of species in the cell - INCLUDING HOST CELL VARIABLES
                 obj.num_stoch_reactions);
 
             reaction_cntr=1; % start the reaction counter
 
+            % DEFINE STOICHIOMETRIES FOR NATIVE GENES
+
+            % mRNA ODEs
+            for i=1:2 % metabolic and ribosomal genes
+                obj.S(i,reaction_cntr)=1; % mRNA synthesis
+                reaction_cntr=reaction_cntr+1;
+                obj.S(i,reaction_cntr)=-1; % mRNA degradation
+                reaction_cntr=reaction_cntr+1;
+                obj.S(i,reaction_cntr)=-1; % mRNA dilution
+                reaction_cntr=reaction_cntr+1;
+            end
+
+            % protein ODEs
+            for i=1:2 % metabolic and ribosomal genes
+                obj.S(2+i,reaction_cntr)=1; % protein synthesis
+                obj.S(5,reaction_cntr)=-par(['n_',obj.het.names{i}]); % includes tRNA unchraging during translation (-tc)
+                obj.S(6,reaction_cntr)=par(['n_',obj.het.names{i}]); % includes tRNA unchraging during translation (+tu)
+                reaction_cntr=reaction_cntr+1;
+                obj.S(2+i,reaction_cntr)=-1; % protein dilution
+                reaction_cntr=reaction_cntr+1;
+            end
+
+            % tRNA ODEs
+            obj.S(5,reaction_cntr)=1; % tRNA aminoacylation
+            reaction_cntr=reaction_cntr+1;
+            obj.S(5,reaction_cntr)=-1; % aa-tRNA dilution
+            reaction_cntr=reaction_cntr+1;
+            obj.S(6,reaction_cntr)=1; % (uncharged) tRNA synthesis
+            reaction_cntr=reaction_cntr+1;
+            obj.S(6,reaction_cntr)=-1; % (uncharged) tRNA dilution
+            reaction_cntr=reaction_cntr+1;
+            
+            % DEFINE STOICHIOMETRIES FOR HETEROGLOUS GENES
             % mRNA - reactions common for all genes
             for i=1:obj.num_het
-                obj.het_S(9+i,reaction_cntr)=1; % mRNA synthesis
+                obj.S(9+i,reaction_cntr)=1; % mRNA synthesis
                 reaction_cntr=reaction_cntr+1;
-                obj.het_S(9+i,reaction_cntr)=-1; % mRNA degradation
+                obj.S(9+i,reaction_cntr)=-1; % mRNA degradation
                 reaction_cntr=reaction_cntr+1;
-                obj.het_S(9+i,reaction_cntr)=-1; % mRNA dilution
+                obj.S(9+i,reaction_cntr)=-1; % mRNA dilution
                 reaction_cntr=reaction_cntr+1;
             end
 
             % mRNA annihilation in AIF motif
             if(strcmp(obj.het.module_name,'pi_controller'))
-                obj.het_S(9+2,reaction_cntr)=-1; obj.het_S(9+3,reaction_cntr)=-1; obj.het_S(9+2*obj.num_het+1,reaction_cntr)=1; % mutual annihilation of m_act and m_anti, formation of bound complex
+                obj.S(9+2,reaction_cntr)=-1; obj.S(9+3,reaction_cntr)=-1; obj.S(9+2*obj.num_het+1,reaction_cntr)=1; % mutual annihilation of m_act and m_anti, formation of bound complex
                 reaction_cntr=reaction_cntr+1;
             end
 
             % proteins - reactions for all genes
             for i=1:obj.num_het
-                obj.het_S(9+obj.num_het+i,reaction_cntr)=1; % protein synthesis
-                obj.het_S(5,reaction_cntr)=-par(['n_',obj.het.names{i}]); % includes tRNA unchraging during translation (-tc)
-                obj.het_S(6,reaction_cntr)=par(['n_',obj.het.names{i}]); % includes tRNA unchraging during translation (+tu)
+                obj.S(9+obj.num_het+i,reaction_cntr)=1; % protein synthesis
+                obj.S(5,reaction_cntr)=-par(['n_',obj.het.names{i}]); % includes tRNA unchraging during translation (-tc)
+                obj.S(6,reaction_cntr)=par(['n_',obj.het.names{i}]); % includes tRNA unchraging during translation (+tu)
                 reaction_cntr=reaction_cntr+1;
-                obj.het_S(9+obj.num_het+i,reaction_cntr)=-1; % protein dilution
+                obj.S(9+obj.num_het+i,reaction_cntr)=-1; % protein dilution
                 reaction_cntr=reaction_cntr+1;
             end
 
             % m_anti-m_act bound complex dilution and degradation in AIF motif
             if(strcmp(obj.het.module_name,'pi_controller'))
-                obj.het_S(9+2*obj.num_het+1,reaction_cntr)=-1; % degradation
+                obj.S(9+2*obj.num_het+1,reaction_cntr)=-1; % degradation
                 reaction_cntr=reaction_cntr+1;
-                obj.het_S(9+2*obj.num_het+1,reaction_cntr)=-1; % dilution
+                obj.S(9+2*obj.num_het+1,reaction_cntr)=-1; % dilution
                 reaction_cntr=reaction_cntr+1;
             end
         end
 
         % generating the propensity vector at a given time
-        function dxdt = ss_model_hybrid(obj, t, x)
-            % denote obj. parameters as par for convenience
-            par = obj.parameters;
-            
-            % give the state vector entries meaningful names
-            m_a = x(1); % metabolic gene mRNA
-            m_r = x(2); % ribosomal gene mRNA
-            p_a = x(3); % metabolic proteins
-            R = x(4); % non-inactivated ribosomes
-            tc = x(5); % charged tRNAs
-            tu = x(6); % uncharged tRNAs
-            Bcm = x(7); % inactivated ribosomes
-            s = x(8); % nutrient quality (constant)
-            h = x(9); % chloramphenicol concentration (constant)
-            x_het=x(10:(9+2*obj.num_het+obj.num_misc)); % heterologous genes and miscellaneous synthetic species
-
-            % CALCULATE PHYSIOLOGICAL VARIABLES
-            % translation elongation rate
-            e=obj.form.e(par,tc);
-
-            % ribosome inactivation rate due to chloramphenicol
-            kcmh=par('kcm').*h;
-
-            % ribosome dissociation constants
-            k_a=obj.form.k(e,par('k+_a'),par('k-_a'),par('n_a'),kcmh);
-            k_r=obj.form.k(e,par('k+_r'),par('k-_r'),par('n_r'),kcmh);
-
-            % heterologous genes rib. dissoc. constants
-            k_het=ones(obj.num_het,1); % initialise with default value 1
-            if(obj.num_het>0)
-                for i=1:obj.num_het
-                    k_het(i)=obj.form.k(e,...
-                    obj.parameters(['k+_',obj.het.names{i}]),...
-                    obj.parameters(['k-_',obj.het.names{i}]),...
-                    obj.parameters(['n_',obj.het.names{i}]),...
-                    kcmh);
-                end
-            end
-
-            T=tc./tu... % ratio of charged to uncharged tRNAs 
-                .*(1-par('is_fixed_T'))+par('fixed_T').*par('is_fixed_T'); % OR a fixed value (to enable comparison with flux-parity regulation)
-            D=1+(m_a./k_a+m_r./k_r+sum(x_het(1:obj.num_het)./k_het))./...
-                (1-par('phi_q')); % denominator in ribosome competition calculations
-            B=R.*(1-1./D); % actively translating ribosomes (inc. those translating housekeeping genes)
-
-            nu=obj.form.nu(par,tu,s); % tRNA charging rate
-
-            l=obj.form.l(par,e,B); % growth rate
-
-            psi=obj.form.psi(par,T); % tRNA synthesis rate - MUST BE SCALED BY GROWTH RATE
-
-            % GET RATE OF EFFECTIVE NUTR. QUAL. CHANGE (for upshifts)
-            if(par('is_upshift')==1)
-                dsdt = (par('s_postshift') - s) * ...
-                    (e./par('n_a')).*(m_a./k_a./D).*R./p_a;
-            else
-                dsdt = 0;
-            end
-
-            % GET RNAP ACTIVITY
-            rnap_act=l;
-
-            % GET EXTERNAL INPUT
-            ext_inp=obj.ext.input(x,t);
-
-            
-            % DEFINE DX/DT FOR THE HOST CELL
-            dxdt = [
-                    % mRNAs
-                    rnap_act.*par('c_a').*par('a_a')-(par('b_a')+l).*m_a-kcmh.*(m_a./k_a./D).*R;
-                    rnap_act.*obj.form.F_r(par,T).*par('c_r').*par('a_r')-(par('b_r')+l).*m_r-kcmh.*(m_r./k_r./D).*R;
-                    % ,metabolic protein a
-                    (e./par('n_a')).*(m_a./k_a./D).*R-l.*p_a;
-                    % ribosomes
-                    (e./par('n_r')).*(m_r./k_r./D).*R-l.*R-kcmh.*B;
-                    % tRNAs
-                    nu.*p_a-l.*tc-e.*B;
-                    psi*l-l.*tu-nu.*p_a+e.*B;
-                    % ribosomes inactivated by chloramphenicol
-                    kcmh.*B-l.*Bcm;
-                    % nutrient quality
-                    dsdt;
-                    % chloramphenicol concentration assumed constant
-                    0;
-                    ];
-            % FOR HETEROLOGOUS SPECIES, ALL ZERO (as they are changed in discrete events)
-            dxdt=[dxdt; zeros(obj.num_het*2+obj.num_misc,1)];
-            % ADD integral of discrete reaction propensities
-            dxdt=[dxdt; 
-                sum(obj.generate_het_propensity_vector(t,x))];
-        end
-        
-        % generating the propensity vector at a given time
-        function v=generate_het_propensity_vector(obj,t,x)
+        function v=generate_propensity_vector(obj,t,x)
             % denote obj. parameters as par for convenience
             par = obj.parameters;
             
@@ -599,10 +529,52 @@ classdef cell_simulator
 
             % GET EXTERNAL INPUT
             ext_inp=obj.ext.input(x,t);
+
+            % initialise the propensity vector
+            v=zeros(obj.num_stoch_reactions,1);
             
-            % DEFINE PRPENSITY VECTOR V FOR HETEROLOGOUS GENES
+            % DEFINE PROPENSITIES FOR NATIVE GENES
             v=zeros(obj.num_stoch_reactions,1); % initialise the propensity vector
             reaction_cntr=1; % start the reaction counter
+
+            % metabolic mRNA
+            v(reaction_cntr) = rnap_act.*1.*par('c_a').*par('a_a'); % mRNA synthesis
+            reaction_cntr=reaction_cntr+1;
+            v(reaction_cntr) = par('b_a').*m_a; % mRNA degradation
+            reaction_cntr=reaction_cntr+1;
+            v(reaction_cntr) = l.*m_a; % mRNA dilution
+            reaction_cntr=reaction_cntr+1;
+            % ribosomal mRNA
+            v(reaction_cntr) = rnap_act.*obj.form.F_r(par,T).*par('c_r').*par('a_a'); % mRNA synthesis
+            reaction_cntr=reaction_cntr+1;
+            v(reaction_cntr) = par('b_a').*m_r; % mRNA degradation
+            reaction_cntr=reaction_cntr+1;
+            v(reaction_cntr) = l.*m_r; % mRNA dilution
+            reaction_cntr=reaction_cntr+1;
+
+            % metabolic proteins
+            v(reaction_cntr) = e./par('n_a').*(m_a./k_a./D).*R; % protein synthesis
+            reaction_cntr=reaction_cntr+1;
+            v(reaction_cntr) = l.*p_a; % protein dilution
+            reaction_cntr=reaction_cntr+1;
+            % ribosomes
+            v(reaction_cntr) = e./par('n_r').*(m_r./k_r./D).*R; % protein synthesis
+            reaction_cntr=reaction_cntr+1;
+            v(reaction_cntr) = l.*R; % protein dilution
+            reaction_cntr=reaction_cntr+1;
+
+            % charged tRNAs
+            v(reaction_cntr) = nu.*p_a; % tRNA aminoacylation
+            reaction_cntr=reaction_cntr+1;
+            v(reaction_cntr) = l.*tc; % aa-tRNA dilution
+            reaction_cntr=reaction_cntr+1;
+            % uncharged tRNAs
+            v(reaction_cntr) = psi.*l; % (uncharged) tRNA synthesis
+            reaction_cntr=reaction_cntr+1;
+            v(reaction_cntr) = l.*tu; % (uncharged) tRNA dilution
+            reaction_cntr=reaction_cntr+1;
+
+            % DEFINE PROPENSITIES FOR HETEROLOGOUS GENES
 
             % mRNA - reactions common for all genes
             for i=1:obj.num_het
@@ -629,7 +601,7 @@ classdef cell_simulator
                 reaction_cntr=reaction_cntr+1;
             end
 
-            % m_anti-m_act bound complex dilutiopn in AIF motif
+            % m_anti-m_act bound complex dilution in AIF motif
             if(strcmp(obj.het.module_name,'pi_controller'))
                 v(reaction_cntr) = par('b_bound').*x_het(2*obj.num_het+1); % degradation
                 reaction_cntr=reaction_cntr+1;
@@ -658,7 +630,7 @@ classdef cell_simulator
 %             obj.opt=odeset(obj.opt,'Events', @obj.check_de_condition);
 %             
 %             % genereate the stocihiometry matrix for heterologous genes
-%             obj=obj.generate_het_stoichiometry_matrix();
+%             obj=obj.generate_Stoichiometry_matrix();
 % 
 %             % start at t=0
 %             t=0;
@@ -676,7 +648,7 @@ classdef cell_simulator
 %                     tau=obj.tau_dt;
 %                     v=obj.generate_het_propensity_vector(obj,t,x);
 %                     num_het_reactions=poissrnd(tau./v);
-%                     dx=num_het_reactions*obj.het_S; % get the change in x
+%                     dx=num_het_reactions*obj.S; % get the change in x
 %                     [t_over_tau, x_over_tau] = ode15s(@obj.ss_model, [t, t+tau], [obj.x(end,:)], obj.opt);
 % 
 % 
@@ -685,7 +657,7 @@ classdef cell_simulator
 %                         tau=tau/2;
 %                         v=obj.generate_het_propensity_vector(obj,t,x);
 %                         num_het_reactions=poissrnd(tau./v);
-%                         dx=num_het_reactions*obj.het_S; % get the change in x
+%                         dx=num_het_reactions*obj.S; % get the change in x
 %                     end
 % 
 %                     % evolve the deterministic part of the system (native genes)
@@ -697,7 +669,7 @@ classdef cell_simulator
 %                     which_reaction=find(random_draw>[0;cumsum(v)],1); % find which reaction occured according to the cdf and random draw
 %                     
 %                     % update x according to which reaction happened
-%                     x_until_de(end,:)=x_until_de(end-1,:)+[obj.het_S(:,which_reaction);0].';
+%                     x_until_de(end,:)=x_until_de(end-1,:)+[obj.S(:,which_reaction);0].';
 %                 end
 % 
 %                 % append the trajectory to our previous results
@@ -713,43 +685,43 @@ classdef cell_simulator
 %         end
 % 
 %         % generating a stoichiometry matrix for native genes
-%         function obj = generate_nat_stoichiometry_matrix(obj)
+%         function obj = generate_Stoichiometry_matrix(obj)
 %             par=obj.parameters;
 % 
 %             % initialise the stoichiometry matrix with zeros
-%             obj.nat_S=zeros(9+2*obj.num_het+obj.num_misc, ... % number of species in the cell - INCLUDING HOST CELL VARIABLES
+%             obj.S=zeros(9+2*obj.num_het+obj.num_misc, ... % number of species in the cell - INCLUDING HOST CELL VARIABLES
 %                 2*3+2*2+4); % mRNA synthesis/degradation/dilution; protein synthesis/dilution; tRNA charging, synthesis, dilution of charged and uncharged tRNAs
 % 
 %             reaction_cntr=1; % start the reaction counter
 % 
 %             % mRNA ODEs
 %             for i=1:2 % metabolic and ribosomal genes
-%                 obj.nat_S(i,reaction_cntr)=1; % mRNA synthesis
+%                 obj.S(i,reaction_cntr)=1; % mRNA synthesis
 %                 reaction_cntr=reaction_cntr+1;
-%                 obj.nat_S(i,reaction_cntr)=-1; % mRNA degradation
+%                 obj.S(i,reaction_cntr)=-1; % mRNA degradation
 %                 reaction_cntr=reaction_cntr+1;
-%                 obj.nat_S(i,reaction_cntr)=-1; % mRNA dilution
+%                 obj.S(i,reaction_cntr)=-1; % mRNA dilution
 %                 reaction_cntr=reaction_cntr+1;
 %             end
 % 
 %             % protein ODEs
 %             for i=1:2 % metabolic and ribosomal genes
-%                 obj.nat_S(2+i,reaction_cntr)=1; % protein synthesis
-%                 obj.nat_S(5,reaction_cntr)=-par(['n_',obj.het.names{i}]); % includes tRNA unchraging during translation (-tc)
-%                 obj.nat_S(6,reaction_cntr)=par(['n_',obj.het.names{i}]); % includes tRNA unchraging during translation (+tu)
+%                 obj.S(2+i,reaction_cntr)=1; % protein synthesis
+%                 obj.S(5,reaction_cntr)=-par(['n_',obj.het.names{i}]); % includes tRNA unchraging during translation (-tc)
+%                 obj.S(6,reaction_cntr)=par(['n_',obj.het.names{i}]); % includes tRNA unchraging during translation (+tu)
 %                 reaction_cntr=reaction_cntr+1;
-%                 obj.het_S(2+i,reaction_cntr)=-1; % protein dilution
+%                 obj.S(2+i,reaction_cntr)=-1; % protein dilution
 %                 reaction_cntr=reaction_cntr+1;
 %             end
 % 
 %             % tRNA ODEs
-%             obj.nat_S(5,reaction_cntr)=1; % tRNA aminoacylation
+%             obj.S(5,reaction_cntr)=1; % tRNA aminoacylation
 %             reaction_cntr=reaction_cntr+1;
-%             obj.nat_S(5,reaction_cntr)=-1; % aa-tRNA dilution
+%             obj.S(5,reaction_cntr)=-1; % aa-tRNA dilution
 %             reaction_cntr=reaction_cntr+1;
-%             obj.nat_S(6,reaction_cntr)=1; % (uncharged) tRNA synthesis
+%             obj.S(6,reaction_cntr)=1; % (uncharged) tRNA synthesis
 %             reaction_cntr=reaction_cntr+1;
-%             obj.nat_S(6,reaction_cntr)=-1; % (uncharged) tRNA dilution
+%             obj.S(6,reaction_cntr)=-1; % (uncharged) tRNA dilution
 %             reaction_cntr=reaction_cntr+1;
 %         end
 %         
