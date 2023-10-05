@@ -282,6 +282,11 @@ classdef cell_simulator
             if(par('is_upshift')==1)
                 dsdt = (par('s_postshift') - s) * ...
                     (e./par('n_a')).*(m_a./k_a./D).*R./p_a;
+            elseif(par('is_depletion')==1)
+                % bake nutrient concentration into the tRNA aminoacylation rate
+                nu = nu.*(1-x_het(end-1)./par('ccells_max'));
+%                 nu = nu.*x_het(end)./(x_het(end)+par('K_nutr'));
+                dsdt=0;
             else
                 dsdt = 0;
             end
@@ -330,7 +335,16 @@ classdef cell_simulator
             % ...MISCELLANEOUS SPECIES
             if(obj.num_misc>0)
                 dxdt=[dxdt;obj.het.misc_ode(t,x,ext_inp,l)];
+
+                % in the case of nutrient depletion, last miscellaneous
+                % species is nutrient concentration in the medium, whose
+                % ODE is defined here as it depends on the host cell first and foremost
+                if(par('is_depletion'))
+                    dxdt(end)=-x_het(end-1).*nu.*p_a./s;
+                end
             end
+%             v=obj.generate_het_propensity_vector(t,x);
+%             dxdt=[dxdt;zeros(length(x)-9,1)]+obj.het_S*v;
         end
 
         %% HYBRID SIMULATION - HOST CELL VARIABLES DETERMINISTIC, HETEROLOGOUS CIRUIT STOCHASTIC
@@ -542,7 +556,9 @@ classdef cell_simulator
                 v_total = v_total +  par('b_bound').*x_het(2*obj.num_het+1) +  l.*x_het(2*obj.num_het+1); % dilution and degradation
             end
 
-            
+            % continuously, only consider aa-tRNA consumption by native - so not ALL ribosomes should be counted
+            B_cont=(D-1-sum(x_het(1:obj.num_het)./k_het))./D.*R;
+
             % DEFINE DX/DT FOR THE HOST CELL
             dxdt = [
                     % mRNAs
@@ -553,8 +569,8 @@ classdef cell_simulator
                     % ribosomes
                     (e./par('n_r')).*(m_r./k_r./D).*R-l.*R-kcmh.*B;
                     % tRNAs
-                    nu.*p_a-l.*tc-e.*B;
-                    psi*l-l.*tu-nu.*p_a+e.*B;
+                    nu.*p_a-l.*tc-e.*B_cont; % continuously, only consider aa-tRNA consumption by native genes
+                    psi*l-l.*tu-nu.*p_a+e.*B_cont;
                     % ribosomes inactivated by chloramphenicol
                     kcmh.*B-l.*Bcm;
                     % nutrient quality
@@ -564,8 +580,11 @@ classdef cell_simulator
                     ];
             % FOR HETEROLOGOUS SPECIES, ALL ZERO (as they are changed in discrete events)
             dxdt=[dxdt; zeros(obj.num_het*2+obj.num_misc,1)];
+
             % ADD integral of discrete reaction propensities
             dxdt=[dxdt; v_total];
+
+            
         end
         
         % generating the propensity vector at a given time
@@ -683,214 +702,6 @@ classdef cell_simulator
             % (scrapping the timer until the next discrete event)
             euler_output=[t_final; x_final(1:end-1)];
         end
-
-%         %% HYBRID TAU-LEAP SIMULATION - HOST CELL VARIABLES DETERMINISTIC, HETEROLOGOUS CIRUIT STOCHASTIC
-%         % hybrid simulator with tau-leaping
-%         function obj = simulate_model_hybrid_tauleap(obj)
-%             % set initial condition
-%             obj = obj.set_x0; 
-%             obj.x0=[obj.x0(1:9); ...        % host cell variables continuous and deterministic
-%                    round(obj.x0(10:end))];   % heterologous circuit variables discrete and stochastic => must be integer
-% 
-%             % add the discrete event condition check to ODE options
-%             detopt=obj.opt; % back up deterministic simulation options
-%             obj.opt=odeset(obj.opt,'Events', @obj.check_de_condition);
-%             
-%             % genereate the stocihiometry matrix for heterologous genes
-%             obj=obj.generate_het_stoichiometry_matrix();
-% 
-%             % start at t=0
-%             t=0;
-% 
-%             % initialise time and state records
-%             obj.t=[0]; obj.x=[obj.x0];
-% 
-%             % simulate
-%             while (t_start<obj.tf)
-%                 disp(t_start)
-%                                 
-%                 % if we didn't just run into the end of the simulation overall
-%                 if(t<obj.tf)
-%                     % find number of times stochastic reactions happened over tau hours
-%                     tau=obj.tau_dt;
-%                     v=obj.generate_het_propensity_vector(obj,t,x);
-%                     num_het_reactions=poissrnd(tau./v);
-%                     dx=num_het_reactions*obj.het_S; % get the change in x
-%                     [t_over_tau, x_over_tau] = ode15s(@obj.ss_model, [t, t+tau], [obj.x(end,:)], obj.opt);
-% 
-% 
-%                     % if the updated x would turn out to be negative, decrease the time step
-%                     while(any(obj.x(end,:)<dx))
-%                         tau=tau/2;
-%                         v=obj.generate_het_propensity_vector(obj,t,x);
-%                         num_het_reactions=poissrnd(tau./v);
-%                         dx=num_het_reactions*obj.het_S; % get the change in x
-%                     end
-% 
-%                     % evolve the deterministic part of the system (native genes)
-%                     [t_over_tau, x_over_tau] = ode15s(@obj.ss_model, [t, t+tau], [obj.x(end,:)], obj.opt);
-% 
-%                     % find which discrete event happened
-%                     v=obj.generate_het_propensity_vector(t_until_de(end),x_until_de(end,:)); % get propensities of all reactions
-%                     random_draw=rand*sum(v); % draw a random variable between 0 and 1, scale by total propensity
-%                     which_reaction=find(random_draw>[0;cumsum(v)],1); % find which reaction occured according to the cdf and random draw
-%                     
-%                     % update x according to which reaction happened
-%                     x_until_de(end,:)=x_until_de(end-1,:)+[obj.het_S(:,which_reaction);0].';
-%                 end
-% 
-%                 % append the trajectory to our previous results
-%                 obj.t=[obj.t; t_until_de];
-%                 obj.x=[obj.x; x_until_de(1:end-1,:)];
-%                 
-%                 % next time, start where we finished
-%                 t_start=t_until_de(end);                
-%             end
-% 
-%             % undo the addition of a discrete event condtion check
-%             obj.opt=detopt;
-%         end
-% 
-%         % generating a stoichiometry matrix for native genes
-%         function obj = generate_nat_stoichiometry_matrix(obj)
-%             par=obj.parameters;
-% 
-%             % initialise the stoichiometry matrix with zeros
-%             obj.nat_S=zeros(9+2*obj.num_het+obj.num_misc, ... % number of species in the cell - INCLUDING HOST CELL VARIABLES
-%                 2*3+2*2+4); % mRNA synthesis/degradation/dilution; protein synthesis/dilution; tRNA charging, synthesis, dilution of charged and uncharged tRNAs
-% 
-%             reaction_cntr=1; % start the reaction counter
-% 
-%             % mRNA ODEs
-%             for i=1:2 % metabolic and ribosomal genes
-%                 obj.nat_S(i,reaction_cntr)=1; % mRNA synthesis
-%                 reaction_cntr=reaction_cntr+1;
-%                 obj.nat_S(i,reaction_cntr)=-1; % mRNA degradation
-%                 reaction_cntr=reaction_cntr+1;
-%                 obj.nat_S(i,reaction_cntr)=-1; % mRNA dilution
-%                 reaction_cntr=reaction_cntr+1;
-%             end
-% 
-%             % protein ODEs
-%             for i=1:2 % metabolic and ribosomal genes
-%                 obj.nat_S(2+i,reaction_cntr)=1; % protein synthesis
-%                 obj.nat_S(5,reaction_cntr)=-par(['n_',obj.het.names{i}]); % includes tRNA unchraging during translation (-tc)
-%                 obj.nat_S(6,reaction_cntr)=par(['n_',obj.het.names{i}]); % includes tRNA unchraging during translation (+tu)
-%                 reaction_cntr=reaction_cntr+1;
-%                 obj.het_S(2+i,reaction_cntr)=-1; % protein dilution
-%                 reaction_cntr=reaction_cntr+1;
-%             end
-% 
-%             % tRNA ODEs
-%             obj.nat_S(5,reaction_cntr)=1; % tRNA aminoacylation
-%             reaction_cntr=reaction_cntr+1;
-%             obj.nat_S(5,reaction_cntr)=-1; % aa-tRNA dilution
-%             reaction_cntr=reaction_cntr+1;
-%             obj.nat_S(6,reaction_cntr)=1; % (uncharged) tRNA synthesis
-%             reaction_cntr=reaction_cntr+1;
-%             obj.nat_S(6,reaction_cntr)=-1; % (uncharged) tRNA dilution
-%             reaction_cntr=reaction_cntr+1;
-%         end
-%         
-%         % generating a propensity vector for native genes
-%         function v=generate_nat_propensity_vector(obj,t,x)
-%             % denote obj. parameters as par for convenience
-%             par = obj.parameters;
-%             
-%             % give the state vector entries meaningful names
-%             m_a = x(1); % metabolic gene mRNA
-%             m_r = x(2); % ribosomal gene mRNA
-%             p_a = x(3); % metabolic proteins
-%             R = x(4); % non-inactivated ribosomes
-%             tc = x(5); % charged tRNAs
-%             tu = x(6); % uncharged tRNAs
-%             Bcm = x(7); % inactivated ribosomes
-%             s = x(8); % nutrient quality (constant)
-%             h = x(9); % chloramphenicol concentration (constant)
-%             x_het=x(10:(9+2*obj.num_het+obj.num_misc)); % heterologous genes and miscellaneous synthetic species
-% 
-%             % CALCULATE PHYSIOLOGICAL VARIABLES
-%             % translation elongation rate
-%             e=obj.form.e(par,tc);
-% 
-%             % ribosome inactivation rate due to chloramphenicol
-%             kcmh=par('kcm').*h;
-% 
-%             % ribosome dissociation constants
-%             k_a=obj.form.k(e,par('k+_a'),par('k-_a'),par('n_a'),kcmh);
-%             k_r=obj.form.k(e,par('k+_r'),par('k-_r'),par('n_r'),kcmh);
-% 
-%             % heterologous genes rib. dissoc. constants
-%             k_het=ones( size(x_het(1:obj.num_het)) ); % initialise with default value 1
-%             if(obj.num_het>0)
-%                 for i=1:obj.num_het
-%                     k_het(i)=obj.form.k(e,...
-%                     obj.parameters(['k+_',obj.het.names{i}]),...
-%                     obj.parameters(['k-_',obj.het.names{i}]),...
-%                     obj.parameters(['n_',obj.het.names{i}]),...
-%                     kcmh);
-%                 end
-%             end
-% 
-%             T=tc./tu... % ratio of charged to uncharged tRNAs 
-%                 .*(1-par('is_fixed_T'))+par('fixed_T').*par('is_fixed_T'); % OR a fixed value (to enable comparison with flux-parity regulation)
-%             D=1+(m_a./k_a+m_r./k_r+sum(x_het(1:obj.num_het)./k_het))./...
-%                 (1-par('phi_q')); % denominator in ribosome competition calculations
-%             B=R.*(1-1./D); % actively translating ribosomes (inc. those translating housekeeping genes)
-% 
-%             nu=obj.form.nu(par,tu,s); % tRNA charging rate
-% 
-%             l=obj.form.l(par,e,B); % growth rate
-% 
-%             psi=obj.form.psi(par,T); % tRNA synthesis rate - MUST BE SCALED BY GROWTH RATE
-% 
-%             % GET RNAP ACTIVITY
-%             rnap_act=l;
-% 
-%             % GET EXTERNAL INPUT
-%             ext_inp=obj.ext.input(x,t);
-%             
-%             % DEFINE PRPENSITY VECTOR V FOR NATIVE GENES
-%             v=zeros(obj.num_stoch_reactions,1); % initialise the propensity vector
-%             reaction_cntr=1; % start the reaction counter
-% 
-%             % metabolic mRNA
-%             v(reaction_cntr) = rnap_act.*1.*par('c_a').*par('a_a'); % mRNA synthesis
-%             reaction_cntr=reaction_cntr+1;
-%             v(reaction_cntr) = par('b_a').*m_a; % mRNA degradation
-%             reaction_cntr=reaction_cntr+1;
-%             v(reaction_cntr) = l.*m_a; % mRNA dilution
-%             reaction_cntr=reaction_cntr+1;
-%             % ribosomal mRNA
-%             v(reaction_cntr) = rnap_act.*obj.form.F_r(par,T).*par('c_r').*par('a_a'); % mRNA synthesis
-%             reaction_cntr=reaction_cntr+1;
-%             v(reaction_cntr) = par('b_a').*m_r; % mRNA degradation
-%             reaction_cntr=reaction_cntr+1;
-%             v(reaction_cntr) = l.*m_r; % mRNA dilution
-%             reaction_cntr=reaction_cntr+1;
-% 
-%             % metabolic proteins
-%             v(reaction_cntr) = e./par('n_a').*(m_a./k_a./D).*R; % protein synthesis
-%             reaction_cntr=reaction_cntr+1;
-%             v(reaction_cntr) = l.*p_a; % protein dilution
-%             reaction_cntr=reaction_cntr+1;
-%             % ribosomes
-%             v(reaction_cntr) = e./par('n_r').*(m_r./k_r./D).*R; % protein synthesis
-%             reaction_cntr=reaction_cntr+1;
-%             v(reaction_cntr) = l.*R; % protein dilution
-%             reaction_cntr=reaction_cntr+1;
-% 
-%             % charged tRNAs
-%             v(reaction_cntr) = nu.*p_a; % tRNA aminoacylation
-%             reaction_cntr=reaction_cntr+1;
-%             v(reaction_cntr) = l.*tc; % aa-tRNA dilution
-%             reaction_cntr=reaction_cntr+1;
-%             % uncharged tRNAs
-%             v(reaction_cntr) = psi.*l; % (uncharged) tRNA synthesis
-%             reaction_cntr=reaction_cntr+1;
-%             v(reaction_cntr) = l.*tu; % (uncharged) tRNA dilution
-%             reaction_cntr=reaction_cntr+1;
-%         end
 
         %% VARIED
         % PLOT simulation results
