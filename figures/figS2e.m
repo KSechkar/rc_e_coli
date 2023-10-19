@@ -127,13 +127,13 @@ bckup.loglikes=loglikes;
 save('S1e.mat','bckup')
 
 %% LOAD the saved simulation results (optional)
-% 
-% %load('S1e_freshest.mat');
-% parnames=bckup.parnames;
-% ranges=bckup.ranges;
-% parcombs=bckup.parcombs;
-% loglikes=bckup.loglikes;
-% points_in_range=size(ranges,2);
+
+load('S1e.mat');
+parnames=bckup.parnames;
+ranges=bckup.ranges;
+parcombs=bckup.parcombs;
+loglikes=bckup.loglikes;
+points_in_range=size(ranges,2);
 
 
 %% PLOT
@@ -158,7 +158,7 @@ for i_comb=1:size(parcombs,1)
     subplot(plots_in_row,plots_in_row,10-(plots_in_row*(y_par-2)+(plots_in_row+1-x_par)))
 
     % plot heatmap
-    hmap=heatmap(flip(loglikes(:,:,i_comb).',1),'ColorMap', jet(100));
+    hmap=heatmap(flip(loglikes(:,:,i_comb).',1),'ColorMap', parula);
 %     hmap=heatmap(flip(loglikes{i_comb},1),'ColorMap', jet(100));
 
     % display labels

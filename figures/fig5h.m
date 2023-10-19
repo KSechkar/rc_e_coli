@@ -1,7 +1,7 @@
-%% fig6f.m
+%% fig6h.m
 
 % PROPORTIONAL-INTEGRAL CONTROLLER
-% Figure 6: g
+% Figure 5: h
 
 % Showcasing how increasing our controller's amplifier gain xi reduces the 
 % adaptation error caused by the expression of extra synthetic mRNA 
@@ -61,7 +61,7 @@ cdists=linspace(0,200,11);
 chis=linspace(0,8e5,11);
 
 % initialise array of adaptation errors
-adaptation_errors=zeros(size(cdists,2),size(chis,2));
+rel_psens=zeros(size(cdists,2),size(chis,2));
 
 %% RUN simulations - with controller
 
@@ -88,34 +88,32 @@ for i=1:size(cdists,2)
         % simulate!
         sim = sim.simulate_model;
         
-        % find D value before disturbance
+        % find p_sens value before disturbance
         for t_counter=1:size(sim.t,1)
             if(sim.t(t_counter)>sim.ext.input_func_parameters('step_time'))
-                t_before=sim.t(t_counter-1);
-                x_before=sim.x(t_counter-1,:);
-                D_before=get_D(sim,x_before,t_before);
+                psens_before=sim.x(t_counter-1,9+sim.num_het+1);
                 break
             end
         end
 
-        % find steady-state D value after disturbance
-        D_after=get_D(sim,sim.x(end,:),sim.t(end));
+        % find steady-state p_sens value after disturbance
+        psens_after=sim.x(end,9+sim.num_het+1);
 
         % record adaptation error
-        adaptation_errors(i,j)=abs((D_after-D_before)./D_before)*100;
+        rel_psens(i,j)=psens_after./psens_before;
 
     end
 end
 
 
-%% FIGURE 5 g
+%% FIGURE 6 h
 
 Fg = figure('Position',[0 0 239 220]);
 set(Fg, 'defaultAxesFontSize', 9)
 set(Fg, 'defaultLineLineWidth', 1.25)
 
 % with aif controller
-hmap=heatmap(flip(adaptation_errors,1));
+hmap=heatmap(flip(rel_psens,1),'ColorLimits',[0.85,1.15],'Colormap',parula);
 
 % display labels
 x_text_labels=string(chis);
@@ -153,46 +151,3 @@ ylabel('c_{dist}, dist. gene conc. [nM]');
 xlabel('\chi, amplifier gain');
 
 hmap.GridVisible = 'off';
-
-%% FUNCTION for getting translation elongation rate
-function D=get_D(sim,ss,t)
-    % evaluate growth
-    par=sim.parameters;
-    m_a = ss(1); % metabolic gene mRNA
-    m_r = ss(2); % ribosomal mRNA
-    p_a = ss(3); % metabolic proteins
-    R = ss(4); % operational ribosomes
-    tc = ss(5); % charged tRNAs
-    tu = ss(6); % uncharged tRNAs
-    Bm = ss(7); % inactivated ribosomes
-    s=ss(8); % nutrient quality
-    h=ss(9); % chloramphenicol conc.
-    ss_het=ss(10:9+2*sim.num_het); % heterologous genes
-
-    e=sim.form.e(par,tc); % translation elongation ratio
-
-    kcmh=par('kcm').*h;
-    k_a=sim.form.k(e,par('k+_a'),par('k-_a'),par('n_a'),par('kcm').*h); % ribosome-mRNA dissociation constant (metab. genes)
-    k_r=sim.form.k(e,par('k+_r'),par('k-_r'),par('n_r'),par('kcm').*h); % ribosome-mRNA dissociation constant (rib. genes)
-    % ribosome dissociation constants
-            k_a=sim.form.k(e,par('k+_a'),par('k-_a'),par('n_a'),kcmh);
-            k_r=sim.form.k(e,par('k+_r'),par('k-_r'),par('n_r'),kcmh);
-
-            % heterologous genes rib. dissoc. constants
-            k_het=ones(sim.num_het,1); % initialise with default value 1
-            if(sim.num_het>0)
-                for i=1:sim.num_het
-                    k_het(i)=sim.form.k(e,...
-                    sim.parameters(['k+_',sim.het.names{i}]),...
-                    sim.parameters(['k-_',sim.het.names{i}]),...
-                    sim.parameters(['n_',sim.het.names{i}]),...
-                    kcmh);
-                end
-            end
-
-    D=1+(m_a./k_a+m_r./k_r+sum(ss_het(1:sim.num_het)./(k_het.')))./...
-            (1-par('phi_q')); % denominator in ribosome competition calculations
-    B=R.*(1-1./D); % actively translating ribosomes (inc. those translating housekeeping genes)
-
-    ext_inp=sim.ext.input(ss,t);
-end

@@ -1,15 +1,15 @@
-%% pi_controller.m
+%% one_switch.m
 % Describes heterologous genes expressed in the cell
-% Here, A PROPORTIONAL-INTEGRAL CONTROLLER maintaining a constant extent of ribosomal
-% competition in cells (plus an extra 'distrubing' synthetic gene whose
-% expression is regulated by an external input - to test the controller's performance)
+% Here, TWO BISTABLE SWITCHES, for which the inducers (inducers of
+% transcription factors) are present at concentration
+% <obj.parameters('f...') times the external signal> - the extrenal signal may 
+% change from 0 to 1 to simulate the addition of inducers
 
 %%
 
-classdef pi_controller
-    % describe genes and their parameters
+classdef t7_selfact
     properties (SetAccess = public)
-        module_name='pi_controller'; % name of the heterologous gene module
+        module_name='t7_selfact'; % name of the heterologous gene module
         names; % names of all heterologous genes
         misc_names; % names of modelled miscellanous species (e.g. compound of interest that het. proteins synthesise)
         parameters; % parameters of heterologous genes
@@ -23,31 +23,28 @@ classdef pi_controller
 
     methods (Access = public)
         % CONSTRUCTOR
-        function obj = pi_controller(obj)
+        function obj = t7_selfact(obj)
+
             % -------------------------------------------------------------
             % SPECIFY GENE INFO--------------------------------------------
 
-            obj.prerequisite_exts={'constant_inducer','pulse_inducer','step_inducer','oscillating_inducer'}; % disturbing gene expression is chemically induced
+            obj.prerequisite_exts={}; % not affected by any external signals => irrelevant
 
             % SPECIFY GENE NAMES HERE
-            obj.names={'sens', ... % burden sensor, activates m_anti exp
-                'anti', ... % antisense RNA, annihilates m_act
-                'act', ... % actuator, activates amplifier expression
-                'amp',... % amplifier, affects cell burden
-                'dist',... % disturbing gene
-                };
-
-            obj.misc_names={'bound'}; % actuator and annihilator bound to each other and inactivated
+            obj.names={'t7'};
+            
+            % SPECIFY MISCELLANEOUS SPECIES TO MODEL
+            obj.misc_names={}; % no miscellaneous species
 
             % END OF USER SPEC---------------------------------------------
             % -------------------------------------------------------------
 
 
-            % initialise the map storing all genes' parameters and fill with default gene expression parameters
+             % initialise the map storing all genes' parameters and fill with default gene expression parameters
             obj.parameters=containers.Map('KeyType', 'char', ...
                     'ValueType', 'double');
              for i=1:size(obj.names,2)
-                obj.parameters(['c_',obj.names{i}]) = 1; % copy no. (nM)
+                obj.parameters(['c_',obj.names{i}]) = 100; % copy no. (nM)
                 obj.parameters(['a_',obj.names{i}]) = 100; % max transcription rate (/h)
                 obj.parameters(['b_',obj.names{i}]) = 6; % mRNA decay rate (/h)
                 obj.parameters(['k+_',obj.names{i}]) = 60; % ribosome binding rate (/h/nM)
@@ -69,39 +66,19 @@ classdef pi_controller
 
             % -------------------------------------------------------------
             % SPECIFY GENE INFO--------------------------------------------
-            
-            % HIGH COPY-NUMBER PLASMID
-            obj.parameters('c_sens')=100;
-            obj.parameters('c_act')=100;
-            obj.parameters('c_anti')=100;
-            obj.parameters('c_amp')=100;
-            obj.parameters('c_dist')=100;
 
             % SPECIFY NON-DEFAULT PARAMETERS HERE
-            % Hill function for p_sens-DNA binding
-            obj.parameters('K_dna(anti)-sens')=1000; % Hill constant
-            obj.parameters('eta_dna(anti)-sens')=1; % Hill coefficient
 
-            % Hill function for p_act-DNA binding
-            obj.parameters('K_dna(amp)-act')=1000; % Hill constant
-            obj.parameters('eta_dna(amp)-act')=1; % Hill coefficient
+            % T7 RNAP, transcribes itself:
+            obj.parameters('K_t7')=1000;
+            obj.parameters('baseline_t7')=0.1;
+            obj.parameters('n_t7')=883;
 
-            % m_anti-m_act binding
-            obj.parameters('kb_anti')=300; % binding rate constant
-            obj.parameters('b_bound')=6; % antisense degradation rate
+            % T7 RNAP toxicity
+            obj.parameters('t7_toxicity')=3e-2; % liao et al. 2017
 
-            % m_anti NOT transcribed
-            obj.parameters('k+_anti')=0; % i.e. cannot bind ribosomes
-
-            % max transcription rates
-            obj.parameters('a_sens')=1;
-            obj.parameters('a_anti')=50;
-            obj.parameters('a_act')=25;
-
-            % --- Disturbance ---
-          
-            % max transcription rate (arbitrary)
-            obj.parameters('a_dist')=100;
+            % T7 RNAP degradation rate
+            obj.parameters('d_t7')=0.18;
 
             % END OF USER SPEC---------------------------------------------
             % -------------------------------------------------------------
@@ -117,24 +94,12 @@ classdef pi_controller
 
             % -------------------------------------------------------------
             % SPECIFY REGULATORY FUNCTIONS---------------------------------
-            
-            % regulating m_anti expression
-            if strcmp(gene_name,'anti')
-                p_sens=x_het(6); % get sensor protein conc.
 
-                % Hill REPRESSION function
-                F = het_par('K_dna(anti)-sens').^het_par('eta_dna(anti)-sens')./ ...
-                    (het_par('K_dna(anti)-sens').^het_par('eta_dna(anti)-sens') + p_sens.^het_par('eta_dna(anti)-sens'));
-
-            elseif strcmp(gene_name,'amp')
-                p_act=x_het(8); % get sensor protein conc.
-
-                % Hill activation function
-                F = p_act.^het_par('eta_dna(amp)-act')./ ...
-                    (het_par('K_dna(amp)-act').^het_par('eta_dna(amp)-act') + p_act.^het_par('eta_dna(amp)-act'));
-
-            elseif (strcmp(gene_name,'dist'))
-                F=ext_inp(1); % expression proportional to inducer conc.           
+            if strcmp(gene_name,'t7')
+                p_t7=x_het(2);
+                F=p_t7./(p_t7+het_par('K_t7'));
+                % there is baseline expression
+                F=het_par('baseline_t7')+(1-het_par('baseline_t7'))*F;
 
             % END OF USER SPEC---------------------------------------------
             % -------------------------------------------------------------
@@ -150,19 +115,10 @@ classdef pi_controller
             misc=x(10+size(obj.names,2)*2:end); % get miscellaneous species info
 
             % -------------------------------------------------------------
-            % SPECIFY TERMS---------------------------------
-            
-            % extra term for m_act-m_anti binding in actuator's ODE
-            if strcmp(gene_name,'act')
-                m_anti=x_het(2); % get annihilator concentration
-                m_act=x_het(3); % get actuator concentration
-                extra_term=-het_par('kb_anti').*m_anti.*m_act; % annihilator and actuator binding
+            % SPECIFY TERMS------------------------------------------------
 
-            % etra term for m_act-m_anti binding in anihilator's ODE
-            elseif strcmp(gene_name,'anti')
-                m_anti=x_het(2); % get annihilator concentration
-                m_act=x_het(3); % get actuator concentration
-                extra_term=-het_par('kb_anti').*m_anti.*m_act;
+            if strcmp(gene_name,'xtra_1')
+                extra_term=0; % no extra terms in ODEs
 
             % END OF USER SPEC---------------------------------------------
             % -------------------------------------------------------------
@@ -172,21 +128,18 @@ classdef pi_controller
             end
         end
 
-        % any extra terms in protein ODEs apart from synthesis & growth dilution
+        % any extra terms in protein ODEs apart from synthesis & growth dilution 
+        % for t& RNAP, degradation!
         function extra_term=extra_p_term(obj,gene_name,x,ext_inp)
+            het_par=obj.parameters;
+            x_het=x( 10 : 9+size(obj.names,2)*2 ); % get heterologous gene info
+            misc=x(10+size(obj.names,2)*2:end); % get miscellaneous species info
 
             % -------------------------------------------------------------
             % SPECIFY REGULATORY FUNCTIONS---------------------------------
-            
-            % no extra terms for protein ODEs in all cases
-            if strcmp(gene_name,'sens')
-                extra_term=0;
-            elseif strcmp(gene_name,'anti')
-                extra_term=0;
-            elseif strcmp(gene_name,'act')
-                extra_term=0;
-            elseif strcmp(gene_name,'dist')
-                extra_term=0;
+
+            if strcmp(gene_name,'t7')
+                extra_term=-x_het(2).*het_par('d_t7'); % no extra terms in ODEs
 
             % END OF USER SPEC---------------------------------------------
             % -------------------------------------------------------------
@@ -195,7 +148,7 @@ classdef pi_controller
                 extra_term=0; % none by default
             end
         end
-        
+
         % ODEs for miscellaneous species in the system
         function dxdt=misc_ode(obj,t,x,ext_inp,l)
             het_par=obj.parameters;
@@ -205,19 +158,12 @@ classdef pi_controller
             % -------------------------------------------------------------
             % SPECIFY  MISCELLANEOUS SPECIES' ODES-------------------------
             
-            % we have 1 such species - bound actuator-annihilator pair
+            dxdt=[l*misc(1);...    % concentration of cells
+                0]; % concentration of nutrients (handled in the main body)
 
-            m_anti=x_het(2); % get annihliator conc.
-            m_act=x_het(3); % get actuator conc.
-%             disp([m_anti, m_act]);
-
-            anti=misc(1);
-
-            dxdt=het_par('kb_anti').*m_anti.*m_act - (het_par('b_bound')+l).*anti; % forms due to actuator and annihilator binding, is diluted by growth and by RNA-degrading machinery
-            
             % END OF USER SPEC---------------------------------------------
             % -------------------------------------------------------------
-            
         end
+        
     end
 end

@@ -39,6 +39,10 @@ function params=cell_params(~)
     params('is_upshift') = 0; % 1 if simulating a nutrient upshift scenario
     params('s_postshift') = 0; % post-upshift steady-state value of nutirent quality (zero as no upshift by default)
 
+    % used for simulating nutrient depletion
+    params('is_depletion') = 0; % 1 if simulating a nutrient depletion scenario
+    params('K_nutr') = 5000; % Monod constant for nutrient concentration
+
     % FITTED PARAMETERS
     params('a_a') = 394464.6979;  % metabolic gene transcription rate (/h) 
     params('a_r') = 1.0318.*params('a_a'); % ribosomal gene transcription rate (/h) 

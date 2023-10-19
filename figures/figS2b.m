@@ -155,7 +155,7 @@ set(Fg, 'defaultAxesFontSize', 9)
 set(Fg, 'defaultLineLineWidth', 1.25)
 
 % with aif controller
-hmap=heatmap(flip(loglikes,1),'ColorMap', jet(100));
+hmap=heatmap(flip(loglikes,1),'ColorMap', parula);
 % display labels
 x_text_labels=string(a_as);
 for i=1:size(a_as,2)

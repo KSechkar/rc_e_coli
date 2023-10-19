@@ -263,33 +263,17 @@ classdef cell_simulator
                 end
             end
 
-            % ACCOUNT FOR PROTEIN DEGRADATION IF T7 RNAP PRESENT
-            if ~any(strcmp(obj.het.names,'t7'))
-                D=1+(m_a./k_a+m_r./k_r+sum(x_het(1:obj.num_het)./k_het))./...
-                    (1-par('phi_q')); % denominator in ribosome competition calculations
-                prot_deg_in_growth=0;
-            else
-                % calculate RC denbominator with protein degradation
-                prot_deg_rate_div_eR=par('d_t7').*x_het(2).*par('n_t7')./(e.*R);
-                sum_mk_not_q=m_a./k_a+m_r./k_r+sum(x_het(1:obj.num_het)./k_het);
-                mq_div_kq=(par('phi_q').*(1-prot_deg_rate_div_eR).*sum_mk_not_q-par('phi_q').*prot_deg_rate_div_eR)./...
-                    (1-par('phi_q').*(1-prot_deg_rate_div_eR));
-                D=1+sum_mk_not_q+mq_div_kq;
-
-                % protein degradation's effect on cell growth
-                prot_deg_in_growth=par('d_t7').*x_het(2).*par('n_t7')./par('M');
-            end
-
             T=tc./tu... % ratio of charged to uncharged tRNAs 
                 .*(1-par('is_fixed_T'))+par('fixed_T').*par('is_fixed_T'); % OR a fixed value (to enable comparison with flux-parity regulation)
+            D=1+(m_a./k_a+m_r./k_r+sum(x_het(1:obj.num_het)./k_het))./...
+                (1-par('phi_q')); % denominator in ribosome competition calculations
             B=R.*(1-1./D); % actively translating ribosomes (inc. those translating housekeeping genes)
 
             nu=obj.form.nu(par,tu,s); % tRNA charging rate
 
-            l=obj.form.l(par,e,B)-prot_deg_in_growth; % growth rate
+            l=obj.form.l(par,e,B); % growth rate
 
             psi=obj.form.psi(par,T); % tRNA synthesis rate - MUST BE SCALED BY GROWTH RATE
-
 
             % GET RNAP ACTIVITY
             rnap_act=l;
@@ -305,9 +289,6 @@ classdef cell_simulator
                 % bake nutrient concentration into the tRNA aminoacylation rate
                 nu = nu.*(1-x_het(end-1)./par('ccells_max'));
 %                 nu = nu.*x_het(end)./(x_het(end)+par('K_nutr'));
-                dsdt=0;
-            elseif any(strcmp(obj.het.names,'t7'))
-                nu = nu./(1+par('t7_toxicity').*x_het(2));
                 dsdt=0;
             else
                 dsdt = 0;
@@ -340,19 +321,11 @@ classdef cell_simulator
                 % calculate
                 for i=1:obj.num_het
                     % mRNA
-                    if(~strcmp(obj.het.names{i},'t7'))
-                        dxdt_het(i)=rnap_act.*obj.het.regulation(obj.het.names{i},x,ext_inp)...
-                            .*par(['c_',obj.het.names{i}]).*par(['a_',obj.het.names{i}])...
-                            -(par(['b_',obj.het.names{i}])+l).*x_het(i)...
-                            +obj.het.extra_m_term(obj.het.names{i},x,ext_inp)...
-                            -kcmh.*(x_het(i)./k_het(i)./D).*R;
-                    else % T7 RNAP activity independent of sigma-70 concentration
-                        dxdt_het(i)=obj.het.regulation(obj.het.names{i},x,ext_inp)...
-                            .*par(['c_',obj.het.names{i}]).*par(['a_',obj.het.names{i}])...
-                            -(par(['b_',obj.het.names{i}])+l).*x_het(i)...
-                            +obj.het.extra_m_term(obj.het.names{i},x,ext_inp)...
-                            -kcmh.*(x_het(i)./k_het(i)./D).*R;
-                    end
+                    dxdt_het(i)=rnap_act.*obj.het.regulation(obj.het.names{i},x,ext_inp)...
+                        .*par(['c_',obj.het.names{i}]).*par(['a_',obj.het.names{i}])...
+                        -(par(['b_',obj.het.names{i}])+l).*x_het(i)...
+                        +obj.het.extra_m_term(obj.het.names{i},x,ext_inp)...
+                        -kcmh.*(x_het(i)./k_het(i)./D).*R;
 
                     % protein
                     dxdt_het(i+obj.num_het)=(e./par(['n_',obj.het.names{i}])).*(x_het(i)./k_het(i)./D).*R...
@@ -707,6 +680,7 @@ classdef cell_simulator
                 v(reaction_cntr) = l.*x_het(2*obj.num_het+1); % dilution
             end
         end
+
         
         % Euler ODE simulation until the discrete event (or the end of the simulation) is hit
         function euler_output=euler_for_hybrid(obj, t_start, x0, de_condition)
@@ -851,7 +825,7 @@ classdef cell_simulator
             % GET EXTERNAL INPUT
             ext_inp=obj.ext.input(x,t);
 
-            % continuously, only consider aa-tRNA consumption by native genes - so not ALL ribosomes should be counted
+            % continuously, only consider aa-tRNA consumption by native - so not ALL ribosomes should be counted
             B_cont=(D-1-sum(x_het(1:obj.num_het)./k_het))./D.*R;
 
             % DEFINE DX/DT FOR THE HOST CELL

@@ -6,10 +6,10 @@
 
 %%
 
-classdef pi_controller
+classdef pi_controller_sandbox
     % describe genes and their parameters
     properties (SetAccess = public)
-        module_name='pi_controller'; % name of the heterologous gene module
+        module_name='pi_controller_sandbox'; % name of the heterologous gene module
         names; % names of all heterologous genes
         misc_names; % names of modelled miscellanous species (e.g. compound of interest that het. proteins synthesise)
         parameters; % parameters of heterologous genes
@@ -23,7 +23,7 @@ classdef pi_controller
 
     methods (Access = public)
         % CONSTRUCTOR
-        function obj = pi_controller(obj)
+        function obj = pi_controller_sandbox(obj)
             % -------------------------------------------------------------
             % SPECIFY GENE INFO--------------------------------------------
 
@@ -35,6 +35,8 @@ classdef pi_controller
                 'act', ... % actuator, activates amplifier expression
                 'amp',... % amplifier, affects cell burden
                 'dist',... % disturbing gene
+                'ta',... % transcription activation factor
+                'x',... % regulated gene
                 };
 
             obj.misc_names={'bound'}; % actuator and annihilator bound to each other and inactivated
@@ -76,6 +78,8 @@ classdef pi_controller
             obj.parameters('c_anti')=100;
             obj.parameters('c_amp')=100;
             obj.parameters('c_dist')=100;
+            obj.parameters('c_ta')=100;
+            obj.parameters('c_x')=100;
 
             % SPECIFY NON-DEFAULT PARAMETERS HERE
             % Hill function for p_sens-DNA binding
@@ -101,7 +105,14 @@ classdef pi_controller
             % --- Disturbance ---
           
             % max transcription rate (arbitrary)
-            obj.parameters('a_dist')=100;
+            obj.parameters('a_dist_o')=100;
+
+            % --- Regulated gene ---
+            obj.parameters('f')=500; % max. inducer concentration (when added)
+            obj.parameters('K_ta-f')=500; % dissociation constant for inducer-protein binding
+            obj.parameters('K_dna(x)-taf')=1000; % gene reg. Hill constant
+            obj.parameters('eta_dna(x)-taf')=2; % gene reg. Hill coefficient
+            obj.parameters('baseline')=0.1; % baseline value of reg. function in absence of induction
 
             % END OF USER SPEC---------------------------------------------
             % -------------------------------------------------------------
@@ -120,22 +131,35 @@ classdef pi_controller
             
             % regulating m_anti expression
             if strcmp(gene_name,'anti')
-                p_sens=x_het(6); % get sensor protein conc.
+                p_sens=x_het(size(obj.names,2)+1); % get sensor protein conc.
 
                 % Hill REPRESSION function
                 F = het_par('K_dna(anti)-sens').^het_par('eta_dna(anti)-sens')./ ...
                     (het_par('K_dna(anti)-sens').^het_par('eta_dna(anti)-sens') + p_sens.^het_par('eta_dna(anti)-sens'));
 
             elseif strcmp(gene_name,'amp')
-                p_act=x_het(8); % get sensor protein conc.
+                p_act=x_het(size(obj.names,2)+3); % get sensor protein conc.
 
                 % Hill activation function
                 F = p_act.^het_par('eta_dna(amp)-act')./ ...
                     (het_par('K_dna(amp)-act').^het_par('eta_dna(amp)-act') + p_act.^het_par('eta_dna(amp)-act'));
 
             elseif (strcmp(gene_name,'dist'))
-                F=ext_inp(1); % expression proportional to inducer conc.           
+                F=ext_inp(1); % expression proportional to inducer conc. 
 
+            elseif strcmp(gene_name,'x')
+                p_ta=x_het(size(obj.names,2)+6);
+                ind_added=het_par('f');
+                ind_share=ind_added./(ind_added+het_par('K_ta-f'));
+
+                taf=p_ta.*ind_share;
+                
+                F=taf.^het_par('eta_dna(x)-taf')./...
+                    (taf.^het_par('eta_dna(x)-taf')+...
+                    het_par('K_dna(x)-taf').^het_par('eta_dna(x)-taf')); % Hill activation function
+%                 F=1-F;
+                % there is baseline expression
+                F=het_par('baseline')+(1-het_par('baseline'))*F;
             % END OF USER SPEC---------------------------------------------
             % -------------------------------------------------------------
             else
@@ -209,7 +233,6 @@ classdef pi_controller
 
             m_anti=x_het(2); % get annihliator conc.
             m_act=x_het(3); % get actuator conc.
-%             disp([m_anti, m_act]);
 
             anti=misc(1);
 

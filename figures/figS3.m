@@ -150,7 +150,7 @@ set(F, 'defaultLineLineWidth', 1.25)
 
 %% SUBFIGURE A - TRANSLATION ELONGATION RATES
 subplot(2,2,1)
-hmap=heatmap(100*abs(flip(es.',1)),'ColorMap', jet(100));
+hmap=heatmap(100*abs(flip(es.',1)),'ColorMap', parula);
 
 % axis labels and ticks
 xlabel('\sigma, nutr. qual.');
@@ -166,7 +166,7 @@ hmap.GridVisible = 'off'; % don't show grid lines
 %% SUBFIGURE B - RIBOSOMAL GENE TRANSCRIPTION REGULATION
 
 subplot(2,2,2)
-hmap=heatmap(100*abs(flip(F_rs.',1)),'ColorMap', jet(100));
+hmap=heatmap(100*abs(flip(F_rs.',1)),'ColorMap', parula);
 
 % axis labels and ticks
 xlabel('\sigma, nutr. qual.');
@@ -181,7 +181,7 @@ hmap.GridVisible = 'off'; % don't show grid lines
 
 %% SUBFIGURE C - tRNA AMINOACYLATION RATES
 subplot(2,2,3)
-hmap=heatmap(100*abs(flip(nus.',1)),'ColorMap', jet(100));
+hmap=heatmap(100*abs(flip(nus.',1)),'ColorMap', parula);
 
 % axis labels and ticks
 xlabel('\sigma, nutr. qual.');
@@ -196,7 +196,7 @@ hmap.GridVisible = 'off'; % don't show grid lines
 
 %% SUBFIGURE D - ppGpp levels
 subplot(2,2,4)
-hmap=heatmap(100*abs(flip(Ts.',1)),'ColorMap', jet(100));
+hmap=heatmap(100*abs(flip(Ts.',1)),'ColorMap', parula);
 
 % axis labels and ticks
 xlabel('\sigma, nutr. qual.');
