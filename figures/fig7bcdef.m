@@ -1,7 +1,7 @@
-%% fig6bcdef.m
+%% fig7bcdef.m
 
 % PROPORTIONAL-INTEGRAL CONTROLLER
-% FIGURE S5a
+% FIGURE 7 b,c,d,e,f
 
 % Performance of the controller with MCMC parameter samples
 
@@ -242,7 +242,7 @@ D_estimated = ...
 
     
 
-%% FIGURE 6 b
+%% FIGURE 7 b
 
 Fb = figure('Position',[0 0 250 186]);
 set(Fb, 'defaultAxesFontSize', 9)
@@ -278,7 +278,7 @@ box on
 axis square
 hold off
 
-%% FIGURE 6 c
+%% FIGURE 7 c
 
 Fc = figure('Position',[0 0 250 185]);
 set(Fc, 'defaultAxesFontSize', 9)
@@ -329,7 +329,7 @@ calculated_openloop=calc(sim_openloop,rel_dist_openloop,rel_t_openloop);
 ls_openloop=calculated_openloop.ls;
 Ds_openloop=calculated_openloop.Ds;
 
-%% FIGURE 6 d - sensor protein conc.
+%% FIGURE 7 d - sensor protein conc.
 
 Fd = figure('Position',[0 0 250 186]);
 set(Fd, 'defaultAxesFontSize', 9)
@@ -357,7 +357,7 @@ box on
 axis square
 hold off
 
-%% FIGURE 6 e - growth rate
+%% FIGURE 7 e - growth rate
 
 Fe = figure('Position',[0 0 250 186]);
 set(Fe, 'defaultAxesFontSize', 9)
@@ -388,7 +388,7 @@ box on
 axis square
 hold off
 
-%% FIGURE 6 f - resource competition denominator
+%% FIGURE 7 f - resource competition denominator
 
 Ff = figure('Position',[0 0 250 189]);
 set(Ff, 'defaultAxesFontSize', 9)

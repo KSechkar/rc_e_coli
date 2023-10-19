@@ -128,12 +128,12 @@ save('S1e.mat','bckup')
 
 %% LOAD the saved simulation results (optional)
 
-load('S1e.mat');
-parnames=bckup.parnames;
-ranges=bckup.ranges;
-parcombs=bckup.parcombs;
-loglikes=bckup.loglikes;
-points_in_range=size(ranges,2);
+% load('S2e.mat');
+% parnames=bckup.parnames;
+% ranges=bckup.ranges;
+% parcombs=bckup.parcombs;
+% loglikes=bckup.loglikes;
+% points_in_range=size(ranges,2);
 
 
 %% PLOT

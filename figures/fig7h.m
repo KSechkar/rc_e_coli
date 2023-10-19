@@ -1,7 +1,7 @@
-%% fig6h.m
+%% fig7h.m
 
 % PROPORTIONAL-INTEGRAL CONTROLLER
-% Figure 5: h
+% Figure 7: h
 
 % Showcasing how increasing our controller's amplifier gain xi reduces the 
 % adaptation error caused by the expression of extra synthetic mRNA 
@@ -106,7 +106,7 @@ for i=1:size(cdists,2)
 end
 
 
-%% FIGURE 6 h
+%% FIGURE 7 h
 
 Fg = figure('Position',[0 0 239 220]);
 set(Fg, 'defaultAxesFontSize', 9)

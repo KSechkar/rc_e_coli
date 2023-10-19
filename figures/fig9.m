@@ -1,7 +1,7 @@
-%% fig7a.m
+%% fig9.m
 
 % PROPORTIONAL-INTEGRAL CONTROLLER
-% Figure 7: a
+% Figure 9
 
 % Showcasing how the controller enforces modularity
 

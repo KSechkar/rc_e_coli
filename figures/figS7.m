@@ -1,10 +1,10 @@
-%% fig6bcdef.m
+%% figS7.m
 
 % PROPORTIONAL-INTEGRAL CONTROLLER
-% FIGURE 6: f,g,h
+% FIGURE S7
 
-% Showcasing how our proportional-integral controller mitigates cisturbances 
-% caused by extra heterologous mRNA expression and keeps the burden almost constant 
+% Showcasing how our proportional-integral controller can be made more
+% robust to leakiness but at the cost of causing oscillations
 
 %% CLEAR all variables
 
@@ -257,11 +257,11 @@ D_estimated = ...
 
     
 
-%% FIGURE 6 b
+%% FIGURE S7 a
 
-Fb = figure('Position',[0 0 250 186]);
-set(Fb, 'defaultAxesFontSize', 9)
-set(Fb, 'defaultLineLineWidth', 1.25)
+Fa = figure('Position',[0 0 250 186]);
+set(Fa, 'defaultAxesFontSize', 9)
+set(Fa, 'defaultLineLineWidth', 1.25)
 
 % colours for plots
 colours={[1 0.586 0 1],... % sens
@@ -293,11 +293,11 @@ box on
 axis square
 hold off
 
-%% FIGURE 6 c
+%% FIGURE S7 b
 
-Fc = figure('Position',[0 0 250 185]);
-set(Fc, 'defaultAxesFontSize', 9)
-set(Fc, 'defaultLineLineWidth', 1.25)
+Fb = figure('Position',[0 0 250 185]);
+set(Fb, 'defaultAxesFontSize', 9)
+set(Fb, 'defaultLineLineWidth', 1.25)
 
 % colours for plots
 colours={[1 0.586 0 1],... % sens
@@ -344,11 +344,11 @@ calculated_openloop=calc(sim_openloop,rel_dist_openloop,rel_t_openloop);
 ls_openloop=calculated_openloop.ls;
 Ds_openloop=calculated_openloop.Ds;
 
-%% FIGURE 6 d - sensor protein conc.
+%% FIGURE S7 c - sensor protein conc.
 
-Fd = figure('Position',[0 0 250 186]);
-set(Fd, 'defaultAxesFontSize', 9)
-set(Fd, 'defaultLineLineWidth', 1.25)
+Fc = figure('Position',[0 0 250 186]);
+set(Fc, 'defaultAxesFontSize', 9)
+set(Fc, 'defaultLineLineWidth', 1.25)
 hold on
 
 
@@ -377,11 +377,11 @@ box on
 axis square
 hold off
 
-%% FIGURE 6 e - growth rate
+%% FIGURE S7 d - growth rate
 
-Fe = figure('Position',[0 0 250 186]);
-set(Fe, 'defaultAxesFontSize', 9)
-set(Fe, 'defaultLineLineWidth', 1.25)
+Fd = figure('Position',[0 0 250 186]);
+set(Fd, 'defaultAxesFontSize', 9)
+set(Fd, 'defaultLineLineWidth', 1.25)
 
 hold on
 
@@ -412,11 +412,11 @@ box on
 axis square
 hold off
 
-%% FIGURE 6 f - resource competition denominator
+%% FIGURE S7 e - resource competition denominator
 
-Ff = figure('Position',[0 0 250 189]);
-set(Ff, 'defaultAxesFontSize', 9)
-set(Ff, 'defaultLineLineWidth', 1.25)
+Fe = figure('Position',[0 0 250 189]);
+set(Fe, 'defaultAxesFontSize', 9)
+set(Fe, 'defaultLineLineWidth', 1.25)
 
 hold on
 

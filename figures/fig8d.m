@@ -1,7 +1,7 @@
-%% fig5g.m
+%% fig8d.m
 
 % PROPORTIONAL-INTEGRAL CONTROLLER
-% Figure 6: c
+% Figure 8: d
 
 % Showcasing the controller's operation range in POOR culture media
 
@@ -212,11 +212,11 @@ for i=1:size(plasmid_concs,2)
     end
 end
 
-%% Main Figure h
+%% Main Figure d
 
-Fh = figure('Position',[0 0 250 186]);
-set(Fh, 'defaultAxesFontSize', 9)
-set(Fh, 'defaultLineLineWidth', 1.25)
+Fd = figure('Position',[0 0 250 186]);
+set(Fd, 'defaultAxesFontSize', 9)
+set(Fd, 'defaultLineLineWidth', 1.25)
 
 hold on
 

@@ -1,7 +1,7 @@
-% fig4cdf.m
+% fig5abd.m
 
 % PREDICTING HETEROLOGOUS GENE EXPRESSION NUMERICALLY AND ANALYTICALLY
-% Figure 4: c, d, f
+% Figure 5: a, b, d
 
 % Analyse the effects of heterologous gene expression: investigate growth
 % rate and het. prot. mas fraction (Main Figure b,c), as well as charged/uncharged 
@@ -109,12 +109,12 @@ for i=1:size(plasmid_concs,2)
     phi_hets(i)=phi_het;
 end
 
-%% MAIN FIGURE C - het. prot. mass fraction as a function of burden
+%% FIGURE A - het. prot. mass fraction as a function of burden
 approx_colour=[0 0.8 0.8];
 
-Fc = figure('Position',[0 0 385 290]);
-set(Fc, 'defaultAxesFontSize', 9)
-set(Fc, 'defaultLineLineWidth', 1.5)
+Fa = figure('Position',[0 0 385 290]);
+set(Fa, 'defaultAxesFontSize', 9)
+set(Fa, 'defaultLineLineWidth', 1.5)
 
 hold on
 
@@ -135,7 +135,7 @@ box on
 axis square
 hold off 
 
-%% MAIN FIGURE D cell growth as a function of burden
+%% FIGURE B - cell growth as a function of burden
 
 Fb = figure('Position',[0 0 385 287]);
 set(Fb, 'defaultAxesFontSize', 9)
@@ -156,7 +156,7 @@ axis square
 hold off
 ylim([0.4 1.6])
 
-%% MAIN FIGURE F - total heterologous protein production rate at t=0 in a population of cells (mu_het)
+%% FIGURE D - total heterologous protein production rate at t=0 in a population of cells (mu_het)
 
 delta=0.25;
 Fd = figure('Position',[0 0 385 290]);

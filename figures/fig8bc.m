@@ -1,7 +1,7 @@
-%% fig6.m
+%% fig8bc.m
 
 % PROPORTIONAL-INTEGRAL CONTROLLER
-% Figure 6: a,b
+% Figure 8: b,c
 
 % Showcasing how increasing our controller's amplifier gain xi reduces the 
 % adaptation error caused by the expression of extra synthetic mRNA 
@@ -161,7 +161,7 @@ for i=1:size(cdists,2)
     end
 end
 
-%% FIGURE 7 a - closed loop
+%% FIGURE 8 b - closed loop
 
 Fa = figure('Position',[0 0 239 220]);
 set(Fa, 'defaultAxesFontSize', 9)
@@ -207,7 +207,7 @@ xlabel('\Delta \sigma, nutr. qual. change');
 
 hmap.GridVisible = 'off';
 
-%% FIGURE 7 b - open loop
+%% FIGURE 8 c - open loop
 
 Fb = figure('Position',[0 0 239 220]);
 set(Fb, 'defaultAxesFontSize', 9)

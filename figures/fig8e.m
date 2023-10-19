@@ -1,9 +1,9 @@
-%% fig7a.m
+%% fig8e.m
 
 % PROPORTIONAL-INTEGRAL CONTROLLER
-% Figure 7: a
+% Figure 8: e
 
-% Showcasing how the controller enforces modularity
+% Showcasing the controller's operation range in RICH culture media
 
 %% CLEAR all variables
 
@@ -17,7 +17,7 @@ clear
 % 2 different setups - ideal AIF and realistic scenario
 sim=cell_simulator;
 
-sim.init_conditions('s')=0.5;
+sim.init_conditions('s')=0.75;
 
 sim=sim.load_heterologous_and_external('pi_controller','constant_inducer'); % load the het. gene and ext. inp. modules
 
@@ -51,9 +51,10 @@ sim.tf =  72;
 sim.opt = odeset('reltol',1.e-6,'abstol',1.e-9);
 
 %% DEFINE plasmid concs. to be tested
+
 sim.het.parameters('a_dist')=500;
 sim=sim.push_het();
-plasmid_concs=linspace(0,1200,50);
+plasmid_concs=linspace(0,1500,50);
 
 %% RUN simulations - with controller
 
@@ -72,6 +73,12 @@ for i=1:size(plasmid_concs,2)
 
     % record
     p_senss(i)=sim.x(end,9+sim.num_het+1);
+
+    % display the growth rate of undisturbed system
+    if(i==1)
+        l_undist=get_l(sim,sim.x(end,:));
+        disp(['Growth rate without disturbance = ',num2str(l_undist),' h^-1'])
+    end
 end
 
 %% SET UP the simulations for open loop
@@ -190,7 +197,7 @@ Omega=(1-par('phi_q')).*(D_est-1)-sum_mjkj_nb;
 
 %% FIND when the controller is expected to be out of its dynamic range
 
-% find steady-state m_x/k_x_nb+m_dist/k_dist_nb values, assuming the same
+% find steady-state m_dist/k_dist_nb values, assuming the same
 % growth rate is maintained by the controller
 mdistkdist_nbs = ...
     lambda_est.*plasmid_concs.*par('a_dist') ./ ...
@@ -207,7 +214,7 @@ end
 
 %% Main Figure h
 
-Fh = figure('Position',[0 0 215 193]);
+Fh = figure('Position',[0 0 250 186]);
 set(Fh, 'defaultAxesFontSize', 9)
 set(Fh, 'defaultLineLineWidth', 1.25)
 
@@ -225,8 +232,9 @@ xlabel('c_{dist}, disturbing gene conc. [nM]','FontName','Arial');
 ylabel({'p_{sens}:p_{sens}^0, relative', 'sensor prot. conc.'},'FontName','Arial')
 
 ylim([0.3 1.1])
-xlim([0 1200])
-
+xlim([0 1500])
+%xticks(0:1e5:3e5)
+% yticks(0.4:0.2:1.2)
 
 legend({'open loop','closed loop'},'FontName','Arial','FontSize',8,'Location','southwest')
 
@@ -291,5 +299,51 @@ function [e,Fr,k_a,k_r,k_sens,k_act,k_amp,k_dist]=get_nb(sim,ss)
     k_sens=k_het(1);
     k_act=k_het(3);
     k_amp=k_het(4);
-    k_dist=k_het(5);  
+    k_dist=k_het(5);
+end
+
+%% GROWTH RATE CALCULATION FUNCTION
+function l=get_l(sim,ss)   
+    par=sim.parameters;
+    % STATE VECTOR TO SINGLE VARIABLES
+    m_a = ss(1);
+    m_r = ss(2);
+    p_a = ss(3);
+    R = ss(4);
+    tc = ss(5);
+    tu = ss(6);
+    Bcm = ss(7);
+    s = ss(8);
+    h = ss(9);
+    x_het=ss(10 : (9+2*sim.num_het) );
+
+    % USEFUL PRE-CALCULATIONS
+    % translation elongation rate
+    e=sim.form.e(par,tc);
+
+    % ribosome inactivation rate due to chloramphenicol
+    kcmh=par('kcm').*h;
+
+    % ribosome dissociation constants
+    k_a=sim.form.k(e,par('k+_a'),par('k-_a'),par('n_a'),kcmh);
+    k_r=sim.form.k(e,par('k+_r'),par('k-_r'),par('n_r'),kcmh);
+    % heterologous genes
+    k_het=ones(1,sim.num_het);
+    if(sim.num_het>0)
+        for j=1:sim.num_het
+            k_het(j)=sim.form.k(e,...
+            sim.parameters(['k+_',sim.het.names{j}]),...
+            sim.parameters(['k-_',sim.het.names{j}]),...
+            sim.parameters(['n_',sim.het.names{j}]),...
+            kcmh);
+        end
+    end
+
+    T=tc./tu; % ratio of charged to uncharged tRNAs
+    D=1+(m_a./k_a+m_r./k_r+sum(x_het(1:sim.num_het)./k_het))./...
+        (1-par('phi_q')); % denominator in ribosome competition calculations
+    B=R.*(1-1./D); % actively translating ribosomes - INCLUDING Q
+
+    % growth rate
+    l=sim.form.l(par,e,B);
 end

@@ -1,15 +1,12 @@
-% fig4cdf.m
+% fig4cde.m
 
-% PREDICTING HETEROLOGOUS GENE EXPRESSION NUMERICALLY AND ANALYTICALLY
-% Figure 4: c, d, f
+% EMERGENT BISTABILITY OF A NON-COOPERATIVE SELF-ACTIVATOR
+% Figure 4: c, d, e
 
-% Analyse the effects of heterologous gene expression: investigate growth
-% rate and het. prot. mas fraction (Main Figure b,c), as well as charged/uncharged 
-% tRNA conc. ratio, traslation el. rate, tRNA aminoacylation rate and  
-% ribosomal genetranscription regulation as a function of 
-% het. gene transcription. Determine which heterologous protein mass fraction 
-% leads to the highest protein production rates in a population of bacterai
-% when the culturing starts (Main Figure d). 
+% Despite rpomoting its own expression non-cooperatively, a T7 RNAP gene
+% controller by a constitutive T7 RNAP promoter may exhibit bistability due
+% to the effect of synthetic gene expression on the host cell's growth
+% rate
 
 %% CLEAR all variables
 

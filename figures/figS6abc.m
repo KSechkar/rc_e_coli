@@ -1,7 +1,7 @@
-%% figS5a.m
+%% figS6abc.m
 
 % PROPORTIONAL-INTEGRAL CONTROLLER
-% FIGURE S5a
+% FIGURE S6 a,b,c
 
 % Performance of the controller with MCMC parameter samples
 

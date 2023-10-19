@@ -1,11 +1,11 @@
-%% fig5bcdef.m
+%% figS5.m
 
 % PROPORTIONAL-INTEGRAL CONTROLLER
-% FIGURE S6: b,c,d,e,f
+% FIGURE S5
 
 % Showcasing how our proportional-integral controller mitigates cisturbances 
 % caused by extra heterologous mRNA expression and keeps the burden almost
-% constant - with su
+% constant - with time-varying disturbance
 
 %% CLEAR all variables
 
@@ -20,19 +20,20 @@ sim=cell_simulator;
 
 sim.init_conditions('s')=0.5;
 
-sim=sim.load_heterologous_and_external('pi_controller','step_inducer'); % load the het. gene and ext. inp. modules
-% sim=sim.load_heterologous_and_external('pi_controller','oscillating_inducer');
+% sim=sim.load_heterologous_and_external('pi_controller','step_inducer'); % load the het. gene and ext. inp. modules
+sim=sim.load_heterologous_and_external('pi_controller','oscillating_inducer');
 
 % disturbance signal parameters
-sim.ext.input_func_parameters('inducer_base_level')=0; % disturbance flicks transcription reg. func. from 0 to 1 at t=72
-sim.ext.input_func_parameters('inducer_final_level')=1; % disturbance flicks transcription reg. func. from 0 to 1 at t=72
-sim.ext.input_func_parameters('step_time')=72; % disturbance flicks transcription reg. func. from 0 to 1 at t=72
-sim.ext.input_func_parameters('slope_duration')=0.1;% disturbance flicks transcription reg. func. from 0 to 1 at t=72
-% sim.ext.input_func_parameters('wave_period')=2.5; % period of the sine wave (h)
-% sim.ext.input_func_parameters('wave_amplitude')=1; % amplitude of the sine wave
-% sim.ext.input_func_parameters('oscillation_start_time')=72; % start time of oscillations
+% sim.ext.input_func_parameters('inducer_base_level')=0; % disturbance flicks transcription reg. func. from 0 to 1 at t=72
+% sim.ext.input_func_parameters('inducer_final_level')=1; % disturbance flicks transcription reg. func. from 0 to 1 at t=72
+% sim.ext.input_func_parameters('step_time')=72; % disturbance flicks transcription reg. func. from 0 to 1 at t=72
+% sim.ext.input_func_parameters('slope_duration')=0.1;% disturbance flicks transcription reg. func. from 0 to 1 at t=72
+sim.ext.input_func_parameters('wave_period')=2.5; % period of the sine wave (h)
+sim.ext.input_func_parameters('wave_amplitude')=0.5; % amplitude of the sine wave
+sim.ext.input_func_parameters('oscillation_start_time')=72; % start time of oscillations
+sim.ext.input_func_parameters('phase_schift')=pi/2; % phase shift of the wave
 
-sim.het.parameters('c_dist')=1000; % gene copy number
+sim.het.parameters('c_dist')=100; % gene copy number
 sim.het.parameters('a_dist')=500; % max. gene transcription rate
 
 % no output protein expression here
@@ -46,13 +47,13 @@ sim.het.parameters('eta_dna(anti)-sens')=1; % sensor prot.-DNA binding Hill coef
 sim.het.parameters('K_dna(amp)-act')=700; % sensor prot.-DNA binding Hill constant
 sim.het.parameters('eta_dna(amp)-act')=1; % sensor prot.-DNA binding Hill coefficient
 
-sim.het.parameters('kb_anti')=3000; % atcuator-annihilator binding rate constant
+sim.het.parameters('kb_anti')=300; % atcuator-annihilator binding rate constant
 sim.het.parameters('c_sens')=100;
 sim.het.parameters('a_sens')=50; % sensor gene transcription rate
 sim.het.parameters('a_anti')=800; % annigilator transcription rate
 sim.het.parameters('a_act')=400; % actuator transcription rate
 
-sim.het.parameters('a_amp')=100; % integral controller amplifier gene copy number
+sim.het.parameters('c_amp')=100; % integral controller amplifier gene copy number
 sim.het.parameters('a_amp')=4000; % integral controller amplifier transcription rate
    
 % push amended parameter values
@@ -69,8 +70,8 @@ sim = sim.simulate_model;
 
 inter_rad=15;
 
-dist_time=sim.ext.input_func_parameters('step_time'); % time of disturbance
-% dist_time=sim.ext.input_func_parameters('oscillation_start_time');
+% dist_time=sim.ext.input_func_parameters('step_time'); % time of disturbance
+dist_time=sim.ext.input_func_parameters('oscillation_start_time');
 
 % find first point in the frame
 for i=1:size(sim.t,1)
@@ -125,25 +126,26 @@ sim_openloop=cell_simulator;
 
 sim_openloop.init_conditions('s')=sim.init_conditions('s');
 
-sim_openloop=sim_openloop.load_heterologous_and_external('pi_controller','step_inducer'); % load the het. gene and ext. inp. modules
-% sim_openloop=sim_openloop.load_heterologous_and_external('pi_controller','oscillating_inducer'); % load the het. gene and ext. inp. modules
+% sim_openloop=sim_openloop.load_heterologous_and_external('pi_controller','step_inducer'); % load the het. gene and ext. inp. modules
+sim_openloop=sim_openloop.load_heterologous_and_external('pi_controller','oscillating_inducer'); % load the het. gene and ext. inp. modules
 
 % disturbance signal parameters
-sim_openloop.ext.input_func_parameters('inducer_base_level')=sim.ext.input_func_parameters('inducer_base_level'); 
-sim_openloop.ext.input_func_parameters('inducer_final_level')=sim.ext.input_func_parameters('inducer_final_level'); 
-sim_openloop.ext.input_func_parameters('step_time')=sim.ext.input_func_parameters('step_time'); 
-sim_openloop.ext.input_func_parameters('slope_duration')=sim.ext.input_func_parameters('slope_duration');
+% sim_openloop.ext.input_func_parameters('inducer_base_level')=sim.ext.input_func_parameters('inducer_base_level'); 
+% sim_openloop.ext.input_func_parameters('inducer_final_level')=sim.ext.input_func_parameters('inducer_final_level'); 
+% sim_openloop.ext.input_func_parameters('step_time')=sim.ext.input_func_parameters('step_time'); 
+% sim_openloop.ext.input_func_parameters('slope_duration')=sim.ext.input_func_parameters('slope_duration');
 
-% sim_openloop.ext.input_func_parameters('wave_period')=sim.ext.input_func_parameters('wave_period');
-% sim_openloop.ext.input_func_parameters('wave_amplitude')=sim.ext.input_func_parameters('wave_amplitude');
-% sim_openloop.ext.input_func_parameters('oscillation_start_time')=sim.ext.input_func_parameters('oscillation_start_time');
+sim_openloop.ext.input_func_parameters('wave_period')=sim.ext.input_func_parameters('wave_period');
+sim_openloop.ext.input_func_parameters('wave_amplitude')=sim.ext.input_func_parameters('wave_amplitude');
+sim_openloop.ext.input_func_parameters('oscillation_start_time')=sim.ext.input_func_parameters('oscillation_start_time');
+sim_openloop.ext.input_func_parameters('phase_schift')=sim.ext.input_func_parameters('phase_schift');
 
 sim_openloop.het.parameters('a_dist')=sim.het.parameters('a_dist');
 sim_openloop.het.parameters('c_dist')=sim.het.parameters('c_dist');
 
 % sensor protein concentration - just as a burden stand-in
 sim_openloop.het.parameters('c_sens')=sim.het.parameters('c_sens');
-sim_openloop.het.parameters('a_sens')=sim.het.parameters('a_sens'); % sensor gene transcription rate
+sim_openloop.het.parameters('a_sens')=sim.het.parameters('a_sens');
 
 % no controller or output protein expression here
 sim_openloop.het.parameters('c_x')=0; % gene copy number
@@ -203,106 +205,12 @@ predist_x_openloop=sim_openloop.x(predist_pt_openloop,:); % x just before the di
 predist_psens_openloop=predist_x_openloop(9+sim_openloop.num_het+1); % sens is the first gene in the list
 [predist_l_openloop, predist_D_openloop] = get_predist(sim_openloop,predist_x_openloop); % get the pre-disturbance l and D values
 
-%% SIMULATE THE SYSTEM WITHOUT PROPORTIONAL CONTROL
-
-sim_noprop=cell_simulator_no_proportional;
-
-sim_noprop.init_conditions('s')=sim.init_conditions('s');
-
-sim_noprop=sim_noprop.load_heterologous_and_external('pi_controller','step_inducer'); % load the het. gene and ext. inp. modules
-% sim_noprop=sim_noprop.load_heterologous_and_external('pi_controller','oscillating_inducer'); % load the het. gene and ext. inp. modules
-
-% disturbance signal parameters
-sim_noprop.ext.input_func_parameters('inducer_base_level')=sim.ext.input_func_parameters('inducer_base_level'); 
-sim_noprop.ext.input_func_parameters('inducer_final_level')=sim.ext.input_func_parameters('inducer_final_level'); 
-sim_noprop.ext.input_func_parameters('step_time')=sim.ext.input_func_parameters('step_time'); 
-sim_noprop.ext.input_func_parameters('slope_duration')=sim.ext.input_func_parameters('slope_duration');
-
-% sim_noprop.ext.input_func_parameters('wave_period')=sim.ext.input_func_parameters('wave_period');
-% sim_noprop.ext.input_func_parameters('wave_amplitude')=sim.ext.input_func_parameters('wave_amplitude');
-% sim_noprop.ext.input_func_parameters('oscillation_start_time')=sim.ext.input_func_parameters('oscillation_start_time');
-
-sim_noprop.het.parameters('c_dist')=sim.het.parameters('c_dist'); % gene copy number
-sim_noprop.het.parameters('a_dist')=sim.het.parameters('a_dist'); % max. gene transcription rate
-
-% no output protein expression here
-sim_noprop.het.parameters('c_x')=sim.het.parameters('c_x'); % gene copy number
-sim_noprop.het.parameters('a_x')=sim.het.parameters('a_x'); % max. gene transcription rate
-
-% integral controller parameters
-sim_noprop.het.parameters('K_dna(anti)-sens')=sim.het.parameters('K_dna(anti)-sens'); % sensor prot.-DNA binding Hill constant
-sim_noprop.het.parameters('eta_dna(anti)-sens')=sim.het.parameters('eta_dna(anti)-sens'); % sensor prot.-DNA binding Hill coefficient
-
-sim_noprop.het.parameters('K_dna(amp)-act')=sim.het.parameters('K_dna(amp)-act'); % sensor prot.-DNA binding Hill constant
-sim_noprop.het.parameters('eta_dna(amp)-act')=sim.het.parameters('eta_dna(amp)-act'); % sensor prot.-DNA binding Hill coefficient
-
-sim_noprop.het.parameters('kb_anti')=sim.het.parameters('kb_anti'); % atcuator-annihilator binding rate constant
-sim_noprop.het.parameters('c_sens')=sim.het.parameters('c_sens');
-sim_noprop.het.parameters('a_sens')=sim.het.parameters('a_sens'); % sensor gene transcription rate
-sim_noprop.het.parameters('a_anti')=sim.het.parameters('a_anti'); % annigilator transcription rate
-sim_noprop.het.parameters('a_act')=sim.het.parameters('a_act'); % actuator transcription rate
-
-sim_noprop.het.parameters('c_amp')=sim.het.parameters('c_amp'); % integral controller amplifier gene copy number
-sim_noprop.het.parameters('a_amp')=sim.het.parameters('a_amp'); % integral controller amplifier transcription rate
-  
-% push amended parameter values
-sim_noprop=sim_noprop.push_het();
-
-% simulate
-sim_noprop.tf=sim.tf;
-sim_noprop = sim_noprop.simulate_model;
-
-% find first point in the frame
-for i=1:size(sim_noprop.t,1)
-    if(sim_noprop.t(i)>=dist_time-inter_rad)
-        first_pt_noprop=i-1;
-        
-        % correction if first point already relevant
-        if(first_pt_noprop==0)
-            first_pt_noprop=1;
-        end
-
-        break
-    end
-end
-
-% find last point in the frame
-for i=size(sim_noprop.t,1):(-1):1
-    if(sim_noprop.t(i)<=dist_time+inter_rad)
-        last_pt_noprop=i+1;
-
-        % correction if last point still relevant
-        if(last_pt_noprop>size(sim_noprop.t,1))
-            last_pt_noprop=i;
-        end
-
-        break
-    end
-end
-
-% record relevant time points
-rel_t_noprop=sim_noprop.t(first_pt_noprop:last_pt_noprop);
-
-% record states of the cell at these times
-rel_dist_noprop=sim_noprop.x(first_pt_noprop:last_pt_noprop,:);
-
-% find last point before disturbance and the respective l and D values
-for i=1:size(sim_noprop.t,1)
-    if(sim_noprop.t(i)>=dist_time)
-        predist_pt_noprop=i-1;
-        break
-    end
-end
-predist_x_noprop=sim_noprop.x(predist_pt_noprop,:); % x just before the disturbance
-predist_psens_noprop=predist_x_noprop(9+sim_noprop.num_het+1); % sens is the first gene in the list
-[predist_l_noprop, predist_D_noprop] = get_predist(sim_noprop,predist_x_noprop); % get the pre-disturbance l and D values
-
 %% ANALYTICALLY ESTIMATE lambda and D
 
 % finding no-burden values of translation rate, dissociation constants,
 % rib. gene transc. regulation function
 sim_nb=cell_simulator;
-sim_nb.init_conditions('s')=0.07;
+sim_nb.init_conditions('s')=sim.init_conditions('s');
 sim_nb=sim_nb.load_heterologous_and_external('pi_controller','step_inducer');
 sim_nb.het.parameters('a_x')=0;
 sim_nb.het.parameters('a_sens')=0;
@@ -425,13 +333,6 @@ calculated_openloop=calc(sim_openloop,rel_dist_openloop,rel_t_openloop);
 ls_openloop=calculated_openloop.ls;
 Ds_openloop=calculated_openloop.Ds;
 
-%% CALCULATE, for no proprtional feedback, growth rate, RC denominator
-
-calculated_noprop=calc(sim_noprop,rel_dist_noprop,rel_t_noprop);
-ls_noprop=calculated_noprop.ls;
-Ds_noprop=calculated_noprop.Ds;
-
-
 %% FIGURE 6 d - sensor protein conc.
 
 Fd = figure('Position',[0 0 250 186]);
@@ -440,18 +341,18 @@ set(Fd, 'defaultLineLineWidth', 1.25)
 hold on
 
 % plot model predictions
+plot(rel_t_openloop-dist_time,rel_dist_openloop(:,9+sim.num_het+1)/predist_psens_openloop,'Color',[0.6350 0.0780 0.1840])
 plot(rel_t-dist_time,rel_dist(:,9+sim.num_het+1)/predist_psens,'Color',[0 0.4470 0.7410])
-%plot(rel_t_openloop-dist_time,rel_dist_openloop(:,9+sim.num_het+1)/predist_psens_openloop,'Color',[0.6350 0.0780 0.1840])
-plot(rel_t_noprop-dist_time,rel_dist_noprop(:,9+sim.num_het+1)/predist_psens_noprop,'Color',[0.8500 0.3250 0.0980])
 
 % plot ideal value
 plot([-inter_rad inter_rad],[1 1],'k:') 
 
 xlabel('t, time since disturbance [h]','FontName','Arial')
 ylabel({'p_{sens}:p_{sens}^0, relative', 'sensor prot. conc.'},'FontName','Arial')
-legend({'w/ prop. fbck','no prop. fbck'},'FontName','Arial','FontSize',8,'Location','northwest')
 
-ylim([0.95 1.01])
+legend({'open loop','closed loop'},'FontName','Arial','FontSize',8,'Location','northwest')
+
+ylim([0.85 1.15])
 xlim([-inter_rad inter_rad])
 xticks(-inter_rad:inter_rad/2:inter_rad)
 
@@ -468,11 +369,11 @@ set(Fe, 'defaultLineLineWidth', 1.25)
 
 hold on
 
+% plot open loop simulation results
+plot(rel_t_openloop-dist_time,ls_openloop/predist_l_openloop,'Color',[0.6350 0.0780 0.1840])
+
 % plot model predictions
 plot(rel_t-dist_time,ls/predist_l,'Color',[0 0.4470 0.7410])
-
-% results with no proportional feedback
-plot(rel_t_noprop-dist_time,ls_noprop/predist_l_noprop,'Color',[0.8500 0.3250 0.0980])
 
 % plot analytically calculated target value
 plot([-inter_rad inter_rad],[lambda_estimated/predist_l lambda_estimated/predist_l],'k:') 
@@ -480,11 +381,11 @@ plot([-inter_rad inter_rad],[lambda_estimated/predist_l lambda_estimated/predist
 xlabel('t, time since disturbance [h]','FontName','Arial')
 ylabel({'\lambda:\lambda^0, relative growth rate'},'FontName','Arial')
 
-ylim([0.95 1.01])
+ylim([0.85 1.15])
 xlim([-inter_rad inter_rad])
 xticks(-inter_rad:inter_rad/2:inter_rad)
 
-legend({'w/ prop. fbck','no prop. fbck'},'FontName','Arial','FontSize',8,'Location','northwest')
+legend({'open loop','closed loop'},'FontName','Arial','FontSize',8,'Location','northwest')
 
 grid on
 box on
@@ -493,17 +394,17 @@ hold off
 
 %% FIGURE 6 f - resource competition denominator
 
-Ff = figure('Position',[0 0 250 189]);
+Ff = figure('Position',[0 0 250 186]);
 set(Ff, 'defaultAxesFontSize', 9)
 set(Ff, 'defaultLineLineWidth', 1.25)
 
 hold on
 
+% plot open loop simulation results
+plot(rel_t_openloop-dist_time,Ds_openloop/predist_D_openloop,'Color',[0.6350 0.0780 0.1840])
+
 % plot model predictions
 plot(rel_t-dist_time,Ds/predist_D,'Color',[0 0.4470 0.7410])
-
-% results with no proportional feedback
-plot(rel_t_noprop-dist_time,Ds_noprop/predist_D_noprop,'Color',[0.8500 0.3250 0.0980])
 
 % plot analytically calculated target value
 plot([-inter_rad inter_rad],[D_estimated/predist_D D_estimated/predist_D],'k:') 
@@ -512,10 +413,10 @@ xlabel('t, time since disturbance [h]','FontName','Arial')
 ylabel({'D:D^0, relative RC','denominator value'},'FontName','Arial')
 
 xlim([-inter_rad inter_rad])
-ylim([0.98 1.04])
+ylim([0.85 1.15])
 xticks(-inter_rad:inter_rad/2:inter_rad)
 
-legend({'w/ prop. fbck','no prop. fbck'},'FontName','Arial','FontSize',8,'Location','northwest')
+legend({'open loop','closed loop'},'FontName','Arial','FontSize',8,'Location','southwest')
 
 grid on
 box on
