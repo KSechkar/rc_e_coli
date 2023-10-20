@@ -32,8 +32,9 @@ Contains scripts allowing to fit the model's parameters to experimental data obt
 - _dream_fit.m_ - run the DREAM algorithm and record the outcome in a _.mat_ file
 - _dream_model.m_ - defines the function for the model's log-likelihood given the experimental data for an input set of parameter values. This function is called while sampling the chains during DREAM fitting
 - _dream_modelfun.m_ - defines the function for finding the sum of squared errors between the experimental measurements and model predictions for an input set of parameter values. This is required to calculate the log-likelihood
-- _DREAM_fitting_outcome.mat_ - stores the sampled chains obtained as outcome of running the the algorithm for 20,000 steps in total (10 parallel chains tun for 1,000 steps each)
+- _DREAM.mat_ - stores the sampled chains obtained as outcome of running the the algorithm for 20,000 steps in total (10 parallel chains tun for 1,000 steps each)
 - _DREAM_postproc_amended.mat_ - script for postprocessing the fitting outcome (find the mode of the sampled distribution, plot the sampled chains, etc.). This script has been taken from the original DREAM package, but minor amendments have been made to it so as to improve the output plots' interpretability
+- _update_a_a.mat_ - script for updating the value of the a_a parameter (assigned an order-of-magnitude estimated value for the duration of MCMC fitting) based on the fitting outcome
 
 ## data
 Experimental data used to fit the parameters and compare model predictions with real-life measurements, taken from [^1] and [^2]. The text file _annotation.txt_ explains the meaning of each dataset present.
