@@ -298,13 +298,37 @@ end
 toc
 
 % save all trjectories for future use
-% save('figS5b_controller.mat', 'ts', 'psens_trajs', 'l_trajs', 'D_trajs')
-% save('figS5b_openloop.mat', 'ts_openloop', 'psens_trajs_openloop', 'l_trajs_openloop', 'D_trajs_openloop')
+save('figS6def_controller.mat', 'ts', 'psens_trajs', 'l_trajs', 'D_trajs')
+save('figS6def_openloop.mat', 'ts_openloop', 'psens_trajs_openloop', 'l_trajs_openloop', 'D_trajs_openloop')
 
-%% LOAD the trajectories
+%% LOAD the saved trajectories (compiling several saved batches together) - alternatively to simulating them from scratch
 
-load('figS5b_controller.mat')
-load('figS5b_openloop.mat')
+% load('figS6def_controller_old.mat')
+% load('figS6def_openloop_old.mat')
+% old_ts=ts;
+% old_psens_trajs=psens_trajs;
+% old_l_trajs=l_trajs;
+% old_D_trajs=D_trajs;
+% old_ts_openloop=ts_openloop;
+% old_psens_trajs_openloop=psens_trajs_openloop;
+% old_l_trajs_openloop=l_trajs_openloop;
+% old_D_trajs_openloop=D_trajs_openloop;
+% load('figS6def_controller_extra.mat')
+% load('figS6def_openloop_extra.mat')
+% ts=[old_ts, ts];
+% psens_trajs=[old_psens_trajs, psens_trajs];
+% l_trajs=[old_l_trajs, l_trajs];
+% D_trajs=[old_D_trajs, D_trajs];
+% ts_openloop=[old_ts_openloop, ts_openloop];
+% psens_trajs_openloop=[old_psens_trajs_openloop, psens_trajs_openloop];
+% l_trajs_openloop=[old_l_trajs_openloop, l_trajs_openloop];
+% D_trajs_openloop=[old_D_trajs_openloop, D_trajs_openloop];
+% num_trajs=size(ts,2);
+% dist_time=7.5;
+% save('figS6def_controller.mat', 'ts', 'psens_trajs', 'l_trajs', 'D_trajs')
+% save('figS6def_openloop.mat', 'ts_openloop', 'psens_trajs_openloop', 'l_trajs_openloop', 'D_trajs_openloop')
+
+
 
 %% FIND pre-disturbance means to plot relative trajectories
 t_in_frame_predist_openloop=(ts_openloop{1}>=2.5)&(ts_openloop{1}<=7.5);
@@ -337,7 +361,7 @@ D_refmean=mean(D_trajs_concatenated(t_in_frame_predist,:),'all');
 
 %% FIGURE 6 d - sensor protein conc.
 
-Fd = figure('Position',[0 0 250 195]);
+Fd = figure('Position',[0 0 250 195],'Renderer','painters');
 set(Fd, 'defaultAxesFontSize', 9)
 set(Fd, 'defaultLineLineWidth', 1.25)
 hold on
@@ -345,26 +369,26 @@ hold on
 % open loop plots
 for traj_cntr=1:num_trajs
     t_in_frame=(ts_openloop{traj_cntr}>=2.5)&(ts_openloop{traj_cntr}<=12.5);
-    plot(ts_openloop{traj_cntr}(t_in_frame)-ts_openloop{traj_cntr}(find(t_in_frame,1)),psens_trajs_openloop{traj_cntr}(t_in_frame)./psens_refmean_openloop,'Color',[0.6350 0.0780 0.1840 0.05])
+    plot(ts_openloop{traj_cntr}(t_in_frame)-dist_time,psens_trajs_openloop{traj_cntr}(t_in_frame)./psens_refmean_openloop,'Color',[0.6350 0.0780 0.1840 0.05])
 end
 % average trajectory
 avg_psens_traj_openloop=mean(psens_trajs_openloop_concatenated,2);
-plot(ts_openloop{1}(t_in_frame)-ts_openloop{traj_cntr}(find(t_in_frame,1)),avg_psens_traj_openloop(t_in_frame)./psens_refmean_openloop,'Color',[0.6350 0.0780 0.1840 1]);
+plot(ts_openloop{1}(t_in_frame)-dist_time,avg_psens_traj_openloop(t_in_frame)./psens_refmean_openloop,'Color',[0.6350 0.0780 0.1840 1]);
 
 % closed loop plots
 for traj_cntr=1:num_trajs
     t_in_frame=(ts{traj_cntr}>=2.5)&(ts{traj_cntr}<=12.5);
-    plot(ts{traj_cntr}(t_in_frame)-ts{traj_cntr}(find(t_in_frame,1)),psens_trajs{traj_cntr}(t_in_frame)./psens_refmean,'Color',[0 0.4470 0.7410 0.05])
+    plot(ts{traj_cntr}(t_in_frame)-dist_time,psens_trajs{traj_cntr}(t_in_frame)./psens_refmean,'Color',[0 0.4470 0.7410 0.05])
 end
 % average trajectory
 avg_psens_traj=mean(psens_trajs_concatenated,2);
-plot(ts{1}(t_in_frame)-ts{1}(find(t_in_frame,1)),avg_psens_traj(t_in_frame)./psens_refmean,'Color',[0 0.4470 0.7410 1]);
+plot(ts{1}(t_in_frame)-dist_time,avg_psens_traj(t_in_frame)./psens_refmean,'Color',[0 0.4470 0.7410 1]);
 
 ylim([0.85 1.1])
-xlim([0 ts{1}(find(t_in_frame,1,'last')+1)-ts{1}(find(t_in_frame,1))])
-xticks(0:2.5:15)
+xlim([ts{1}(find(t_in_frame,1)-1)-dist_time ts{1}(find(t_in_frame,1,'last')+1)-dist_time])
+xticks(-15:2.5:15)
 
-% xlabel('t, time since disturbance [h]','FontName','Arial')
+xlabel('t, time since disturbance [h]','FontName','Arial')
 ylabel({'p_{sens}:p_{sens}^0, relative', 'sensor prot. conc.'},'FontName','Arial')
 
 
@@ -375,7 +399,7 @@ hold off
 
 %% FIGURE 6 e - growth rate
 
-Fe = figure('Position',[0 0 250 195]);
+Fe = figure('Position',[0 0 250 195],'Renderer','painters');
 set(Fe, 'defaultAxesFontSize', 9)
 set(Fe, 'defaultLineLineWidth', 1.25)
 hold on
@@ -383,26 +407,26 @@ hold on
 % open loop plots
 for traj_cntr=1:num_trajs
     t_in_frame=(ts_openloop{traj_cntr}>=2.5)&(ts_openloop{traj_cntr}<=12.5);
-    plot(ts_openloop{traj_cntr}(t_in_frame)-ts_openloop{traj_cntr}(find(t_in_frame,1)),l_trajs_openloop{traj_cntr}(t_in_frame)./l_refmean_openloop,'Color',[0.6350 0.0780 0.1840 0.01])
+    plot(ts_openloop{traj_cntr}(t_in_frame)-dist_time,l_trajs_openloop{traj_cntr}(t_in_frame)./l_refmean_openloop,'Color',[0.6350 0.0780 0.1840 0.01])
 end
 
 % average trajectory
 avg_l_traj_openloop=mean(l_trajs_openloop_concatenated,2);
-plot(ts_openloop{1}(t_in_frame)-ts_openloop{traj_cntr}(find(t_in_frame,1)),avg_l_traj_openloop(t_in_frame)./l_refmean_openloop,'Color',[0.6350 0.0780 0.1840 1]);
+plot(ts_openloop{1}(t_in_frame)-dist_time,avg_l_traj_openloop(t_in_frame)./l_refmean_openloop,'Color',[0.6350 0.0780 0.1840 1]);
 
 % closed loop plots
 for traj_cntr=1:num_trajs
     t_in_frame=(ts{traj_cntr}>=2.5)&(ts{traj_cntr}<=12.5);
-    plot(ts{traj_cntr}(t_in_frame)-ts{traj_cntr}(find(t_in_frame,1)),l_trajs{traj_cntr}(t_in_frame)./l_refmean,'Color',[0 0.4470 0.7410 0.01])
+    plot(ts{traj_cntr}(t_in_frame)-dist_time,l_trajs{traj_cntr}(t_in_frame)./l_refmean,'Color',[0 0.4470 0.7410 0.01])
 end
 
 % average trajectory
 avg_l_traj=mean(l_trajs_concatenated,2);
-plot(ts{1}(t_in_frame)-ts{1}(find(t_in_frame,1)),avg_l_traj(t_in_frame)./l_refmean,'Color',[0 0.4470 0.7410 1]);
+plot(ts{1}(t_in_frame)-dist_time,avg_l_traj(t_in_frame)./l_refmean,'Color',[0 0.4470 0.7410 1]);
 
 ylim([0.85 1.1])
-xlim([0 ts{1}(find(t_in_frame,1,'last')+1)-ts{1}(find(t_in_frame,1))])
-xticks(0:2.5:15)
+xlim([ts{1}(find(t_in_frame,1)-1)-dist_time ts{1}(find(t_in_frame,1,'last')+1)-dist_time])
+xticks(-15:2.5:15)
 
 xlabel('t, time since disturbance [h]','FontName','Arial')
 ylabel({'\lambda:\lambda^0, relative growth rate'},'FontName','Arial')
@@ -414,7 +438,7 @@ hold off
 
 %% FIGURE 6 f - RC denominator
 
-Ff = figure('Position',[0 0 250 195]);
+Ff = figure('Position',[0 0 250 195],'Renderer','painters');
 set(Ff, 'defaultAxesFontSize', 9)
 set(Ff, 'defaultLineLineWidth', 1.25)
 hold on
@@ -422,26 +446,26 @@ hold on
 % open loop plots
 for traj_cntr=1:num_trajs
     t_in_frame=(ts_openloop{traj_cntr}>=2.5)&(ts_openloop{traj_cntr}<=12.5);
-    plot(ts_openloop{traj_cntr}(t_in_frame)-ts_openloop{traj_cntr}(find(t_in_frame,1)),D_trajs_openloop{traj_cntr}(t_in_frame)./D_refmean_openloop,'Color',[0.6350 0.0780 0.1840 0.01])
+    plot(ts_openloop{traj_cntr}(t_in_frame)-dist_time,D_trajs_openloop{traj_cntr}(t_in_frame)./D_refmean_openloop,'Color',[0.6350 0.0780 0.1840 0.01])
 end
 
 % average trajectory
 avg_D_traj_openloop=mean(D_trajs_openloop_concatenated,2);
-plot(ts_openloop{1}(t_in_frame)-ts_openloop{traj_cntr}(find(t_in_frame,1)),avg_D_traj_openloop(t_in_frame)./D_refmean_openloop,'Color',[0.6350 0.0780 0.1840 1]);
+plot(ts_openloop{1}(t_in_frame)-dist_time,avg_D_traj_openloop(t_in_frame)./D_refmean_openloop,'Color',[0.6350 0.0780 0.1840 1]);
 
 % closed loop plots
 for traj_cntr=1:num_trajs
     t_in_frame=(ts{traj_cntr}>=2.5)&(ts{traj_cntr}<=12.5);
-    plot(ts{traj_cntr}(t_in_frame)-ts{traj_cntr}(find(t_in_frame,1)),D_trajs{traj_cntr}(t_in_frame)./D_refmean,'Color',[0 0.4470 0.7410 0.01])
+    plot(ts{traj_cntr}(t_in_frame)-dist_time,D_trajs{traj_cntr}(t_in_frame)./D_refmean,'Color',[0 0.4470 0.7410 0.01])
 end
 
 % average trajectory
 avg_D_traj=mean(D_trajs_concatenated,2);
-plot(ts{1}(t_in_frame)-ts{1}(find(t_in_frame,1)),avg_D_traj(t_in_frame)./D_refmean,'Color',[0 0.4470 0.7410 1]);
+plot(ts{1}(t_in_frame)-dist_time,avg_D_traj(t_in_frame)./D_refmean,'Color',[0 0.4470 0.7410 1]);
 
 ylim([0.85 1.1])
-xlim([0 ts{1}(find(t_in_frame,1,'last')+1)-ts{1}(find(t_in_frame,1))])
-xticks(0:2.5:15)
+xlim([ts{1}(find(t_in_frame,1)-1)-dist_time ts{1}(find(t_in_frame,1,'last')+1)-dist_time])
+xticks(-15:2.5:15)
 
 xlabel('t, time since disturbance [h]','FontName','Arial')
 ylabel({'D:D^0, relative RC','denominator value'},'FontName','Arial')
