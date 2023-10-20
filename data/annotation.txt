@@ -10,8 +10,10 @@ ANNOTATION AND REFERENCES FOR EXPERIMENTAL DATA
 	-- exp_meas_elongation.csv matches translation elogation rates with corresponding growth rates
 	-- exp_meas_hetexp.csv matches heterologous protein mass fractions with ratios of the corresponding growth rates to the growth rate of cells not expressing any synthetic genes
 	-- exp_meas_ppGpp.csv matches ppGpp concentration in the cell (relative to the reference condition of the cell growing at a rate of 1/h) with corresponding growth rates
+	-- exp_meas_upshifts.csv contains dynamic trajectories of the cell growth rate over time in different nutrient upshift scenarios [2,3]
 
 REFERENCES
 [1] - Scott et al. 2010 Mechanistic links between cellular trade-offs, gene expression, and growth
 [2] - Chure and Cremer 2022 An Optimal Regulation of Fluxes Dictates Microbial Growth In and Out of Steady-State
+[3] - Erickson et al. 2017 A global resource allocation strategy governs growth transition kinetics of Escherichia coli
 
