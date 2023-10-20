@@ -18,3 +18,5 @@ cell_model/DREAM_diagnostics.txt
 param_fitting/DREAM_diagnostics.txt
 param_fitting/DREAM_fitting_outcome.mat
 figures/fig6bcdef_sandbox.m
+data/exp_meas_depletion.csv
+data/exp_selfact_oscill.mat
