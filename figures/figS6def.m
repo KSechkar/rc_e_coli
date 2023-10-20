@@ -14,7 +14,7 @@ clear
 
 %% DEFINE number of trajectories and how we simulate the trajectories
 
-num_trajs=16;
+num_trajs=32;
 
 %% INITIALISE stochastic trajectory arrays and simulators
 
