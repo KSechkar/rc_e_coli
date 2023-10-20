@@ -4,12 +4,14 @@
 % competition in cells (plus an extra 'distrubing' synthetic gene whose
 % expression is regulated by an external input - to test the controller's performance)
 
+% PLUS an inducible genetic module
+
 %%
 
-classdef pi_controller_sandbox
+classdef pi_controller_inducible
     % describe genes and their parameters
     properties (SetAccess = public)
-        module_name='pi_controller_sandbox'; % name of the heterologous gene module
+        module_name='pi_controller_inducible'; % name of the heterologous gene module
         names; % names of all heterologous genes
         misc_names; % names of modelled miscellanous species (e.g. compound of interest that het. proteins synthesise)
         parameters; % parameters of heterologous genes
@@ -23,7 +25,7 @@ classdef pi_controller_sandbox
 
     methods (Access = public)
         % CONSTRUCTOR
-        function obj = pi_controller_sandbox(obj)
+        function obj = pi_controller_inducible(obj)
             % -------------------------------------------------------------
             % SPECIFY GENE INFO--------------------------------------------
 

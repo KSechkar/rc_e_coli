@@ -1,7 +1,7 @@
-% fig4cde.m
+% fig4de.m
 
 % EMERGENT BISTABILITY OF A NON-COOPERATIVE SELF-ACTIVATOR
-% Figure 4: c, d, e
+% Figure 4: d, e
 
 % Despite rpomoting its own expression non-cooperatively, a T7 RNAP gene
 % controller by a constitutive T7 RNAP promoter may exhibit bistability due

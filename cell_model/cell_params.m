@@ -39,17 +39,13 @@ function params=cell_params(~)
     params('is_upshift') = 0; % 1 if simulating a nutrient upshift scenario
     params('s_postshift') = 0; % post-upshift steady-state value of nutirent quality (zero as no upshift by default)
 
-    % used for simulating nutrient depletion
-    params('is_depletion') = 0; % 1 if simulating a nutrient depletion scenario
-    params('K_nutr') = 5000; % Monod constant for nutrient concentration
-
     % FITTED PARAMETERS
     params('a_a') = 394464.6979;  % metabolic gene transcription rate (/h) 
     params('a_r') = 1.0318.*params('a_a'); % ribosomal gene transcription rate (/h) 
     params('nu_max')= 4.0469e+03; % max tRNA amioacylation rate (/h)
     params('K_nut')= 1.2397e+03; %5992.78; % tRNA charging rate Michaelis-Menten constant (nM) 
     params('K_e')= 1.2397e+03; %5992.78; % translation elongation rate Michaelis-Menten constant (nM) 
-    params('kcm')= 3.5436e-04;  % chloramphenical binding rate constant (/h/nM)   
+    params('kcm')= 0.000356139;  % chloramphenical binding rate constant (/h/nM)   
 end
 
 %% REFERENCES:

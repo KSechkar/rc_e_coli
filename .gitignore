@@ -6,3 +6,15 @@ irrelevant_designs/
 *.asv
 mcmcsave.mat
 warning_file.txt
+figures/figS6def_reprocess.m
+figures/figS6def_openloop_old.mat
+figures/figS6def_openloop_extra.mat
+figures/figS6def_controller_old.mat
+figures/figS6def_controller_extra.mat
+cell_model/hslab@100.101.62.39
+figures/sims_16-10.mat
+figures/ymodel.mat
+cell_model/DREAM_diagnostics.txt
+param_fitting/DREAM_diagnostics.txt
+param_fitting/DREAM_fitting_outcome.mat
+figures/fig6bcdef_sandbox.m

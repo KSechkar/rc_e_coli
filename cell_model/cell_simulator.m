@@ -37,7 +37,6 @@ classdef cell_simulator
         % HYBRID SIMULATOR
         het_S; % stoichiometry matix for hybrid simulations of heterologous gene expression
         num_stoch_reactions; % number of possible stochastic reactions
-        euler_for_hybrid_timestep=1e-7; % time step of the euler simulation
         record_time_step=0.001; % time interval between recordings of the
 
         % HYBRID TAU-LEAP SIMULATOR
@@ -301,11 +300,6 @@ classdef cell_simulator
             if(par('is_upshift')==1)
                 dsdt = (par('s_postshift') - s) * ...
                     (e./par('n_a')).*(m_a./k_a./D).*R./p_a;
-            elseif(par('is_depletion')==1)
-                % bake nutrient concentration into the tRNA aminoacylation rate
-                nu = nu.*(1-x_het(end-1)./par('ccells_max'));
-%                 nu = nu.*x_het(end)./(x_het(end)+par('K_nutr'));
-                dsdt=0;
             elseif any(strcmp(obj.het.names,'t7'))
                 nu = nu./(1+par('t7_toxicity').*x_het(2));
                 dsdt=0;
@@ -365,22 +359,13 @@ classdef cell_simulator
             % ...MISCELLANEOUS SPECIES
             if(obj.num_misc>0)
                 dxdt=[dxdt;obj.het.misc_ode(t,x,ext_inp,l)];
-
-                % in the case of nutrient depletion, last miscellaneous
-                % species is nutrient concentration in the medium, whose
-                % ODE is defined here as it depends on the host cell first and foremost
-                if(par('is_depletion'))
-                    dxdt(end)=-x_het(end-1).*nu.*p_a./s;
-                end
             end
-%             v=obj.generate_het_propensity_vector(t,x);
-%             dxdt=[dxdt;zeros(length(x)-9,1)]+obj.het_S*v;
         end
 
-        %% HYBRID SIMULATION - HOST CELL VARIABLES DETERMINISTIC, HETEROLOGOUS CIRUIT STOCHASTIC
-
-        % hybrid simulator 
-        function obj = simulate_model_hybrid(obj)
+        %% HYBRID TAU-LEAP SIMULATION - HOST CELL VARIABLES DETERMINISTIC, HETEROLOGOUS CIRUIT STOCHASTIC
+        
+        % hybrid simulator with tau-leaping
+        function obj = simulate_model_hybrid_tauleap(obj)
             % set initial condition
             obj = obj.set_x0; 
             obj.x0=[obj.x0(1:9); ...        % host cell variables continuous and deterministic
@@ -390,62 +375,48 @@ classdef cell_simulator
             % genereate the stocihiometry matrix for heterologous genes
             obj=obj.generate_het_stoichiometry_matrix();
 
-            % start at t=0
-            t_start=0;
-            x_start=obj.x0;
+            % set current time and x: start at t=0
+            t_curr=0;
+            x_curr=obj.x0;
 
             % initialise empty time and state arrays
-            obj.t=[0];obj.x=[obj.x0];
+            obj.t=[0]; obj.x=[obj.x0];
 
             % simulate
             next_record=obj.record_time_step; % the next time point to be recorded
-            while (t_start<obj.tf)
-                % draw an exponentially determined variable for the discrete event condition
-                de_condition=-log(rand);
+            while (t_curr<obj.tf)
+                % next time point
+                t_next=t_curr+obj.tau_step;
 
-                % simulate deterministacally until the next discrete event
-                % (note: every time, integrating propensities from scratch)
-                euler_output=obj.euler_for_hybrid(t_start, x_start, de_condition);
-                % unpack the simulation results: last and penultimate points
-                t_final=euler_output(1);
-                x_final=euler_output(2:end);
+                % find the changes in the stochastic part of the system
+                v=obj.generate_het_propensity_vector(t_curr,x_curr); % get the reaction propensitiy vector
+                num_het_reactions=poissrnd(v.*obj.tau_step);
+
+                % update the deterministic part of the system
+                [~, x_over_tau] = ode15s(@obj.ss_model_hybrid_tauleap, [t_curr, t_next], x_curr, obj.opt); % evolve it according to the ODEs
+                x_next=x_over_tau(end,:).'; % get the deterministic update
+
+                % combine the deterministic update with the stochastic one
+                x_next=x_next+obj.het_S*num_het_reactions;
+                % if we overshoot into negative concentrations, set them to 0 instead
+                x_next(x_next<0)=0;
                 
-                % if we didn't just run into the end of the simulation and have a discrete event instead
-                if(t_final<obj.tf)
-                    % find which discrete event happened just before the last point
-                    v=obj.generate_het_propensity_vector(t_final,x_final); % get propensities of all reactions
-                    random_draw=rand*sum(v); % draw a random variable between 0 and 1, scale by total propensity
-                    cumsum_v=cumsum(v);
-                    for i=1:size(v,1)
-                        if(random_draw<=cumsum_v(i))
-                            which_reaction=i;
-                            break
-                        end
-                    end
-%                     which_reaction=v_indices(random_draw<=cumsum(v)); % find which reaction occured according to the cdf and random draw % FIND MUST BE REPLACED
-                    
-                    % update x according to which reaction happened
-                    x_final=x_final+obj.het_S(:,which_reaction);
-                end
-
-                if(t_final>=next_record)
-                    disp(t_final)
-                    obj.t=[obj.t,t_final];
-                    obj.x=[obj.x,x_final];
-                    while(next_record<t_final)
-                            next_record=next_record+obj.record_time_step;
-                    end
+                if(t_next>=next_record)
+                    disp(t_next) % print the time of the record to monitor progress
+                    obj.t=[obj.t,t_next];
+                    obj.x=[obj.x,x_next];
+                    next_record=next_record+obj.record_time_step;
                 end
                 
                 % next time, start where we finished
-                t_start=t_final; 
-                x_start=x_final;
+                t_curr=t_next;
+                x_curr=x_next;
             end
 
             % transpose the t and x vectors for consistency with
             % deterministic simulations
             obj.t=obj.t';
-            obj.x=obj.x';            
+            obj.x=obj.x';  
         end
 
         % generating the stoichiometry matrix for heterologous genes (also find number of stochastic reactions)
@@ -500,119 +471,6 @@ classdef cell_simulator
             end
         end
 
-        % ODE simulation or the deterministic part
-        function dxdt = ss_model_hybrid(obj, t, x)
-            % denote obj. parameters as par for convenience
-            par = obj.parameters;
-            
-            % give the state vector entries meaningful names
-            m_a = x(1); % metabolic gene mRNA
-            m_r = x(2); % ribosomal gene mRNA
-            p_a = x(3); % metabolic proteins
-            R = x(4); % non-inactivated ribosomes
-            tc = x(5); % charged tRNAs
-            tu = x(6); % uncharged tRNAs
-            Bcm = x(7); % inactivated ribosomes
-            s = x(8); % nutrient quality (constant)
-            h = x(9); % chloramphenicol concentration (constant)
-            x_het=x(10:(9+2*obj.num_het+obj.num_misc)); % heterologous genes and miscellaneous synthetic species
-
-            % CALCULATE PHYSIOLOGICAL VARIABLES
-            % translation elongation rate
-            e=obj.form.e(par,tc);
-
-            % ribosome inactivation rate due to chloramphenicol
-            kcmh=par('kcm').*h;
-
-            % ribosome dissociation constants
-            k_a=obj.form.k(e,par('k+_a'),par('k-_a'),par('n_a'),kcmh);
-            k_r=obj.form.k(e,par('k+_r'),par('k-_r'),par('n_r'),kcmh);
-
-            % heterologous genes rib. dissoc. constants
-            k_het=ones(obj.num_het,1); % initialise with default value 1
-            if(obj.num_het>0)
-                for i=1:obj.num_het
-                    k_het(i)=obj.form.k(e,...
-                    obj.parameters(['k+_',obj.het.names{i}]),...
-                    obj.parameters(['k-_',obj.het.names{i}]),...
-                    obj.parameters(['n_',obj.het.names{i}]),...
-                    kcmh);
-                end
-            end
-
-            T=tc./tu... % ratio of charged to uncharged tRNAs 
-                .*(1-par('is_fixed_T'))+par('fixed_T').*par('is_fixed_T'); % OR a fixed value (to enable comparison with flux-parity regulation)
-            D=1+(m_a./k_a+m_r./k_r+sum(x_het(1:obj.num_het)./k_het))./...
-                (1-par('phi_q')); % denominator in ribosome competition calculations
-            B=R.*(1-1./D); % actively translating ribosomes (inc. those translating housekeeping genes)
-
-            nu=obj.form.nu(par,tu,s); % tRNA charging rate
-
-            l=obj.form.l(par,e,B); % growth rate
-
-            psi=obj.form.psi(par,T); % tRNA synthesis rate - MUST BE SCALED BY GROWTH RATE
-
-            % GET RATE OF EFFECTIVE NUTR. QUAL. CHANGE (for upshifts)
-            if(par('is_upshift')==1)
-                dsdt = (par('s_postshift') - s) * ...
-                    (e./par('n_a')).*(m_a./k_a./D).*R./p_a;
-            else
-                dsdt = 0;
-            end
-
-            % GET RNAP ACTIVITY
-            rnap_act=l;
-
-            % GET EXTERNAL INPUT
-            ext_inp=obj.ext.input(x,t);
-
-            % FIND TOTAL PROPENSITY OF ALL STOCHASTIC REACTIONS
-            v_total=0; % initialise the propensity vector
-            for i=1:obj.num_het
-                v_total = v_total +  rnap_act.*obj.het.regulation(obj.het.names{i},x,ext_inp)...
-                        .*par(['c_',obj.het.names{i}]).*par(['a_',obj.het.names{i}])... % mRNA synthesis
-                +  par(['b_',obj.het.names{i}]).*x_het(i) + l.*x_het(i); % dilution & degradation
-            end
-            if(strcmp(obj.het.module_name,'pi_controller'))
-                v_total = v_total +  par('kb_anti').*x_het(2).*x_het(3); % mutual annihilation of m_act and m_anti, formation of bound complex
-            end
-            for i=1:obj.num_het
-                v_total = v_total +  (e./par(['n_',obj.het.names{i}])).*(x_het(i)./k_het(i)./D).*R + l.*x_het(i+obj.num_het); % protein synthesis and dilution
-            end
-            if(strcmp(obj.het.module_name,'pi_controller'))
-                v_total = v_total +  par('b_bound').*x_het(2*obj.num_het+1) +  l.*x_het(2*obj.num_het+1); % dilution and degradation
-            end
-
-            % continuously, only consider aa-tRNA consumption by native - so not ALL ribosomes should be counted
-            B_cont=(D-1-sum(x_het(1:obj.num_het)./k_het))./D.*R;
-
-            % DEFINE DX/DT FOR THE HOST CELL
-            dxdt = [
-                    % mRNAs
-                    rnap_act.*par('c_a').*par('a_a')-(par('b_a')+l).*m_a-kcmh.*(m_a./k_a./D).*R;
-                    rnap_act.*obj.form.F_r(par,T).*par('c_r').*par('a_r')-(par('b_r')+l).*m_r-kcmh.*(m_r./k_r./D).*R;
-                    % ,metabolic protein a
-                    (e./par('n_a')).*(m_a./k_a./D).*R-l.*p_a;
-                    % ribosomes
-                    (e./par('n_r')).*(m_r./k_r./D).*R-l.*R-kcmh.*B;
-                    % tRNAs
-                    nu.*p_a-l.*tc-e.*B_cont; % continuously, only consider aa-tRNA consumption by native genes
-                    psi*l-l.*tu-nu.*p_a+e.*B_cont;
-                    % ribosomes inactivated by chloramphenicol
-                    kcmh.*B-l.*Bcm;
-                    % nutrient quality
-                    dsdt;
-                    % chloramphenicol concentration assumed constant
-                    0;
-                    ];
-            % FOR HETEROLOGOUS SPECIES, ALL ZERO (as they are changed in discrete events)
-            dxdt=[dxdt; zeros(obj.num_het*2+obj.num_misc,1)];
-
-            % ADD integral of discrete reaction propensities
-            dxdt=[dxdt; v_total];
-
-        end
-        
         % generating the propensity vector at a given time
         function v=generate_het_propensity_vector(obj,t,x)
             % denote obj. parameters as par for convenience
@@ -708,83 +566,6 @@ classdef cell_simulator
             end
         end
         
-        % Euler ODE simulation until the discrete event (or the end of the simulation) is hit
-        function euler_output=euler_for_hybrid(obj, t_start, x0, de_condition)
-            t_final=t_start;
-            x_final=[x0; 0]; % zero for the timer until next discrete event
-            
-            while(t_final<obj.tf && x_final(end)<de_condition)
-                % the formerly final values are now penultimate
-                t_penultimate=t_final;
-                x_penultimate=x_final;
-                % update the final values
-                t_final=t_penultimate+obj.euler_for_hybrid_timestep;
-                x_final=x_penultimate+obj.euler_for_hybrid_timestep*obj.ss_model_hybrid(t_penultimate,x_penultimate);
-            end
-%             disp(x_final(end)/de_condition)
-
-            % output is a linearised array
-            % (scrapping the timer until the next discrete event)
-            euler_output=[t_final; x_final(1:end-1)];
-        end
-
-        %% HYBRID TAU-LEAP SIMULATION - HOST CELL VARIABLES DETERMINISTIC, HETEROLOGOUS CIRUIT STOCHASTIC
-        % hybrid simulator with tau-leaping
-        function obj = simulate_model_hybrid_tauleap(obj)
-            % set initial condition
-            obj = obj.set_x0; 
-            obj.x0=[obj.x0(1:9); ...        % host cell variables continuous and deterministic
-                   round(obj.x0(10:end))];   % heterologous circuit variables discrete and stochastic => must be integer
-
-            
-            % genereate the stocihiometry matrix for heterologous genes
-            obj=obj.generate_het_stoichiometry_matrix();
-
-            % set current time and x: start at t=0
-            t_curr=0;
-            x_curr=obj.x0;
-
-            % initialise empty time and state arrays
-            obj.t=[0]; obj.x=[obj.x0];
-
-            % simulate
-            next_record=obj.record_time_step; % the next time point to be recorded
-            while (t_curr<obj.tf)
-                % next time point
-                t_next=t_curr+obj.tau_step;
-
-                % find the changes in the stochastic part of the system
-                v=obj.generate_het_propensity_vector(t_curr,x_curr); % get the reaction propensitiy vector
-                num_het_reactions=poissrnd(v.*obj.tau_step);
-
-                % update the deterministic part of the system
-                [~, x_over_tau] = ode15s(@obj.ss_model_hybrid_tauleap, [t_curr, t_next], x_curr, obj.opt); % evolve it according to the ODEs
-                x_next=x_over_tau(end,:).'; % get the deterministic update
-
-                % combine the deterministic update with the stochastic one
-                x_next=x_next+obj.het_S*num_het_reactions;
-                % if we overshoot into negative concentrations, set them to 0 instead
-                x_next(x_next<0)=0;
-                
-                if(t_next>=next_record)
-                    disp(t_next) % print the time of the record to monitor progress
-                    obj.t=[obj.t,t_next];
-                    obj.x=[obj.x,x_next];
-                    next_record=next_record+obj.record_time_step;
-                end
-                
-                % next time, start where we finished
-                t_curr=t_next;
-                x_curr=x_next;
-            end
-
-            % transpose the t and x vectors for consistency with
-            % deterministic simulations
-            obj.t=obj.t';
-            obj.x=obj.x';  
-        end
-        
-
         % ODE simulation or the deterministic part
         function dxdt = ss_model_hybrid_tauleap(obj, t, x)
             % denote obj. parameters as par for convenience
@@ -876,7 +657,6 @@ classdef cell_simulator
             % FOR HETEROLOGOUS SPECIES, ALL ZERO (as they are changed in discrete events)
             dxdt=[dxdt; zeros(obj.num_het*2+obj.num_misc,1)];
         end
-
 
         %% VARIED
         % PLOT simulation results

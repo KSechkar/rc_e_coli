@@ -19,7 +19,7 @@ sim=cell_simulator;
 
 sim.init_conditions('s')=0.5;
 
-sim=sim.load_heterologous_and_external('pi_controller_sandbox','constant_inducer'); % load the het. gene and ext. inp. modules
+sim=sim.load_heterologous_and_external('pi_controller_inducible','constant_inducer'); % load the het. gene and ext. inp. modules
 
 % disturbance signal parameters
 sim.ext.input_func_parameters('inducer_level')=1; % inducer level: just full expression of xtra1 gene
@@ -146,7 +146,7 @@ sim_openloop=cell_simulator;
 
 sim_openloop.init_conditions('s')=sim.init_conditions('s');
 
-sim_openloop=sim_openloop.load_heterologous_and_external('pi_controller_sandbox','constant_inducer'); % load the het. gene and ext. inp. modules
+sim_openloop=sim_openloop.load_heterologous_and_external('pi_controller_inducible','constant_inducer'); % load the het. gene and ext. inp. modules
 
 % disturbance signal parameters
 sim_openloop.ext.input_func_parameters('inducer_level')=sim.ext.input_func_parameters('inducer_level'); % inducer level: just full expression of disturbing gene

@@ -93,7 +93,6 @@ parfor traj_cntr=1:num_trajs
     % STOCHASTIC simulation parameters
     sim{traj_cntr}.tf=15; % simulation time frame
     sim{traj_cntr}.record_time_step=1e-3;
-    sim{traj_cntr}.euler_for_hybrid_timestep=1e-8;
     sim{traj_cntr}.tau_step=1e-6;
     
     % GET the steady state deterministically to avopid waiting for the system to equilibrate in Gillespie simulations

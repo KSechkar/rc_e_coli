@@ -20,7 +20,7 @@ close all
 num_samples=100;
 
 %% LOAD the MCMC chains
-load DREAM_fitting_outcome.mat
+load DREAM.mat
 ParSet = genparset(chain); DREAMPar.N = size(chain,3);
 Pars = ParSet ( floor ( 0.75 * size(ParSet,1) ) : size(ParSet,1), 1 : DREAMPar.d ); % take the last 25% of the posterior samples
 N_Pars = size(Pars,1); % get number of posterior samples

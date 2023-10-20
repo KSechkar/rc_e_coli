@@ -1,4 +1,0 @@
-MATLAB version 9.12.0.2039608 (R2022a) Update 5 on architecture win64
-
-run: { runid='run1' toolbox='ode' tbxctor=@ode_isol2ep isol_type='isol' sol_type='ep' dir='C:\Users\ersat\CODE\rc_e_coli\cell_model\data\run1' bdfname='C:\Users\ersat\CODE\rc_e_coli\cell_model\data\run1\bd.mat' logname='C:\Users\ersat\CODE\rc_e_coli\cell_model\data\run1\coco_log.txt' scrname='C:\Users\ersat\CODE\rc_e_coli\cell_model\data\run1\coco_scr.txt' }
-
