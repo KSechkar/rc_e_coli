@@ -56,7 +56,7 @@ sim.opt = odeset('reltol',1.e-6,'abstol',1.e-9);
 sim.het.parameters('a_dist')=500;
 sim=sim.push_het();
 cdists=linspace(0,1500,11);
-delta_sigmas=linspace(-0.43,0.43,11);
+delta_sigmas=linspace(-0.35,0.35,11);
 
 % record the default nutrient quality
 default_sigma=sim.init_conditions('s');

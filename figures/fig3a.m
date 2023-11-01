@@ -146,8 +146,8 @@ for chlorind=1:size(xs_1,2)
 end
 
 % plot
-dashings={'--','-.',':','none'};
-for chlorind=3:(-1):1
+dashings={'--','-.',':','-'};
+for chlorind=4:(-1):1
     if(fit_coeffs(chlorind,1)~=0)
         xpoints=linspace(0,xs_1{chlorind}(end)*1.1,100); % points for which we plot the linear fit
         ypoints=polyval(fit_coeffs(chlorind,:),xpoints);

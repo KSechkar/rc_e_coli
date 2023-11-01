@@ -54,7 +54,7 @@ sim.opt = odeset('reltol',1.e-6,'abstol',1.e-9);
 
 sim.het.parameters('a_dist')=500;
 sim=sim.push_het();
-plasmid_concs=linspace(0,1500,50);
+plasmid_concs=linspace(0,1500,51);
 
 %% RUN simulations - with controller
 

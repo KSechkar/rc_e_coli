@@ -54,7 +54,7 @@ sim.opt = odeset('reltol',1.e-6,'abstol',1.e-9);
 %% DEFINE plasmid concs. to be tested
 sim.het.parameters('a_dist')=500;
 sim=sim.push_het();
-plasmid_concs=linspace(0,1200,50);
+plasmid_concs=linspace(0,1500,51);
 
 %% RUN simulations - with controller
 
@@ -105,7 +105,6 @@ sim_openloop=sim_openloop.push_het();
 % simulation parameters
 sim_openloop.tf =  sim_openloop.tf;
 sim_openloop.opt = sim_openloop.opt;
-sim_openloop.het.parameters('c_xtra2')=100;
 
 %% RUN simulations - open loop
 % initialise the array in which the results are stored
@@ -226,7 +225,7 @@ xlabel('c_{dist}, disturbing gene conc. [nM]','FontName','Arial');
 ylabel({'p_{sens}:p_{sens}^0, relative', 'sensor prot. conc.'},'FontName','Arial')
 
 ylim([0.3 1.1])
-xlim([0 1200])
+xlim([0 1500])
 
 
 legend({'open loop','closed loop'},'FontName','Arial','FontSize',8,'Location','southwest')

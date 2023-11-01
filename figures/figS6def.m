@@ -302,30 +302,41 @@ save('figS6def_openloop.mat', 'ts_openloop', 'psens_trajs_openloop', 'l_trajs_op
 
 %% LOAD the saved trajectories (compiling several saved batches together) - alternatively to simulating them from scratch
 
-% load('figS6def_controller_old.mat')
-% load('figS6def_openloop_old.mat')
-% old_ts=ts;
-% old_psens_trajs=psens_trajs;
-% old_l_trajs=l_trajs;
-% old_D_trajs=D_trajs;
-% old_ts_openloop=ts_openloop;
-% old_psens_trajs_openloop=psens_trajs_openloop;
-% old_l_trajs_openloop=l_trajs_openloop;
-% old_D_trajs_openloop=D_trajs_openloop;
-% load('figS6def_controller_extra.mat')
-% load('figS6def_openloop_extra.mat')
-% ts=[old_ts, ts];
-% psens_trajs=[old_psens_trajs, psens_trajs];
-% l_trajs=[old_l_trajs, l_trajs];
-% D_trajs=[old_D_trajs, D_trajs];
-% ts_openloop=[old_ts_openloop, ts_openloop];
-% psens_trajs_openloop=[old_psens_trajs_openloop, psens_trajs_openloop];
-% l_trajs_openloop=[old_l_trajs_openloop, l_trajs_openloop];
-% D_trajs_openloop=[old_D_trajs_openloop, D_trajs_openloop];
-% num_trajs=size(ts,2);
-% dist_time=7.5;
-% save('figS6def_controller.mat', 'ts', 'psens_trajs', 'l_trajs', 'D_trajs')
-% save('figS6def_openloop.mat', 'ts_openloop', 'psens_trajs_openloop', 'l_trajs_openloop', 'D_trajs_openloop')
+controller_saved_files={'figS6def_controller_batch1.mat', 'figS6def_controller_batch2.mat', 'figS6def_controller_batch3.mat', 'figS6def_controller_batch4.mat'};
+openloop_saved_files={'figS6def_openloop_batch1.mat', 'figS6def_openloop_batch2.mat', 'figS6def_openloop_batch3.mat', 'figS6def_openloop_batch4.mat'};
+prevbatches_ts=[];
+prevbatches_psens_trajs=[];
+prevbatches_l_trajs=[];
+prevbatches_D_trajs=[];
+prevbatches_ts_openloop=[];
+prevbatches_psens_trajs_openloop=[];
+prevbatches_l_trajs_openloop=[];
+prevbatches_D_trajs_openloop=[];
+for i=1:size(controller_saved_files,2)
+    load(controller_saved_files{i})
+    load(openloop_saved_files{i})
+    prevbatches_ts=[prevbatches_ts, ts];
+    prevbatches_psens_trajs=[prevbatches_psens_trajs, psens_trajs];
+    prevbatches_l_trajs=[prevbatches_l_trajs, l_trajs];
+    prevbatches_D_trajs=[prevbatches_D_trajs, D_trajs];
+    prevbatches_ts_openloop=[prevbatches_ts_openloop, ts_openloop];
+    prevbatches_psens_trajs_openloop=[prevbatches_psens_trajs_openloop, psens_trajs_openloop];
+    prevbatches_l_trajs_openloop=[prevbatches_l_trajs_openloop, l_trajs_openloop];
+    prevbatches_D_trajs_openloop=[prevbatches_D_trajs_openloop, D_trajs_openloop];
+end
+ts=prevbatches_ts;
+psens_trajs=prevbatches_psens_trajs;
+l_trajs=prevbatches_l_trajs;
+D_trajs=prevbatches_D_trajs;
+ts_openloop=prevbatches_ts_openloop;
+psens_trajs_openloop=prevbatches_psens_trajs_openloop;
+l_trajs_openloop=prevbatches_l_trajs_openloop;
+D_trajs_openloop=prevbatches_D_trajs_openloop;
+num_trajs=size(ts,2);
+
+dist_time=7.5;
+save('figS6def_controller.mat', 'ts', 'psens_trajs', 'l_trajs', 'D_trajs')
+save('figS6def_openloop.mat', 'ts_openloop', 'psens_trajs_openloop', 'l_trajs_openloop', 'D_trajs_openloop')
 
 
 
@@ -368,7 +379,7 @@ hold on
 % open loop plots
 for traj_cntr=1:num_trajs
     t_in_frame=(ts_openloop{traj_cntr}>=2.5)&(ts_openloop{traj_cntr}<=12.5);
-    plot(ts_openloop{traj_cntr}(t_in_frame)-dist_time,psens_trajs_openloop{traj_cntr}(t_in_frame)./psens_refmean_openloop,'Color',[0.6350 0.0780 0.1840 0.05])
+    plot(ts_openloop{traj_cntr}(t_in_frame)-dist_time,psens_trajs_openloop{traj_cntr}(t_in_frame)./psens_refmean_openloop,'Color',[0.6350 0.0780 0.1840 0.02])
 end
 % average trajectory
 avg_psens_traj_openloop=mean(psens_trajs_openloop_concatenated,2);
@@ -377,7 +388,7 @@ plot(ts_openloop{1}(t_in_frame)-dist_time,avg_psens_traj_openloop(t_in_frame)./p
 % closed loop plots
 for traj_cntr=1:num_trajs
     t_in_frame=(ts{traj_cntr}>=2.5)&(ts{traj_cntr}<=12.5);
-    plot(ts{traj_cntr}(t_in_frame)-dist_time,psens_trajs{traj_cntr}(t_in_frame)./psens_refmean,'Color',[0 0.4470 0.7410 0.05])
+    plot(ts{traj_cntr}(t_in_frame)-dist_time,psens_trajs{traj_cntr}(t_in_frame)./psens_refmean,'Color',[0 0.4470 0.7410 0.02])
 end
 % average trajectory
 avg_psens_traj=mean(psens_trajs_concatenated,2);
