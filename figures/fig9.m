@@ -255,7 +255,7 @@ for i=1:size(inducer_concs,2)
     p_xs_nutr_openloop(i)=sim_openloop.x(end,9+sim.num_het+7);
 end
 
-%% Main Figure a - open loop
+%% Main Figure b - open loop
 
 Fa = figure('Position',[0 0 350 260]);
 set(Fa, 'defaultAxesFontSize', 9)
@@ -263,18 +263,20 @@ set(Fa, 'defaultLineLineWidth', 1.25)
 
 hold on
 
-% plot p_x values with and without the controller
-plot(inducer_concs,p_xs_openloop,'Color',[0.6350 0.0780 0.1840])
-plot(inducer_concs,p_xs_comp_openloop,'Color',[0.6350 0.0780 0.1840],'LineStyle','--')
-plot(inducer_concs,p_xs_nutr_openloop,'Color',[0.6350 0.0780 0.1840],'LineStyle',':')
+% plot p_x values without the controller
+plot(inducer_concs,p_xs_nutr_openloop,'Color',[0.6350 0.0780 0.1840],'LineStyle','--', ...
+    'DisplayName','c_{dist}=0 nM, \sigma=0.25')
+plot(inducer_concs,p_xs_openloop,'Color',[0.6350 0.0780 0.1840], ...
+    'DisplayName','c_{dist}=0 nM, \sigma=0.5')
+plot(inducer_concs,p_xs_comp_openloop,'Color',[0.6350 0.0780 0.1840],'LineStyle',':', ...
+    'DisplayName','c_{dist}=500 nM, \sigma=0.5')
 
 xlabel('f, inducer conc. [nM]','FontName','Arial');
-ylabel({'p_x, output prot. conc. [nM]'},'FontName','Arial')
-legend({'c_{dist}=0 nM, \sigma=0.5', 'c_{dist}=500 nM, \sigma=0.5', 'c_{dist}=0 nM, \sigma=0.25'},...
-    'Location','northwest')
+ylabel('p_x, output prot. conc. [nM]','FontName','Arial')
+legend('Location','northwest')
 
 xticks([0.1, 10, 1000, 100000])
-ylim([0 16000])
+ylim([0 20000])
 xlim([0.1 1e5])
 
 set(gca, 'XScale', 'log')
@@ -284,7 +286,7 @@ box on
 axis square
 hold off
 
-%% Main Figure b - closed loop
+%% Main Figure c - closed loop
 
 Fb = figure('Position',[0 0 350 260]);
 set(Fb, 'defaultAxesFontSize', 9)
@@ -292,29 +294,33 @@ set(Fb, 'defaultLineLineWidth', 1.25)
 
 hold on
 
-% plot p_x values with and without the controller
-plot(inducer_concs,p_xs,'Color',[0 0.4470 0.7410])
-plot(inducer_concs,p_xs_comp,'Color',[0 0.4470 0.7410],'LineStyle',':')
-plot(inducer_concs,p_xs_nutr,'Color',[0 0.4470 0.7410],'LineStyle','--')
+% plot p_x values with athe controller
+plot(inducer_concs,p_xs_nutr,'Color',[0 0.4470 0.7410],'LineStyle','--', ...
+    'DisplayName','c_{dist}=0 nM, \sigma=0.25')
+plot(inducer_concs,p_xs,'Color',[0 0.4470 0.7410], ...
+    'DisplayName','c_{dist}=0 nM, \sigma=0.5')
+plot(inducer_concs,p_xs_comp,'Color',[0 0.4470 0.7410],'LineStyle',':', ...
+    'DisplayName','c_{dist}=500 nM, \sigma=0.5')
 
 xlabel('f, inducer conc. [nM]','FontName','Arial');
 ylabel({'p_x, output prot. conc. [nM]'},'FontName','Arial')
-legend({'c_{dist}=0 nM, \sigma=0.5', 'c_{dist}=500 nM, \sigma=0.5', 'c_{dist}=0 nM, \sigma=0.25'},...
-    'Location','northwest')
+legend('Location','northwest')
 
 xticks([0.1, 10, 1000, 100000])
 xlim([0.1 1e5])
-ylim([0 10000])
+ylim([0 12500])
 
 set(gca, 'XScale', 'log')
 set(gca,'XMinorTick','off')
+ax = gca;
+ax.YAxis.Exponent = 4;
 
 grid 
 box on
 axis square
 hold off
 
-%% Main Figure c - open loop
+%% Main Figure d - open loop
 
 Fb = figure('Position',[0 0 350 260]);
 set(Fb, 'defaultAxesFontSize', 9)
@@ -322,15 +328,17 @@ set(Fb, 'defaultLineLineWidth', 1.25)
 
 hold on
 
-% plot p_x values with and without the controller
-plot(inducer_concs,p_xs_openloop./p_xs_openloop,'Color',[0.6350 0.0780 0.1840])
-plot(inducer_concs,p_xs_comp_openloop./p_xs_openloop,'Color',[0.6350 0.0780 0.1840],'LineStyle',':')
-plot(inducer_concs,p_xs_nutr_openloop./p_xs_openloop,'Color',[0.6350 0.0780 0.1840],'LineStyle','--')
+% plot relative p_x values without the controller
+plot(inducer_concs,p_xs_nutr_openloop./p_xs_openloop,'Color',[0.6350 0.0780 0.1840],'LineStyle','--', ...
+    'DisplayName','c_{dist}=0 nM, \sigma=0.25')
+plot(inducer_concs,p_xs_openloop./p_xs_openloop,'Color',[0.6350 0.0780 0.1840], ...
+    'DisplayName','c_{dist}=0 nM, \sigma=0.5')
+plot(inducer_concs,p_xs_comp_openloop./p_xs_openloop,'Color',[0.6350 0.0780 0.1840],'LineStyle',':', ...
+    'DisplayName','c_{dist}=500 nM, \sigma=0.5')
 
 xlabel('f, inducer conc. [nM]','FontName','Arial');
 ylabel({'p_x:p_x^0, relative output prot. conc. [nM]'},'FontName','Arial')
-legend({'c_{dist}=0 nM, \sigma=0.5', 'c_{dist}=500 nM, \sigma=0.5', 'c_{dist}=0 nM, \sigma=0.25'},...
-    'Location','northwest')
+legend('Location','northwest')
 
 xticks([0.1, 10, 1000, 100000])
 xlim([0.1 1e5])
@@ -344,7 +352,7 @@ box on
 axis square
 hold off
 
-%% Main Figure d - closed loop
+%% Main Figure e - closed loop
 
 Fb = figure('Position',[0 0 350 260]);
 set(Fb, 'defaultAxesFontSize', 9)
@@ -352,10 +360,13 @@ set(Fb, 'defaultLineLineWidth', 1.25)
 
 hold on
 
-% plot p_x values with and without the controller
-plot(inducer_concs,p_xs./p_xs,'Color',[0 0.4470 0.7410])
-plot(inducer_concs,p_xs_comp./p_xs,'Color',[0 0.4470 0.7410],'LineStyle',':')
-plot(inducer_concs,p_xs_nutr./p_xs,'Color',[0 0.4470 0.7410],'LineStyle','--')
+% plot relative p_x values with the controller
+plot(inducer_concs,p_xs_nutr_openloop./p_xs_openloop,'Color',[0 0.4470 0.7410],'LineStyle','--', ...
+    'DisplayName','c_{dist}=0 nM, \sigma=0.25')
+plot(inducer_concs,p_xs_openloop./p_xs_openloop,'Color',[0 0.4470 0.7410], ...
+    'DisplayName','c_{dist}=0 nM, \sigma=0.5')
+plot(inducer_concs,p_xs_comp_openloop./p_xs_openloop,'Color',[0 0.4470 0.7410],'LineStyle',':', ...
+    'DisplayName','c_{dist}=500 nM, \sigma=0.5')
 
 xlabel('f, inducer conc. [nM]','FontName','Arial');
 ylabel({'p_x:p_x^0, relative output prot. conc. [nM]'},'FontName','Arial')
