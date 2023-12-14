@@ -1,7 +1,7 @@
-%% figS4.m
+%% figS4e.m
 
 % WINNER-TAKES-ALL PHENOMENON
-% Figure S4
+% Figure S4b
 
 % Two bistable switches (self-activating genes) in the same cell exhibiting
 % winner-takes-all behaviour, when the activation of one switch may prevent
@@ -43,10 +43,10 @@ sim.het.parameters('f2')=20; % inducer for switch 2
 
 % Switch 1:
 sim.het.parameters('eta_dna(switch1)-switch1f1')=2; % gene reg. Hill coefficient
-sim.het.parameters('baseline1')=0.1; % baseline promoter activity
+sim.het.parameters('baseline1')=0.05; % baseline promoter activity
 % Switch 2:
 sim.het.parameters('eta_dna(switch2)-switch2f2')=2; % gene reg. Hill coefficient
-sim.het.parameters('baseline2')=0.1; % baseline promoter activity
+sim.het.parameters('baseline2')=0.05; % baseline promoter activity
 
 % inducer protein binding
 sim.het.parameters('K_switch1-f1')=1000; % dissociation constant for inducer-protein binding
@@ -108,7 +108,7 @@ for fd_index=1:size(fold_decreases,2)
     colour=(colour_start*(size(fold_decreases,2)-fd_index)+colour_end*(fd_index-1))/(size(fold_decreases,2)-1);
 
     % plot equilibria for different inducer 1 concentrations
-    plot(eqbs{fd_index}(1,:),eqbs{fd_index}(2,:),'Color',colour,'LineWidth',2)
+    plot(eqbs{fd_index}(1,:),eqbs{fd_index}(2,:),'-o','Color',colour,'LineWidth',1.5,'MarkerSize',4)
 end
 
 legend({'\upsilon=1','\upsilon=1.25','\upsilon=2.5','\upsilon=5','\upsilon=10'},'FontSize',9)
