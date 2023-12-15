@@ -438,17 +438,20 @@ classdef cell_simulator
 
             % mRNA - reactions common for all genes
             for i=1:obj.num_het
-                obj.het_S(9+i,reaction_cntr)=1; % mRNA synthesis
+                mRNA_count_scale=round(par(['n_',obj.het.names{i}])/25); % mRNA counts are scaled to account for translation by mutliple ribosomes
+                obj.het_S(9+i,reaction_cntr)=mRNA_count_scale; % mRNA synthesis
                 reaction_cntr=reaction_cntr+1;
-                obj.het_S(9+i,reaction_cntr)=-1; % mRNA degradation
+                obj.het_S(9+i,reaction_cntr)=-mRNA_count_scale; % mRNA degradation
                 reaction_cntr=reaction_cntr+1;
-                obj.het_S(9+i,reaction_cntr)=-1; % mRNA dilution
+                obj.het_S(9+i,reaction_cntr)=-mRNA_count_scale; % mRNA dilution
                 reaction_cntr=reaction_cntr+1;
             end
 
             % mRNA annihilation in AIF motif
             if(strcmp(obj.het.module_name,'pi_controller'))
-                obj.het_S(9+2,reaction_cntr)=-1; obj.het_S(9+3,reaction_cntr)=-1; obj.het_S(9+2*obj.num_het+1,reaction_cntr)=1; % mutual annihilation of m_act and m_anti, formation of bound complex
+                obj.het_S(9+2,reaction_cntr)=-round(par('n_act')/25); 
+                obj.het_S(9+3,reaction_cntr)=-round(par('n_anti')/25); 
+                obj.het_S(9+2*obj.num_het+1,reaction_cntr)=1; % mutual annihilation of m_act and m_anti, formation of bound complex
                 reaction_cntr=reaction_cntr+1;
             end
 
@@ -535,12 +538,13 @@ classdef cell_simulator
 
             % mRNA - reactions common for all genes
             for i=1:obj.num_het
+                mRNA_count_scale=round(par(['n_',obj.het.names{i}])/25); % mRNA counts are scaled to account for translation by mutliple ribosomes
                 v(reaction_cntr) = rnap_act.*obj.het.regulation(obj.het.names{i},x,ext_inp)...
-                        .*par(['c_',obj.het.names{i}]).*par(['a_',obj.het.names{i}]); % mRNA synthesis
+                        .*par(['c_',obj.het.names{i}]).*par(['a_',obj.het.names{i}])./mRNA_count_scale; % mRNA synthesis
                 reaction_cntr=reaction_cntr+1;
-                v(reaction_cntr) = par(['b_',obj.het.names{i}]).*x_het(i); % mRNA degradation
+                v(reaction_cntr) = par(['b_',obj.het.names{i}]).*x_het(i)./mRNA_count_scale; % mRNA degradation
                 reaction_cntr=reaction_cntr+1;
-                v(reaction_cntr) = l.*x_het(i); % mRNA dilution
+                v(reaction_cntr) = l.*x_het(i)./mRNA_count_scale; % mRNA dilution
                 reaction_cntr=reaction_cntr+1;
             end
 
@@ -558,7 +562,7 @@ classdef cell_simulator
                 reaction_cntr=reaction_cntr+1;
             end
 
-            % m_anti-m_act bound complex dilutiopn in AIF motif
+            % m_anti-m_act bound complex dilution in AIF motif
             if(strcmp(obj.het.module_name,'pi_controller'))
                 v(reaction_cntr) = par('b_bound').*x_het(2*obj.num_het+1); % degradation
                 reaction_cntr=reaction_cntr+1;
