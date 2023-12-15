@@ -38,11 +38,11 @@ for scenario=1:size(f1s,2)
     % Switch 1:
     sims{scenario}.het.parameters('K_dna(switch1)-switch1f1')=5e3; % gene reg. Hill constant
     sims{scenario}.het.parameters('eta_dna(switch1)-switch1f1')=2; % gene reg. Hill coefficient
-    sims{scenario}.het.parameters('baseline1')=0.1; % baseline promoter activity
+    sims{scenario}.het.parameters('baseline1')=0.05; % baseline promoter activity
     % Switch 2:
     sims{scenario}.het.parameters('K_dna(switch2)-switch2f2')=5e3; % gene reg. Hill constant
     sims{scenario}.het.parameters('eta_dna(switch2)-switch2f2')=2; % gene reg. Hill coefficient
-    sims{scenario}.het.parameters('baseline2')=0.1; % baseline promoter activity
+    sims{scenario}.het.parameters('baseline2')=0.05; % baseline promoter activity
 
     % inducer protein binding
     sims{scenario}.het.parameters('K_switch1-f1')=1000; % dissociation constant for inducer-protein binding
@@ -98,6 +98,11 @@ set(Fig_pp, 'defaultLineLineWidth', 1.25)
 
 hold on
 
+% plot equilibria for different inducer 1 concentrations
+plot(eqbs(1,:),eqbs(2,:),'-o','Color',[1 0 0], ...
+    'LineWidth',1.5,'MarkerSize',4,...
+    'HandleVisibility','off')
+
 % plot the three trajectories
 traj_colours={[0 0.75 0.75],[0.375 0.75 0.375],[0.75 0.75 0]}; % colours of trajectories
 for scenario=1:size(f1s,2) 
@@ -111,14 +116,12 @@ for scenario=1:size(f1s,2)
     
     x_het=sims{scenario}.x(:,10:(9+2*sims{scenario}.num_het));
     
-    plot(x_het(i_start_obs:end,3),x_het(i_start_obs:end,4),'-','Color',traj_colours{scenario},'LineWidth',1);
+    plot(x_het(i_start_obs:end,3),x_het(i_start_obs:end,4),'-', ...
+        'Color',traj_colours{scenario},'LineWidth',1.5, ...
+        'DisplayName',['f_1=',num2str(f1s{scenario}),' nM']);
 end
 
-% plot equilibria for different inducer 1 concentrations
-plot(eqbs(1,:),eqbs(2,:),'Color',[1 0 0],'LineWidth',2)
-
-legend('f_1=4 nM','f_1=20 nM','f_1=800 nM',...
-    'Location','northeast','FontName','Arial')
+legend('Location','northeast','FontName','Arial')
 
 xlabel('p_{s1}, conc. of switch 1 prot. [nM]','FontName','Arial')
 ylabel('p_{s2}, conc. of switch 2 prot. [nM]','FontName','Arial')

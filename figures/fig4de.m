@@ -34,7 +34,7 @@ sim.het.parameters('K_t7')=550;
 sim.het.parameters('b_t7')=16.64;
 sim.het.parameters('d_t7')=0.18;
 sim.het.parameters('baseline_t7')=0.0016; % Liao et al. 2017
-sim.het.parameters('t7_toxicity')=0.03; % Liao et al. 2017
+sim.het.parameters('t7_toxicity')=0.0072264; % Liao et al. 2017
 sim=sim.push_het;
 s=0.5;
 
@@ -91,8 +91,8 @@ x_fromlow=sim.x;
 l_fromlow=get_ls(sim);
 
 %% SIMULATE the system startung from a HIGH-t7 initial condition
-sim.het.init_conditions('m_t7')=50;
-sim.het.init_conditions('p_t7')=0;
+sim.het.init_conditions('m_t7')=5;
+sim.het.init_conditions('p_t7')=5e2;
 sim=sim.push_het();
 sim.init_conditions('p_a')=(sim.init_conditions('p_a')*sim.parameters('n_a')-...
     sim.het.init_conditions('p_t7').*sim.het.parameters('n_t7'))./sim.parameters('n_a'); % adjust initial condition to have constant cell mass
@@ -119,9 +119,10 @@ plot(t_fromlow,x_fromlow(:,11))
 plot(t_fromhigh,x_fromhigh(:,11))
 
 xlabel('time [h]','FontName','Arial');
-ylabel('m_{t7}, T7-RNAP conc. [nM]','FontName','Arial')
+ylabel('p_{t7}, T7-RNAP conc. [nM]','FontName','Arial')
 
-legend({'m_{t7}(0 h)=25 nM','p_{t7}(0 h)=50 nM'})
+legend({'p_{t7}(0 h)=0 nM','p_{t7}(0 h)=500 nM'},...
+    'Location','east')
 
 set(gca, 'YScale', 'log')
 ylim([1 1e4])
@@ -147,8 +148,9 @@ plot(t_fromhigh,l_fromhigh)
 xlabel('time [h]','FontName','Arial');
 ylabel('\lambda, growth rate [1/h]','FontName','Arial')
 
-legend({'p_{t7}(0 h)=25 nM','p_{t7}(0 h)=50 nM'})
+legend({'p_{t7}(0 h)=0 nM','p_{t7}(0 h)=500 nM'},'Location','east')
 
+ylim([0 1.75])
 xlim([0 sim.tf])
 
 grid 
