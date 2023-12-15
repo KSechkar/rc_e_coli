@@ -1,9 +1,9 @@
-%% figS5a.m
+%% figS7def.m
 
 % PROPORTIONAL-INTEGRAL CONTROLLER
-% FIGURE S5a
+% FIGURE S7def
 
-% Performance of the controller with MCMC parameter samples
+% Stochastic simulation of the controller's performance
 
 %% CLEAR all variables
 
@@ -297,13 +297,13 @@ end
 toc
 
 % save all trjectories for future use
-save('figS6def_controller.mat', 'ts', 'psens_trajs', 'l_trajs', 'D_trajs')
-save('figS6def_openloop.mat', 'ts_openloop', 'psens_trajs_openloop', 'l_trajs_openloop', 'D_trajs_openloop')
+save('figS7def_controller.mat', 'ts', 'psens_trajs', 'l_trajs', 'D_trajs')
+save('figS7def_openloop.mat', 'ts_openloop', 'psens_trajs_openloop', 'l_trajs_openloop', 'D_trajs_openloop')
 
 %% LOAD the saved trajectories (compiling several saved batches together) - alternatively to simulating them from scratch
 
-controller_saved_files={'figS6def_controller_batch1.mat', 'figS6def_controller_batch2.mat', 'figS6def_controller_batch3.mat', 'figS6def_controller_batch4.mat'};
-openloop_saved_files={'figS6def_openloop_batch1.mat', 'figS6def_openloop_batch2.mat', 'figS6def_openloop_batch3.mat', 'figS6def_openloop_batch4.mat'};
+controller_saved_files={'figS7def_controller_batch1.mat', 'figS7def_controller_batch2.mat'};%, 'figS7def_controller_batch3.mat', 'figS7def_controller_batch4.mat'};
+openloop_saved_files={'figS7def_openloop_batch1.mat', 'figS7def_openloop_batch2.mat'};%, 'figS7def_openloop_batch3.mat', 'figS7def_openloop_batch4.mat'};
 prevbatches_ts=[];
 prevbatches_psens_trajs=[];
 prevbatches_l_trajs=[];
@@ -335,14 +335,14 @@ D_trajs_openloop=prevbatches_D_trajs_openloop;
 num_trajs=size(ts,2);
 
 dist_time=7.5;
-save('figS6def_controller.mat', 'ts', 'psens_trajs', 'l_trajs', 'D_trajs')
-save('figS6def_openloop.mat', 'ts_openloop', 'psens_trajs_openloop', 'l_trajs_openloop', 'D_trajs_openloop')
+save('figS7def_controller.mat', 'ts', 'psens_trajs', 'l_trajs', 'D_trajs')
+save('figS7def_openloop.mat', 'ts_openloop', 'psens_trajs_openloop', 'l_trajs_openloop', 'D_trajs_openloop')
 
 
 
 %% FIND pre-disturbance means to plot relative trajectories
-t_in_frame_predist_openloop=(ts_openloop{1}>=2.5)&(ts_openloop{1}<=7.5);
-t_in_frame_predist=(ts{1}>=2.5)&(ts{1}<=7.5);
+t_in_frame_predist_openloop=(ts_openloop{1}>=5)&(ts_openloop{1}<=7.5);
+t_in_frame_predist=(ts{1}>=5)&(ts{1}<=7.5);
 
 % psens - open loop
 psens_trajs_openloop_concatenated=cat(2,psens_trajs_openloop{:});
@@ -378,8 +378,8 @@ hold on
 
 % open loop plots
 for traj_cntr=1:num_trajs
-    t_in_frame=(ts_openloop{traj_cntr}>=2.5)&(ts_openloop{traj_cntr}<=12.5);
-    plot(ts_openloop{traj_cntr}(t_in_frame)-dist_time,psens_trajs_openloop{traj_cntr}(t_in_frame)./psens_refmean_openloop,'Color',[0.6350 0.0780 0.1840 0.02])
+    t_in_frame=(ts_openloop{traj_cntr}>=5)&(ts_openloop{traj_cntr}<=12.5);
+    plot(ts_openloop{traj_cntr}(t_in_frame)-dist_time,psens_trajs_openloop{traj_cntr}(t_in_frame)./psens_refmean_openloop,'Color',[0.6350 0.0780 0.1840 0.05])
 end
 % average trajectory
 avg_psens_traj_openloop=mean(psens_trajs_openloop_concatenated,2);
@@ -387,14 +387,14 @@ plot(ts_openloop{1}(t_in_frame)-dist_time,avg_psens_traj_openloop(t_in_frame)./p
 
 % closed loop plots
 for traj_cntr=1:num_trajs
-    t_in_frame=(ts{traj_cntr}>=2.5)&(ts{traj_cntr}<=12.5);
-    plot(ts{traj_cntr}(t_in_frame)-dist_time,psens_trajs{traj_cntr}(t_in_frame)./psens_refmean,'Color',[0 0.4470 0.7410 0.02])
+    t_in_frame=(ts{traj_cntr}>=5)&(ts{traj_cntr}<=12.5);
+    plot(ts{traj_cntr}(t_in_frame)-dist_time,psens_trajs{traj_cntr}(t_in_frame)./psens_refmean,'Color',[0 0.4470 0.7410 0.05])
 end
 % average trajectory
 avg_psens_traj=mean(psens_trajs_concatenated,2);
 plot(ts{1}(t_in_frame)-dist_time,avg_psens_traj(t_in_frame)./psens_refmean,'Color',[0 0.4470 0.7410 1]);
 
-ylim([0.85 1.1])
+ylim([0.8 1.2])
 xlim([ts{1}(find(t_in_frame,1)-1)-dist_time ts{1}(find(t_in_frame,1,'last')+1)-dist_time])
 xticks(-15:2.5:15)
 
@@ -416,7 +416,7 @@ hold on
 
 % open loop plots
 for traj_cntr=1:num_trajs
-    t_in_frame=(ts_openloop{traj_cntr}>=2.5)&(ts_openloop{traj_cntr}<=12.5);
+    t_in_frame=(ts_openloop{traj_cntr}>=5)&(ts_openloop{traj_cntr}<=12.5);
     plot(ts_openloop{traj_cntr}(t_in_frame)-dist_time,l_trajs_openloop{traj_cntr}(t_in_frame)./l_refmean_openloop,'Color',[0.6350 0.0780 0.1840 0.01])
 end
 
@@ -426,7 +426,7 @@ plot(ts_openloop{1}(t_in_frame)-dist_time,avg_l_traj_openloop(t_in_frame)./l_ref
 
 % closed loop plots
 for traj_cntr=1:num_trajs
-    t_in_frame=(ts{traj_cntr}>=2.5)&(ts{traj_cntr}<=12.5);
+    t_in_frame=(ts{traj_cntr}>=5)&(ts{traj_cntr}<=12.5);
     plot(ts{traj_cntr}(t_in_frame)-dist_time,l_trajs{traj_cntr}(t_in_frame)./l_refmean,'Color',[0 0.4470 0.7410 0.01])
 end
 
@@ -434,7 +434,7 @@ end
 avg_l_traj=mean(l_trajs_concatenated,2);
 plot(ts{1}(t_in_frame)-dist_time,avg_l_traj(t_in_frame)./l_refmean,'Color',[0 0.4470 0.7410 1]);
 
-ylim([0.85 1.1])
+ylim([0.9 1.1])
 xlim([ts{1}(find(t_in_frame,1)-1)-dist_time ts{1}(find(t_in_frame,1,'last')+1)-dist_time])
 xticks(-15:2.5:15)
 
@@ -455,7 +455,7 @@ hold on
 
 % open loop plots
 for traj_cntr=1:num_trajs
-    t_in_frame=(ts_openloop{traj_cntr}>=2.5)&(ts_openloop{traj_cntr}<=12.5);
+    t_in_frame=(ts_openloop{traj_cntr}>=5)&(ts_openloop{traj_cntr}<=12.5);
     plot(ts_openloop{traj_cntr}(t_in_frame)-dist_time,D_trajs_openloop{traj_cntr}(t_in_frame)./D_refmean_openloop,'Color',[0.6350 0.0780 0.1840 0.01])
 end
 
@@ -465,7 +465,7 @@ plot(ts_openloop{1}(t_in_frame)-dist_time,avg_D_traj_openloop(t_in_frame)./D_ref
 
 % closed loop plots
 for traj_cntr=1:num_trajs
-    t_in_frame=(ts{traj_cntr}>=2.5)&(ts{traj_cntr}<=12.5);
+    t_in_frame=(ts{traj_cntr}>=5)&(ts{traj_cntr}<=12.5);
     plot(ts{traj_cntr}(t_in_frame)-dist_time,D_trajs{traj_cntr}(t_in_frame)./D_refmean,'Color',[0 0.4470 0.7410 0.01])
 end
 
@@ -473,7 +473,7 @@ end
 avg_D_traj=mean(D_trajs_concatenated,2);
 plot(ts{1}(t_in_frame)-dist_time,avg_D_traj(t_in_frame)./D_refmean,'Color',[0 0.4470 0.7410 1]);
 
-ylim([0.85 1.1])
+ylim([0.9 1.1])
 xlim([ts{1}(find(t_in_frame,1)-1)-dist_time ts{1}(find(t_in_frame,1,'last')+1)-dist_time])
 xticks(-15:2.5:15)
 
