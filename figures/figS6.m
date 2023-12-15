@@ -1,7 +1,7 @@
-%% figS5.m
+%% figS6.m
 
 % PROPORTIONAL-INTEGRAL CONTROLLER
-% FIGURE S5
+% FIGURE S6
 
 % Showcasing how our proportional-integral controller mitigates cisturbances 
 % caused by extra heterologous mRNA expression and keeps the burden almost

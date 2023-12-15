@@ -1,7 +1,7 @@
-%% figS7.m
+%% figS8.m
 
 % PROPORTIONAL-INTEGRAL CONTROLLER
-% FIGURE S7
+% FIGURE S8
 
 % Showcasing how our proportional-integral controller can be made more
 % robust to leakiness but at the cost of causing oscillations

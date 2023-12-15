@@ -1,4 +1,4 @@
-% figS5.m
+% figS5defg.m
 
 % EMERGENT BISTABILITY OF A NON-COOPERATIVE SELF-ACTIVATOR
 % Figure S5: d,e,f,g
