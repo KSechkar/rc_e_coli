@@ -124,11 +124,11 @@ for i_comb=1:size(parcombs,1)
 end
 % save results
 bckup.loglikes=loglikes;
-save('S1e.mat','bckup')
+save('figS2e.mat','bckup')
 
 %% LOAD the saved simulation results (optional)
 
-% load('S2e.mat');
+% load('figS2e.mat');
 % parnames=bckup.parnames;
 % ranges=bckup.ranges;
 % parcombs=bckup.parcombs;
