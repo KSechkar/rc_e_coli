@@ -75,6 +75,7 @@ REFERENCES
 
 [^1] Matthew Scott, Carl W. Gunderson, Eduard M. Mateescu, Zhongge Zhang, and Terence Hwa. Interdependence of cell growth and gene expression: Origins and consequences. Science, 330(6007):1099–1102, 2010.
 
-[^2] Griffin Chure and Jonas Cremer. An optimal regulation of fluxes dictates microbial growth in and out of steady-state. biorXiv, 2022.
+[^2] Griffin Chure and Jonas Cremer. An optimal regulation of fluxes dictates microbial growth in and out733
+of steady-state. eLife 12, e84878, 2023.
 
 [^3] Jasper Vrugt. Markov chain Monte Carlo simulation using the DREAM software package: Theory, concepts, and MATLAB implementation. Environmental Modelling & Software. 75:273-316, 2016.
