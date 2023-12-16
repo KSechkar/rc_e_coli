@@ -1,7 +1,10 @@
 # rc_e_coli
-MATLAB code for modelling how synthetic gene circuits interact with the host cell's (_E. coli_) native genes and affect its growth rate, used in the manuscript 'A coarse-grained bacterial cell model for resource-aware analysis and design of synthetic gene circuits'. The folders are organised as follows:
+MATLAB code for modelling how synthetic gene circuits interact with the host cell's (_E. coli_) native genes and affect its growth rate, used in the manuscript 'A coarse-grained bacterial cell model for resource-aware analysis and design of synthetic gene circuits'.
 
-## cell_model
+## File organisation
+The folders are organised as follows:
+
+### cell_model
 Contains scripts implementing the model of an E.coli cell. These include:
 - _cell_simulator.m_ - a Matlab class object enabling simulations of the host cell. The expression of synthetic circuits can be simulated by loading the 'heterologous gene' and 'external input' modules (see _het_modules_ and _ext_inputs_ folders). Note that the associated modules' parameters must be pushed into the main simulator's memory using the function _push_het()_ every time they are altered.
 - _cell_params.m_ - provides default values of all parameters describing the host cell
@@ -9,25 +12,26 @@ Contains scripts implementing the model of an E.coli cell. These include:
 - _cell_formulae.m_ - contains a collection of formulae for rate and activation functions used by the cell simulator
 - _get_steady.m_ - an auxiliary function that allows to determine the cell's steady state in given conditions by running _cell_simulator_ simulations.
 
-## het_modules
+### het_modules
 Contains scripts defining class objects that allow to model the expression of different heterologous gene circuits. These include:
 - _no_het.m_ - no heterologous gene being expressed. Due to being 'empty', this script can be copied and filled in to describe a synthetic gene circuit of interest
 - _one_constit.m_ - one constitutive heterologous gene
 - _two_constit.m_ - two constitutive heterologous genes
+- _t7_selfact.m_ - a non-cooperative self-activator circuit consisting of a T7 RNA polymerase that transcribes its own gene
 - _two_switches.m_ - two self-activating heterologous genes acting as bistable switches. If the genes impose a sufficiently high burden on the cell, winner-takes-all behaviour means that the activation of one switch prevent the activation of the other
 - _pi_controller.m_ - a proportional-integral feedback controller for maintaining a constant extent of competition for ribosomes in the cell
 
-## ext_modules
+### ext_modules
 Contains scripts defining class objects that describe external inputs administered to the cells, such as chemical inducer concentrations or light stimuli. These include:
 - _no_ext.m_ - no external signal. Due to being 'empty', this script can be copied and filled in to describe an externa input of interest
 - _constant_inducer.m_ - constant concentration of a chemical inducer
 - _step_inducer.m_ - a step increase in the concentration of a chemical inducer
 - _pulse_inducer.m_ - time-limited step pulse above or below the baseline concentration of a chemical inducer
 
-## figures
+### figures
 Running the corresponding scripts allows to reproduce the simulation results presented in the publication. Files not named _fig(...).m_ are auxiliary scripts required by some of the figure-generating scripts.
 
-## param_fitting
+### param_fitting
 Contains scripts allowing to fit the model's parameters to experimental data obtained by Scott et al. [^1] and processed as descroibed by Chure et al. [^2] using the DiffeRential Evolution Adaptive Metropolis (DREAM) algorithm [^3]. Note that these scripts require the [DREAM](https://faculty.sites.uci.edu/jasper/software/#eleven) package to work.
 - _dream_fit.m_ - run the DREAM algorithm and record the outcome in a _.mat_ file
 - _dream_model.m_ - defines the function for the model's log-likelihood given the experimental data for an input set of parameter values. This function is called while sampling the chains during DREAM fitting
@@ -36,8 +40,34 @@ Contains scripts allowing to fit the model's parameters to experimental data obt
 - _DREAM_postproc_amended.mat_ - script for postprocessing the fitting outcome (find the mode of the sampled distribution, plot the sampled chains, etc.). This script has been taken from the original DREAM package, but minor amendments have been made to it so as to improve the output plots' interpretability
 - _update_a_a.mat_ - script for updating the value of the a_a parameter (assigned an order-of-magnitude estimated value for the duration of MCMC fitting) based on the fitting outcome
 
-## data
+### data
 Experimental data used to fit the parameters and compare model predictions with real-life measurements, taken from [^1] and [^2]. The text file _annotation.txt_ explains the meaning of each dataset present.
+
+## System requirements
+The code was run and ensured to be functional with Matlab R2022a and Matlab R2023b on PCs running on Windows 10 Pro 22H2, Windows 11 Home 22H2 and Ubuntu 20.04.6.
+
+No non-standard hardware is required to run the code. Additional software requirements include the Matlab Paralle Computing Toolbox 7.6 and the DREAM Matlab package, part of the HydroSight toolbox (https://github.com/peterson-tim-j/HydroSight; date last accessed: 10 September 2022).
+
+## Installation guide
+To install and run the code, download this repository as a zip file, extract its contents into a folder, and open it using Matlab. Provided that all other required software has been installed, the process should take less than 5 minutes on a typical PC.
+
+## Demo and reproduction of results
+To reproduce the results displayed in the figures from the article and its supplementary information, run the script with the corresponding name in the 'figures' folder (e.g. _fig3a.m_ will reproduce the main text's Figure 3a, _figS1.m_ will reproduce Supplementary Figure 1...). The obtained plots should match the figures in the text.
+
+Different scripts will have different runtimes on a typical PC. However, with the exception of the scipts listed below, they should not take more than 10 minutes. The longer-running programs are listed below; for ease of review, for each such script a _.mat_ file with the raw simulation outcome data is provided in the same folder.
+- _dream_fit.m_ - parameter fitting; takes $\approx 48$ hours provided that the computer can run 10 parallel pool workers at once. Raw simulation outcome data given in _DREAM.mat_
+- _figS2e.m_ - parameter sensitivity analysis; takes $\approx 3$ hours provided that the computer can run 12 parallel pool workers at once. Raw simulation outcome data given in _figS2e.mat_
+- _figS5defg.m_ - bifurcation analysis of a non-cooperative self-activator; takes $\approx 2$ hours. Raw simulation outcome data given in _figS5defg.mat_
+- _figS7def.m_ - one trajectory takes $72-96$ hours to simulate. Multiple trajectories can be sampled at the same time using the Matlab Parallel Computing Toolboox. Raw simulation outcome data given in _figS7def_controller_batch<1,2,3>.mat_ and _figS7def_openloop_batch<1,2,3>.mat_
+
+## Instructions for use in custom applications
+For simulating the expression of an arbitrary heterologous gene circuit by the host cell, define the circuit model by filling the template file _no_het.m_ in the 'heterologous modules' folder according to the insturctions in the template script's comment lines. If any external input (e.g. inducer pulse) is provided to the system, it can be defined by filling the template file _no_ext.m_ in the 'external inputs' folderaccording to the insturctions in the template script's comment lines -- otherwise, the unmodified _no_ext.m_ script should be used. The system's behaviour can then be simulated by running:
+```
+sim=cell_simulator; % initialise simulator
+sim=sim.load_heterologous_and_external('heterologous_module_name','external_input_module_name'); % load heterologous gene expression module
+sim.tf = simulation_time; % simulation will be run from 0 to simulation_time hours
+sim=sim.simulate_model(); % simulate
+```
 
 ---
 
