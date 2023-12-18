@@ -14,7 +14,7 @@ clear
 
 %% DEFINE number of trajectories and how we simulate the trajectories
 
-num_trajs=32;
+num_trajs=48;
 
 %% INITIALISE stochastic trajectory arrays and simulators
 
@@ -302,8 +302,8 @@ save('figS7def_openloop.mat', 'ts_openloop', 'psens_trajs_openloop', 'l_trajs_op
 
 %% LOAD the saved trajectories (compiling several saved batches together) - alternatively to simulating them from scratch
 
-controller_saved_files={'figS7def_controller_batch1.mat', 'figS7def_controller_batch2.mat'};%, 'figS7def_controller_batch3.mat', 'figS7def_controller_batch4.mat'};
-openloop_saved_files={'figS7def_openloop_batch1.mat', 'figS7def_openloop_batch2.mat'};%, 'figS7def_openloop_batch3.mat', 'figS7def_openloop_batch4.mat'};
+controller_saved_files={'figS7def_controller_batch1.mat', 'figS7def_controller_batch2.mat', 'figS7def_controller_batch3.mat'};%, 'figS7def_controller_batch4.mat'};
+openloop_saved_files={'figS7def_openloop_batch1.mat', 'figS7def_openloop_batch2.mat', 'figS7def_openloop_batch3.mat'};%, 'figS7def_openloop_batch4.mat'};
 prevbatches_ts=[];
 prevbatches_psens_trajs=[];
 prevbatches_l_trajs=[];
@@ -381,6 +381,7 @@ for traj_cntr=1:num_trajs
     t_in_frame=(ts_openloop{traj_cntr}>=5)&(ts_openloop{traj_cntr}<=12.5);
     plot(ts_openloop{traj_cntr}(t_in_frame)-dist_time,psens_trajs_openloop{traj_cntr}(t_in_frame)./psens_refmean_openloop,'Color',[0.6350 0.0780 0.1840 0.05])
 end
+
 % average trajectory
 avg_psens_traj_openloop=mean(psens_trajs_openloop_concatenated,2);
 plot(ts_openloop{1}(t_in_frame)-dist_time,avg_psens_traj_openloop(t_in_frame)./psens_refmean_openloop,'Color',[0.6350 0.0780 0.1840 1]);

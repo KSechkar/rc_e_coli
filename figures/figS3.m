@@ -60,32 +60,11 @@ F_rs = zeros(size(sigmas,2),size(plasmid_concs,2)); % ribosomal gene transcripti
 Ts = zeros(size(sigmas,2),size(plasmid_concs,2)); % proportional to 1/ppGpp concentration
 nus = zeros(size(sigmas,2),size(plasmid_concs,2)); % tRNA charging rate
 
-
-%% RUN without heterologous gene expression
-for i=1:size(sigmas,2)
-    % set parameter values
-    sim.init_conditions('s')=sigmas(i);
-    for het_cntr=1:sim.num_het
-        sim.het.parameters(['c_',sim.het.names{het_cntr}])=0;
-    end
-    sim = sim.push_het(); % push initial condition and parameters to main object
-
-    ss=get_steady(sim,Delta,Max_iter);
-    
-    [e,nu,F_r,T]=get_enuFrT(sim,ss); % get values of variables
-    
-    % record
-    e0(i)=e;
-    F_r0(i)=F_r;
-    nu0(i)=nu;
-    T0(i)=T;
-end
-
 %% RUN with different burden levels
 
 % get actual model predictions
 for i=1:size(sigmas,2)
-    parfor j=1:size(plasmid_concs,2)
+    for j=1:size(plasmid_concs,2)
         parsim=cell_simulator(); % create cell simulator for parallel computing
         parsim=parsim.load_heterologous_and_external('one_constit','no_ext'); % load heterologous gene expression module
         parsim.het.parameters('a_xtra')=a_xtra;
@@ -104,12 +83,27 @@ for i=1:size(sigmas,2)
         [e,nu,F_r,T]=get_enuFrT(parsim,ss); % get values of variables
         
         % record
-        es(i,j)=(e-e0(i))/e0(i);
-        F_rs(i,j)=(F_r-F_r0(i))/F_r0(i);
-        nus(i,j)=(nu-nu0(i))/nu0(i);
-        Ts(i,j)=(T-T0(i))/T0(i);
+        es(i,j)=e;%(e-e0(i))/e0(i);
+        F_rs(i,j)=F_r;%(F_r-F_r0(i))/F_r0(i);
+        nus(i,j)=nu;
+        Ts(i,j)=T;
     end
     disp([num2str(i),' out of ',num2str(size(sigmas,2)),' nutirent qualities considered: ',num2str(sigmas(i))])
+end
+
+%% FIND RELATIVE CHANGES
+
+e0=es(:,1);
+F_r0=F_rs(:,1);
+nu0=nus(:,1);
+T0=Ts(:,1);
+for i=1:size(sigmas,2)
+    for j=1:size(plasmid_concs,2)
+        es(i,j)=(es(i,j)-e0(i))/e0(i);
+        F_rs(i,j)=(F_rs(i,j)-F_r0(i))/F_r0(i);
+        nus(i,j)=(nus(i,j)-nu0(i))/nu0(i);
+        Ts(i,j)=(Ts(i,j)-T0(i))/T0(i);
+    end
 end
 
 %% MAKE axis labels

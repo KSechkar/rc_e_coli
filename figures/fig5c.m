@@ -108,7 +108,7 @@ for i=1:size(plasmid_concs,2)
     phi_hets(i)=phi_het;
 end
 
-%% FIGURE 3 e 
+%% FIGURE 5 c 
 approx_colour=[0 0.8 0.8];
 Fig = figure('Position',[0 0 385 290]);
 set(Fig, 'defaultAxesFontSize', 9)

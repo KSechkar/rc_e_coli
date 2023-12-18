@@ -1,7 +1,7 @@
-%% figS1cd.m
+%% figS2cd.m
 
 % MCMC FITTING
-% Figure S1: c,d
+% Figure S2: c,d
 
 % From the MCMC fit, find the eigenvalues of the Fisher Information Matrix
 % (displayed in Figure c, not plotted using Matlab) and the parameter
@@ -17,7 +17,7 @@ clear
 close all
 
 %% LOAD the MCMC chains
-load DREAM_fitting_outcome.mat
+load DREAM.mat
 ParSet = genparset(chain); DREAMPar.N = size(chain,3);
 Pars = ParSet ( floor ( 0.75 * size(ParSet,1) ) : size(ParSet,1), 1 : DREAMPar.d ); % take the last 25% of the posterior samples
 N_Pars = size(Pars,1); % get number of posterior samples

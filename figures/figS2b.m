@@ -1,7 +1,7 @@
-%% figS1b.m
+%% figS2b.m
 
 % MCMC FITTING
-% Figure S1: b
+% Figure S2: b
 
 % Demonstrate that the fit's accuracy is relatively unaffected over a wide
 % range of ribosomal and metabolic gene promoter strengths as long as their
