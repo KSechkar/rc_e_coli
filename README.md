@@ -46,7 +46,7 @@ Experimental data used to fit the parameters and compare model predictions with 
 ## System requirements
 The code was run and ensured to be functional with Matlab R2022a and Matlab R2023b on PCs running on Windows 10 Pro 22H2, Windows 11 Home 22H2 and Ubuntu 20.04.6.
 
-No non-standard hardware is required to run the code. Additional software requirements include the Matlab Paralle Computing Toolbox 7.6 and the DREAM Matlab package, part of the HydroSight toolbox (https://github.com/peterson-tim-j/HydroSight; date last accessed: 10 September 2022).
+No non-standard hardware is required to run the code. Additional software requirements include the Matlab Parallel Computing Toolbox 7.6 and the DREAM Matlab package, part of the HydroSight toolbox (https://github.com/peterson-tim-j/HydroSight; date last accessed: 10 September 2022).
 
 ## Installation guide
 To install and run the code, download this repository as a zip file, extract its contents into a folder, and open it using Matlab. Provided that all other required software has been installed, the process should take less than 5 minutes on a typical PC.
