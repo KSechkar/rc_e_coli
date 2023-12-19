@@ -54,7 +54,7 @@ To install and run the code, download this repository as a zip file, extract its
 ## Demo and reproduction of results
 To reproduce the results displayed in the figures from the article and its supplementary information, run the script with the corresponding name in the 'figures' folder (e.g. _fig3a.m_ will reproduce the main text's Figure 3a, _figS1.m_ will reproduce Supplementary Figure 1...). The obtained plots should match the figures in the text.
 
-Different scripts will have different runtimes on a typical PC. However, with the exception of the scipts listed below, they should not take more than 10 minutes.
+Different scripts will have different runtimes on a typical PC. However, with the exception of the scripts listed below, they should not take more than 10 minutes.
 - _dream_fit.m_ - parameter fitting; takes $\approx 48$ hours provided that the computer can run 10 parallel pool workers at once. Raw parameter fitting outcome data given in _DREAM.mat_
 - _fig9.m_ - demonstration of how the integral controller proposed in the article enforces modularity of synthetic biology designs; takes $\approx 30$ minutes.
 - _figS2a.m_, _figS7abc.m_ - scripts that invove sampling parameters from the fitted distribution and simulating the model with them; take $\approx 20$ minutes.
@@ -63,7 +63,7 @@ Different scripts will have different runtimes on a typical PC. However, with th
 - _figS7def.m_ - one trajectory takes $72-96$ hours to simulate. Multiple trajectories can be sampled at the same time using the Matlab Parallel Computing Toolboox.
 
 ## Instructions for use in custom applications
-For simulating the expression of an arbitrary heterologous gene circuit by the host cell, define the circuit model by filling the template file _no_het.m_ in the 'heterologous modules' folder according to the insturctions in the template script's comment lines. If any external input (e.g. inducer pulse) is provided to the system, it can be defined by filling the template file _no_ext.m_ in the 'external inputs' folderaccording to the insturctions in the template script's comment lines -- otherwise, the unmodified _no_ext.m_ script should be used. The system's behaviour can then be simulated by running:
+For simulating the expression of an arbitrary heterologous gene circuit by the host cell, define the circuit model by filling the template file _no_het.m_ in the 'heterologous modules' folder according to the instructions in the template script's comment lines. If any external input (e.g. inducer pulse) is provided to the system, it can be defined by filling the template file _no_ext.m_ in the 'external inputs' folder according to the instructions in the template script's comment lines -- otherwise, the unmodified _no_ext.m_ script should be used. The system's behaviour can then be simulated by running:
 ```
 sim=cell_simulator; % initialise simulator
 sim=sim.load_heterologous_and_external('heterologous_module_name','external_input_module_name'); % load heterologous gene expression module
