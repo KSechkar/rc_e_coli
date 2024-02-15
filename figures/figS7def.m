@@ -1,6 +1,6 @@
 %% figS7def.m
 
-% PROPORTIONAL-INTEGRAL CONTROLLER
+% AIF CONTROLLER
 % FIGURE S7def
 
 % Stochastic simulation of the controller's performance
@@ -369,7 +369,7 @@ D_trajs_concatenated=cat(2,D_trajs{:});
 D_refmean=mean(D_trajs_concatenated(t_in_frame_predist,:),'all');
 
 
-%% FIGURE 6 d - sensor protein conc.
+%% FIGURE S7 D - sensor protein conc.
 
 Fd = figure('Position',[0 0 250 195],'Renderer','painters');
 set(Fd, 'defaultAxesFontSize', 9)
@@ -408,7 +408,7 @@ box on
 axis square
 hold off
 
-%% FIGURE 6 e - growth rate
+%% FIGURE S7 E - growth rate
 
 Fe = figure('Position',[0 0 250 195],'Renderer','painters');
 set(Fe, 'defaultAxesFontSize', 9)
@@ -447,7 +447,7 @@ box on
 axis square
 hold off
 
-%% FIGURE 6 f - RC denominator
+%% FIGURE S7 F - RC denominator
 
 Ff = figure('Position',[0 0 250 195],'Renderer','painters');
 set(Ff, 'defaultAxesFontSize', 9)

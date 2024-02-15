@@ -142,7 +142,7 @@ F = figure('Position',[0 0 720 560]);
 set(F, 'defaultAxesFontSize', 9)
 set(F, 'defaultLineLineWidth', 1.25)
 
-%% SUBFIGURE A - TRANSLATION ELONGATION RATES
+%% SUBFIGURE S3 A - TRANSLATION ELONGATION RATES
 subplot(2,2,1)
 hmap=heatmap(100*abs(flip(es.',1)),'ColorMap', parula);
 
@@ -157,7 +157,7 @@ hmap.YDisplayLabels = y_text_labels;
 caxis(hmap,[0 1.5e-4]); % colour map
 hmap.GridVisible = 'off'; % don't show grid lines
 
-%% SUBFIGURE B - RIBOSOMAL GENE TRANSCRIPTION REGULATION
+%% SUBFIGURE S3 B - RIBOSOMAL GENE TRANSCRIPTION REGULATION
 
 subplot(2,2,2)
 hmap=heatmap(100*abs(flip(F_rs.',1)),'ColorMap', parula);
@@ -173,7 +173,7 @@ hmap.YDisplayLabels = y_text_labels;
 caxis(hmap,[0 1.5e-4]); % colour map
 hmap.GridVisible = 'off'; % don't show grid lines
 
-%% SUBFIGURE C - tRNA AMINOACYLATION RATES
+%% SUBFIGURE C - tRNA AMINOACYLATION RATES (not included in the supplementary information)
 subplot(2,2,3)
 hmap=heatmap(100*abs(flip(nus.',1)),'ColorMap', parula);
 
@@ -188,7 +188,7 @@ hmap.YDisplayLabels = y_text_labels;
 caxis(hmap,[0 1.5e-4]); % colour map
 hmap.GridVisible = 'off'; % don't show grid lines
 
-%% SUBFIGURE D - ppGpp levels
+%% SUBFIGURE D - ppGpp levels (not included in the supplementary information)
 subplot(2,2,4)
 hmap=heatmap(100*abs(flip(Ts.',1)),'ColorMap', parula);
 

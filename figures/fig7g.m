@@ -1,6 +1,6 @@
 %% fig7g.m
 
-% PROPORTIONAL-INTEGRAL CONTROLLER
+% AIF CONTROLLER
 % Figure 7: g
 
 % The controller's steady-state performance with different magnitudes of
@@ -205,7 +205,7 @@ for i=1:size(plasmid_concs,2)
     end
 end
 
-%% Figure g
+%% Figure 7 g
 
 Fh = figure('Position',[0 0 215 193]);
 set(Fh, 'defaultAxesFontSize', 9)

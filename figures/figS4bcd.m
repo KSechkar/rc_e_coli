@@ -1,4 +1,4 @@
-%% figS4ab.m
+%% figS4bcd.m
 
 % WINNER-TAKES-ALL PHENOMENON
 % Figure S4bcd

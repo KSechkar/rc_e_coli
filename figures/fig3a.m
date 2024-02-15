@@ -95,10 +95,10 @@ colours={[0.6350 0.0780 0.1840],...
     [0.8500 0.3250 0.0980],...
     [0 0.4470 0.7410]};
 
-%% FIGURE 2 A
+%% FIGURE 3 A
 
-Fa = figure('Position',[0 0 385 280]);
-set(Fa, 'defaultAxesFontSize', 9)
+Fa = figure('Position',[0 0 275 204]);
+set(Fa, 'defaultAxesFontSize', 7)
 set(Fa, 'defaultLineLineWidth', 1)
 
 hold on
@@ -110,7 +110,7 @@ for i=1:size(data.xdata,1)
         last_nutr_qual=data.xdata(i,1);
     end
     plot(data.ydata(i,1),data.ydata(i,2),'o','Color',colours{colourind},'LineWidth',1) % real data
-    plot(ymodel(i,1),ymodel(i,2),'+','Color',colours{colourind},'MarkerSize',8,'LineWidth',1.25) % model predictions
+    plot(ymodel(i,1),ymodel(i,2),'+','Color',colours{colourind},'MarkerSize',6,'LineWidth',1.25) % model predictions
 
 end
 ylabel('\phi_r, ribosomal mass fraction','FontName','Arial');

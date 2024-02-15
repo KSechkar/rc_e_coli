@@ -93,10 +93,10 @@ for j=1:size(nutrients,2)
 end
 
 
-%% FIGURE 2 E
-Fe = figure('Position',[0 0 385 280]);
-set(Fe, 'defaultAxesFontSize', 9)
-set(Fe, 'defaultLineLineWidth', 1.5)
+%% FIGURE 3 E
+Fe = figure('Position',[0 0 275 204]);
+set(Fe, 'defaultAxesFontSize', 7)
+set(Fe, 'defaultLineLineWidth', 1.25)
 
 plot(nutrients,l_map(1,:)./l_map(2,:),'-')
 

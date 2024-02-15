@@ -1,6 +1,6 @@
 %% fig8bc.m
 
-% PROPORTIONAL-INTEGRAL CONTROLLER
+% AIF CONTROLLER
 % Figure 8: b,c
 
 % Showcasing how increasing our controller's amplifier gain xi reduces the 

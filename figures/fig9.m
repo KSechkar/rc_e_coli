@@ -1,6 +1,6 @@
 %% fig9.m
 
-% PROPORTIONAL-INTEGRAL CONTROLLER
+% AIF CONTROLLER
 % Figure 9
 
 % Showcasing how the controller enforces modularity
@@ -257,8 +257,8 @@ end
 
 %% Main Figure b - open loop
 
-Fa = figure('Position',[0 0 350 260]);
-set(Fa, 'defaultAxesFontSize', 9)
+Fa = figure('Position',[0 0 350 200]);
+set(Fa, 'defaultAxesFontSize', 7)
 set(Fa, 'defaultLineLineWidth', 1.25)
 
 hold on
@@ -283,13 +283,13 @@ set(gca, 'XScale', 'log')
 
 grid 
 box on
-axis square
+% axis square
 hold off
 
 %% Main Figure c - closed loop
 
-Fb = figure('Position',[0 0 350 260]);
-set(Fb, 'defaultAxesFontSize', 9)
+Fb = figure('Position',[0 0 350 200]);
+set(Fb, 'defaultAxesFontSize', 7)
 set(Fb, 'defaultLineLineWidth', 1.25)
 
 hold on
@@ -317,13 +317,13 @@ ax.YAxis.Exponent = 4;
 
 grid 
 box on
-axis square
+% axis square
 hold off
 
 %% Main Figure d - open loop
 
-Fb = figure('Position',[0 0 350 260]);
-set(Fb, 'defaultAxesFontSize', 9)
+Fb = figure('Position',[0 0 350 200]);
+set(Fb, 'defaultAxesFontSize', 7)
 set(Fb, 'defaultLineLineWidth', 1.25)
 
 hold on
@@ -349,13 +349,13 @@ set(gca,'XMinorTick','off')
 
 grid 
 box on
-axis square
+% axis square
 hold off
 
 %% Main Figure e - closed loop
 
-Fb = figure('Position',[0 0 350 260]);
-set(Fb, 'defaultAxesFontSize', 9)
+Fb = figure('Position',[0 0 350 200]);
+set(Fb, 'defaultAxesFontSize', 7)
 set(Fb, 'defaultLineLineWidth', 1.25)
 
 hold on
@@ -382,5 +382,5 @@ set(gca,'XMinorTick','off')
 
 grid 
 box on
-axis square
+% axis square
 hold off

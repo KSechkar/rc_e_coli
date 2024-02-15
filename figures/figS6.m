@@ -1,9 +1,9 @@
 %% figS6.m
 
-% PROPORTIONAL-INTEGRAL CONTROLLER
+% AIF CONTROLLER
 % FIGURE S6
 
-% Showcasing how our proportional-integral controller mitigates cisturbances 
+% Showcasing how our aif controller mitigates cisturbances 
 % caused by extra heterologous mRNA expression and keeps the burden almost
 % constant - with time-varying disturbance
 
@@ -246,7 +246,7 @@ D_estimated = ...
 
     
 
-%% FIGURE 6 b
+%% FIGURE S6 A
 
 Fb = figure('Position',[0 0 250 186]);
 set(Fb, 'defaultAxesFontSize', 9)
@@ -282,7 +282,7 @@ box on
 axis square
 hold off
 
-%% FIGURE 6 c
+%% FIGURE S6 B
 
 Fc = figure('Position',[0 0 250 185]);
 set(Fc, 'defaultAxesFontSize', 9)

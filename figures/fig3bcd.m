@@ -93,15 +93,15 @@ end
 
 ppGpp_ref=ppGpp_map(closest_i); % reference ppGpp level
 
-%% FIGURE 2 B
+%% FIGURE 3 B
 
-Fb = figure('Position',[0 0 385 280]);
-set(Fb, 'defaultAxesFontSize', 9)
+Fb = figure('Position',[0 0 275 204]);
+set(Fb, 'defaultAxesFontSize', 7)
 
 hold on
 
 plot(data_rib(:,1),data_rib(:,2),'.','Color','b')
-plot(l_map,phir_map,'-','Color','r','LineWidth',1.5)
+plot(l_map,phir_map,'-','Color','r','LineWidth',1.25)
 plot([0.3 0.3],[0 0.3],':','Color','k')
 
 ylabel('\phi_r, ribosomal mass fraction','FontName','Arial');
@@ -113,14 +113,14 @@ axis square
 box on
 hold off
 
-%% FIGURE 2 C
+%% FIGURE 3 C
 
-Fc = figure('Position',[0 0 385 280]);
-set(Fc, 'defaultAxesFontSize', 9)
+Fc = figure('Position',[0 0 275 204]);
+set(Fc, 'defaultAxesFontSize', 7)
 hold on
 
 plot(data_el(:,1),data_el(:,2),'.','Color','b')
-plot(l_map,el_map,'-','Color','r','LineWidth',1.5)
+plot(l_map,el_map,'-','Color','r','LineWidth',1.25)
 %plot([0.3 0.3],[6 20],':','Color','k')
 
 ylabel('\epsilon, translation elong. rate [aa/s]','FontName','Arial');
@@ -132,14 +132,14 @@ axis square
 box on
 hold off
 
-%% FIGURE 2 D
+%% FIGURE 3 D
 
-Fd = figure('Position',[0 0 385 281]);
-set(Fd, 'defaultAxesFontSize', 9)
+Fd = figure('Position',[0 0 275 205]);
+set(Fd, 'defaultAxesFontSize', 7)
 hold on
 
 plot(data_ppGpp(:,1),data_ppGpp(:,2),'.','Color','b')
-plot(l_map,ppGpp_map./ppGpp_ref,'-','Color','r','LineWidth',1.5)
+plot(l_map,ppGpp_map./ppGpp_ref,'-','Color','r','LineWidth',1.25)
 %plot([0.9 0.9],[10^(-1) 10^(1.5)],'--','Color','m','LineWidth',1)
 
 xlabel('\lambda, growth rate [1/h]');

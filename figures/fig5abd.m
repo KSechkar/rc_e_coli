@@ -109,7 +109,7 @@ for i=1:size(plasmid_concs,2)
     phi_hets(i)=phi_het;
 end
 
-%% FIGURE A - het. prot. mass fraction as a function of burden
+%% FIGURE 5 A - het. prot. mass fraction as a function of burden
 approx_colour=[0 0.8 0.8];
 
 Fa = figure('Position',[0 0 385 290]);
@@ -135,7 +135,7 @@ box on
 axis square
 hold off 
 
-%% FIGURE B - cell growth as a function of burden
+%% FIGURE 5 B - cell growth as a function of burden
 
 Fb = figure('Position',[0 0 385 287]);
 set(Fb, 'defaultAxesFontSize', 9)
@@ -156,7 +156,7 @@ axis square
 hold off
 ylim([0.4 1.6])
 
-%% FIGURE D - total heterologous protein production rate at t=0 in a population of cells (mu_het)
+%% FIGURE 5 D - total heterologous protein production rate at t=0 in a population of cells (mu_het)
 
 delta=0.25;
 Fd = figure('Position',[0 0 385 290]);

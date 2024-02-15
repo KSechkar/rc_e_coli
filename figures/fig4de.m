@@ -106,7 +106,7 @@ x_fromhigh=sim.x;
 % calculate growth rates
 l_fromhigh=get_ls(sim);
 
-%% FIGURE a - protein levels
+%% FIGURE 4 D - protein levels
 
 Fa = figure('Position',[0 0 215 193]);
 set(Fa, 'defaultAxesFontSize', 9)
@@ -133,7 +133,7 @@ box on
 axis square
 hold off
 
-%% FIGURE b - growth rates
+%% FIGURE 4 E - growth rates
 
 Fb = figure('Position',[0 0 215 193]);
 set(Fb, 'defaultAxesFontSize', 9)

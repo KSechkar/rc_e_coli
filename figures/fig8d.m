@@ -1,6 +1,6 @@
 %% fig8d.m
 
-% PROPORTIONAL-INTEGRAL CONTROLLER
+% AIF CONTROLLER
 % Figure 8: d
 
 % Showcasing the controller's operation range in POOR culture media
@@ -212,7 +212,7 @@ for i=1:size(plasmid_concs,2)
     end
 end
 
-%% Main Figure d
+%% Main Figure 8 d
 
 Fd = figure('Position',[0 0 250 186]);
 set(Fd, 'defaultAxesFontSize', 9)

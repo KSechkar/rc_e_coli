@@ -1,6 +1,6 @@
 %% figS7abc.m
 
-% PROPORTIONAL-INTEGRAL CONTROLLER
+% AIF CONTROLLER
 % FIGURE S7 a,b,c
 
 % Performance of the controller with MCMC parameter samples

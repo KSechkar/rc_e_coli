@@ -1,7 +1,7 @@
-%% figS1b.m
+%% figS2e.m
 
 % MCMC FITTING
-% Figure S1: e
+% Figure S2: e
 
 % Analyse the model's parameter sensitivity by going through different
 % pairwise combinations of the values of the four fitted parameters

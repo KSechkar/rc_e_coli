@@ -188,7 +188,7 @@ end
 % toc
 
 %% SAVE the outcome
-save('figS5defg_cbc.mat')
+save('figS5defg.mat')
 
 %% FIGURE D - bifurcation diagram
 

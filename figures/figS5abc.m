@@ -110,7 +110,7 @@ for i=1:size(tox_range,2)
     end
 end
 
-%% FIGURE a - no toxicity
+%% FIGURE S5 a - no toxicity
 
 Fa = figure('Position',[0 0 215 193]);
 set(Fa, 'defaultAxesFontSize', 9)
@@ -126,7 +126,7 @@ basic_traj_colour=[0 0.4470 0.7410]; % basic trajectory colour
 for j=size(mt7_range,2):(-1):1 
     plot(t_trajs{1}{j},pt7_trajs{1}{j},...
         '-','Color',[basic_traj_colour, alpha_range(j)], ...
-        'DisplayName',['p_{t7}(0 h)=',num2str(pt7_range(j)),' nM']);
+        'DisplayName',['p_{t7}(0 h)=',num2str(pt7_range(j),'%.2e'),' nM']);
 end
 
 title(['\gamma_{t7}=',num2str(tox_range(1)),' nM'])
@@ -138,6 +138,7 @@ ylim([1 1e4])
 xlim([0 24])
 
 % legend
+legend()
 
 grid 
 box on
@@ -145,7 +146,7 @@ axis square
 hold off
 
 
-%% FIGURE b - low toxicity
+%% FIGURE S5 b - low toxicity
 
 Fb = figure('Position',[0 0 215 193]);
 set(Fb, 'defaultAxesFontSize', 9)
@@ -161,7 +162,7 @@ basic_traj_colour=[0 0.4470 0.7410]; % basic trajectory colour
 for j=size(mt7_range,2):(-1):1 
     plot(t_trajs{2}{j},pt7_trajs{2}{j},...
         '-','Color',[basic_traj_colour, alpha_range(j)], ...
-        'DisplayName',['p_{t7}(0 h)=',num2str(pt7_range(j)),' nM']);
+        'DisplayName',['p_{t7}(0 h)=',num2str(round(pt7_range(j),2)),' nM']);
 end
 
 title(['\gamma_{t7}=',num2str(tox_range(2)),' nM'])
@@ -179,7 +180,7 @@ box on
 axis square
 hold off
 
-%% FIGURE c - high toxicity
+%% FIGURE S5 c - high toxicity
 
 Fc = figure('Position',[0 0 215 193]);
 set(Fc, 'defaultAxesFontSize', 9)
@@ -189,13 +190,13 @@ hold on
 
 % define trajectory colours
 alpha_range=linspace(0.3,1,size(mt7_range,2)); % less transparent = higher inducer conc.
-basic_traj_colour=[0.8500 0.3250 0.0980]; % basic trajectory colour
+basic_traj_colour=[0 0.4470 0.7410]; % basic trajectory colour
 
 % plot the trajectories
 for j=size(mt7_range,2):(-1):1 
     plot(t_trajs{3}{j},pt7_trajs{3}{j},...
         '-','Color',[basic_traj_colour, alpha_range(j)], ...
-        'DisplayName',['p_{t7}(0 h)=',num2str(pt7_range(j)),' nM']);
+        'DisplayName',['p_{t7}(0 h)=',num2str(round(pt7_range(j),2)),' nM']);
 end
 
 title(['\gamma_{t7}=',num2str(tox_range(3)),' nM'])

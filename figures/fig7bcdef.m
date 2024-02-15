@@ -1,6 +1,6 @@
 %% fig7bcdef.m
 
-% PROPORTIONAL-INTEGRAL CONTROLLER
+% AIF CONTROLLER
 % FIGURE 7 b,c,d,e,f
 
 % Performance of the controller with MCMC parameter samples
@@ -280,7 +280,7 @@ hold off
 
 %% FIGURE 7 c
 
-Fc = figure('Position',[0 0 250 185]);
+Fc = figure('Position',[0 0 275 204]);
 set(Fc, 'defaultAxesFontSize', 9)
 set(Fc, 'defaultLineLineWidth', 1.25)
 

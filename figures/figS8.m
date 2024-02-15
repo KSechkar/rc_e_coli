@@ -1,9 +1,9 @@
 %% figS8.m
 
-% PROPORTIONAL-INTEGRAL CONTROLLER
+% AIF CONTROLLER
 % FIGURE S8
 
-% Showcasing how our proportional-integral controller can be made more
+% Showcasing how our AIF controller can be made more
 % robust to leakiness but at the cost of causing oscillations
 
 %% CLEAR all variables
@@ -257,7 +257,7 @@ D_estimated = ...
 
     
 
-%% FIGURE S7 a
+%% FIGURE S8 a
 
 Fa = figure('Position',[0 0 250 186]);
 set(Fa, 'defaultAxesFontSize', 9)
@@ -293,7 +293,7 @@ box on
 axis square
 hold off
 
-%% FIGURE S7 b
+%% FIGURE S8 b
 
 Fb = figure('Position',[0 0 250 185]);
 set(Fb, 'defaultAxesFontSize', 9)
@@ -344,7 +344,7 @@ calculated_openloop=calc(sim_openloop,rel_dist_openloop,rel_t_openloop);
 ls_openloop=calculated_openloop.ls;
 Ds_openloop=calculated_openloop.Ds;
 
-%% FIGURE S7 c - sensor protein conc.
+%% FIGURE S8 c - sensor protein conc.
 
 Fc = figure('Position',[0 0 250 186]);
 set(Fc, 'defaultAxesFontSize', 9)
@@ -377,7 +377,7 @@ box on
 axis square
 hold off
 
-%% FIGURE S7 d - growth rate
+%% FIGURE S8 d - growth rate
 
 Fd = figure('Position',[0 0 250 186]);
 set(Fd, 'defaultAxesFontSize', 9)
@@ -412,7 +412,7 @@ box on
 axis square
 hold off
 
-%% FIGURE S7 e - resource competition denominator
+%% FIGURE S8 e - resource competition denominator
 
 Fe = figure('Position',[0 0 250 189]);
 set(Fe, 'defaultAxesFontSize', 9)

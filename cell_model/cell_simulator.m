@@ -550,7 +550,7 @@ classdef cell_simulator
 
             % mRNA annihilation in AIF motif
             if(strcmp(obj.het.module_name,'pi_controller'))
-                v(reaction_cntr) = par('kb_anti').*x_het(2).*x_het(3); % mutual annihilation of m_act and m_anti, formation of bound complex
+                v(reaction_cntr) = par('kb_anti').*x_het(2).*x_het(3)./mRNA_count_scale; % mutual annihilation of m_act and m_anti, formation of bound complex
                 reaction_cntr=reaction_cntr+1;
             end
 
