@@ -1,10 +1,13 @@
-%% figS8.m
+%% figS8_orig_kappatheta.m
 
-% PROPORTIONAL-INTEGRAL CONTROLLER
+% AIF CONTROLLER
 % FIGURE S8
 
 % Showcasing how our proportional-integral controller can be made more
 % robust to leakiness but at the cost of causing oscillations
+
+% Considering the case of ORIGINAL kappa and theta values vs that with
+% increased kappa and theta in figS8.m
 
 %% CLEAR all variables
 

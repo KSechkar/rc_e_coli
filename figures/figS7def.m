@@ -302,8 +302,8 @@ save('figS7def_openloop.mat', 'ts_openloop', 'psens_trajs_openloop', 'l_trajs_op
 
 %% LOAD the saved trajectories (compiling several saved batches together) - alternatively to simulating them from scratch
 
-controller_saved_files={'figS7def_controller_batch1.mat', 'figS7def_controller_batch2.mat', 'figS7def_controller_batch3.mat'};%, 'figS7def_controller_batch4.mat'};
-openloop_saved_files={'figS7def_openloop_batch1.mat', 'figS7def_openloop_batch2.mat', 'figS7def_openloop_batch3.mat'};%, 'figS7def_openloop_batch4.mat'};
+controller_saved_files={'figS7def_controller_batch1.mat', 'figS7def_controller_batch2.mat', 'figS7def_controller_batch3.mat'};
+openloop_saved_files={'figS7def_openloop_batch1.mat', 'figS7def_openloop_batch2.mat', 'figS7def_openloop_batch3.mat'};
 prevbatches_ts=[];
 prevbatches_psens_trajs=[];
 prevbatches_l_trajs=[];

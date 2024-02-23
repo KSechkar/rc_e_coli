@@ -173,36 +173,6 @@ hmap.YDisplayLabels = y_text_labels;
 caxis(hmap,[0 1.5e-4]); % colour map
 hmap.GridVisible = 'off'; % don't show grid lines
 
-%% SUBFIGURE C - tRNA AMINOACYLATION RATES (not included in the supplementary information)
-subplot(2,2,3)
-hmap=heatmap(100*abs(flip(nus.',1)),'ColorMap', parula);
-
-% axis labels and ticks
-xlabel('\sigma, nutr. qual.');
-ylabel('c_x, gene DNA conc.');
-title('Change in \nu due to burden, %');
-hmap.XDisplayLabels = x_text_labels;
-hmap.YDisplayLabels = y_text_labels;
-
-%appaearance of the heatmap
-caxis(hmap,[0 1.5e-4]); % colour map
-hmap.GridVisible = 'off'; % don't show grid lines
-
-%% SUBFIGURE D - ppGpp levels (not included in the supplementary information)
-subplot(2,2,4)
-hmap=heatmap(100*abs(flip(Ts.',1)),'ColorMap', parula);
-
-% axis labels and ticks
-xlabel('\sigma, nutr. qual.');
-ylabel('c_x, gene DNA conc.');
-title('Change in T due to burden, %');
-hmap.XDisplayLabels = x_text_labels;
-hmap.YDisplayLabels = y_text_labels;
-
-%appaearance of the heatmap
-caxis(hmap,[0 1.5e-4]); % colour map
-hmap.GridVisible = 'off'; % don't show grid lines
-
 %% FUNCTION for getting growth rate, translation elongation rate and het. prot. mass fraction from the system's steady state
 function [e,nu,F_r,T]=get_enuFrT(sim,ss)
     % evaluate growth
