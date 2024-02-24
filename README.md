@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/606879146.svg)](https://zenodo.org/doi/10.5281/zenodo.10700011)
+
 # rc_e_coli
 MATLAB code for modelling how synthetic gene circuits interact with the host cell's (_E. coli_) native genes and affect its growth rate, used in the manuscript 'A coarse-grained bacterial cell model for resource-aware analysis and design of synthetic gene circuits'.
 
